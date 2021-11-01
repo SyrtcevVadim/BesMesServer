@@ -4,13 +4,34 @@
 
 size_t MultithreadTcpServer::threadsNumber = std::thread::hardware_concurrency();
 
-MultithreadTcpServer::MultithreadTcpServer(QObject *parent):QTcpServer(parent)
+MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
+                                           qint16 serverPort,
+                                           QObject *parent):
+    QTcpServer(parent), serverIPAddress(serverIPAddress), serverPort(serverPort)
 {
     incomingConnectionsCounter=0;
     initWorkers();
+
+}
+void MultithreadTcpServer::start()
+{
+    // Начинаем слушать входящие соединения
+    listen(serverIPAddress, serverPort);
+    // Запускает рабочие потоки
     for(ServerWorker *worker:serverWorkers)
     {
         worker->start();
+    }
+}
+
+void MultithreadTcpServer::stop()
+{
+    // Приостанавливаем прослушивание входящих соединений
+    close();
+    // Останавливаем потоки обработчики
+    for(ServerWorker *worker: serverWorkers)
+    {
+        worker->wait();
     }
 }
 

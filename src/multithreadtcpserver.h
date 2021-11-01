@@ -15,9 +15,14 @@ class MultithreadTcpServer : public QTcpServer
 {
     Q_OBJECT
 public:
-    MultithreadTcpServer(QObject *parent = nullptr);
+    MultithreadTcpServer(QHostAddress serverIPAddress,
+                         qint16 serverPort,
+                         QObject *parent = nullptr);
     ~MultithreadTcpServer();
-
+    /// Запускает работу сервера: прослушивание входящих соединений
+    void start();
+    /// Останавливает работу сервера
+    void stop();
 
 protected:
     /// Вызывается сервером каждый раз, когда имеется входящее соединение
@@ -44,6 +49,11 @@ private:
     /// Список рабочих, обрабатывающих в отдельных потоках
     /// пользовательские соединения
     QVector<ServerWorker*> serverWorkers;
+
+    /// IP-адрес устройства, на котором запущен сервер
+    QHostAddress serverIPAddress;
+    /// Порт, прослушиваемый сервером
+    qint16 serverPort;
 };
 
 #endif // MULTITHREADTCPSERVER_H

@@ -11,11 +11,13 @@ CONFIG += c++17
 SOURCES += \
     src/clientconnection.cpp \
     src/main.cpp \
+    src/mainwindow.cpp \
     src/multithreadtcpserver.cpp \
     src/serverworker.cpp
 
 HEADERS += \
     src/clientconnection.h \
+    src/mainwindow.h \
     src/multithreadtcpserver.h \
     src/serverworker.h
 
@@ -24,4 +26,5 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-FORMS +=
+FORMS += \
+    src/mainwindow.ui

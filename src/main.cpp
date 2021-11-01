@@ -1,11 +1,11 @@
 #include <QtWidgets>
-#include "multithreadtcpserver.h"
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MultithreadTcpServer server;
-    server.listen(QHostAddress::Any, 1234);
-    qDebug() << "Сервер начинает прослушивать входящие соединения";
+
+    MainWindow mainWindow;
+    mainWindow.show();
     return a.exec();
 }
