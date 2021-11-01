@@ -22,17 +22,16 @@ void MultithreadTcpServer::start()
     {
         worker->start();
     }
+    qDebug() << "Сервер запущен!";
 }
 
 void MultithreadTcpServer::stop()
 {
     // Приостанавливаем прослушивание входящих соединений
     close();
-    // Останавливаем потоки обработчики
-    for(ServerWorker *worker: serverWorkers)
-    {
-        worker->wait();
-    }
+    // Отправляем сигнал о том, что нужно остановить рабочие потоки (отключаем все соединения от них)
+    emit serverStopped();
+    qDebug() << "Сервер остановлен";
 }
 
 void MultithreadTcpServer::removeWorkers()
@@ -64,6 +63,9 @@ void MultithreadTcpServer::initWorkers()
     for(int i{0}; i < threadsNumber; i++)
     {
         ServerWorker *newWorker = new ServerWorker(this);
+        // Когда работа сервера останавливается, должны остановиться
+        // рабочие потоки сервера
+        connect(this, SIGNAL(serverStopped()), newWorker, SIGNAL(workerStopped()));
         serverWorkers.append(newWorker);
     }
 }

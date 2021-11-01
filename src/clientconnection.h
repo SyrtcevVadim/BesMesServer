@@ -22,6 +22,7 @@ public:
     ~ClientConnection();
 public slots:
     void receiveServerResponse(QString response);
+    void close();
 signals:
     /// Отправляется, когда пользователь отправил команду ПРИВЕТ и передал
     /// имя пользователя и пароль от аккаунта

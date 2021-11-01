@@ -20,6 +20,11 @@ ClientConnection::~ClientConnection()
     qDebug() << "Клиентское подключение разорвано!";
 }
 
+void ClientConnection::close()
+{
+    socket->close();
+}
+
 void ClientConnection::receiveServerResponse(QString response)
 {
     *stream << response << "\r\n";

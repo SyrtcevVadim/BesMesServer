@@ -14,8 +14,11 @@ ServerWorker::ServerWorker(QObject *parent): QThread(parent)
 void ServerWorker::addClientConnection(qintptr socketDescriptor)
 {
     ClientConnection *incomingConnection = new ClientConnection(socketDescriptor);
-    connect(incomingConnection, SIGNAL(helloSaid(QString, QString)),
-            SLOT(processHelloMessage(QString, QString)));
+    connect(incomingConnection, SIGNAL(helloSaid(QString,QString)),
+            SLOT(processHelloMessage(QString,QString)));
+    connect(this, SIGNAL(workerStopped()),
+            incomingConnection, SLOT(close()));
+
     incomingConnection->receiveServerResponse("Hello! Say the name and the pass pls\r\n");
 }
 

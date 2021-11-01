@@ -19,11 +19,13 @@ public:
                          qint16 serverPort,
                          QObject *parent = nullptr);
     ~MultithreadTcpServer();
+signals:
+    void serverStopped();
+public slots:
     /// Запускает работу сервера: прослушивание входящих соединений
     void start();
     /// Останавливает работу сервера
     void stop();
-
 protected:
     /// Вызывается сервером каждый раз, когда имеется входящее соединение
     void incomingConnection(qintptr socketDescriptor);

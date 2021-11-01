@@ -15,8 +15,12 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+private slots:
+    /// Устанавливает значение счётчика активных клиентских подключений
+    void setActiveConnectionsCounter(int counter);
 private:
+    /// Связывает элементы графического интерфейса окна с соответствующим слотами
+    void configureViews();
     Ui::MainWindow *ui;
 
     /// Многопоточный сервер, принимающий входящие пользовательские подключения

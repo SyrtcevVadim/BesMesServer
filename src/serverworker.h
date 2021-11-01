@@ -17,6 +17,10 @@ public:
     /// соединение
     void addClientConnection(qintptr socketDescriptor);
 
+signals:
+    /// Сигнал, отправляемый всем подключенным к данному потоку соединениям, уведомляющий о том, что
+    /// нужно разорвать соединение
+    void workerStopped();
 protected:
     void run();
 private slots:

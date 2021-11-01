@@ -9,11 +9,24 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     server = new MultithreadTcpServer(QHostAddress::Any, 1234);
-    server->start();
-    qDebug() << "Сервер начинает прослушивать входящие соединения";
+    configureViews();
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::configureViews()
+{
+    // Запускает работу сервера
+    connect(ui->startServerBtn, SIGNAL(clicked()), server, SLOT(start()));
+    // Останавливает работу сервера
+    connect(ui->stopServerBtn, SIGNAL(clicked()), server, SLOT(stop()));
+}
+
+void MainWindow::setActiveConnectionsCounter(int counter)
+{
+    ui->activeConnectionsCounter->setText(QString("%1").setNum(counter));
 }
