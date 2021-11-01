@@ -24,6 +24,10 @@ void MainWindow::configureViews()
     connect(ui->startServerBtn, SIGNAL(clicked()), server, SLOT(start()));
     // Останавливает работу сервера
     connect(ui->stopServerBtn, SIGNAL(clicked()), server, SLOT(stop()));
+
+    // Когда количество активных подключений изменяется, обновляем счётчик в GUI
+    connect(server, SIGNAL(activeConnectionsChanged(int)),
+            SLOT(setActiveConnectionsCounter(int)));
 }
 
 void MainWindow::setActiveConnectionsCounter(int counter)

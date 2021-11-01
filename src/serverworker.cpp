@@ -14,8 +14,11 @@ ServerWorker::ServerWorker(QObject *parent): QThread(parent)
 void ServerWorker::addClientConnection(qintptr socketDescriptor)
 {
     ClientConnection *incomingConnection = new ClientConnection(socketDescriptor);
+    // После разрыва пользовательского соединения уведомляем об этом рабочий поток
+    connect(incomingConnection, SIGNAL(closed()), SIGNAL(connectionClosed()));
     connect(incomingConnection, SIGNAL(helloSaid(QString,QString)),
             SLOT(processHelloMessage(QString,QString)));
+    // При остановке рабочего потока должны быть разорваны все пользовательские соединения
     connect(this, SIGNAL(workerStopped()),
             incomingConnection, SLOT(close()));
 

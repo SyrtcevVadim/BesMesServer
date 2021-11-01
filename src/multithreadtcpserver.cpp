@@ -9,7 +9,8 @@ MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
                                            QObject *parent):
     QTcpServer(parent), serverIPAddress(serverIPAddress), serverPort(serverPort)
 {
-    incomingConnectionsCounter=0;
+    totalIncomingConnectionsCounter=0;
+    activeConnectionsCounter=0;
     initWorkers();
 
 }
@@ -66,6 +67,7 @@ void MultithreadTcpServer::initWorkers()
         // Когда работа сервера останавливается, должны остановиться
         // рабочие потоки сервера
         connect(this, SIGNAL(serverStopped()), newWorker, SIGNAL(workerStopped()));
+        connect(newWorker, SIGNAL(connectionClosed()), SLOT(decreaseActiveConnectionsCounter()));
         serverWorkers.append(newWorker);
     }
 }
@@ -73,7 +75,20 @@ void MultithreadTcpServer::initWorkers()
 void MultithreadTcpServer::incomingConnection(qintptr socketDescriptor)
 {
     // Выбираем серверного рабочего, который будет ответственен за обработку сообщений от данного подключения
-    ServerWorker *currentWorker = serverWorkers[incomingConnectionsCounter%threadsNumber];
+    ServerWorker *currentWorker = serverWorkers[totalIncomingConnectionsCounter%threadsNumber];
     currentWorker->addClientConnection(socketDescriptor);
-    incomingConnectionsCounter++;
+    ++totalIncomingConnectionsCounter;
+    increaseActiveConnectionsCounter();
+}
+
+void MultithreadTcpServer::increaseActiveConnectionsCounter()
+{
+    activeConnectionsCounter++;
+    emit activeConnectionsChanged(activeConnectionsCounter);
+}
+
+void MultithreadTcpServer::decreaseActiveConnectionsCounter()
+{
+    activeConnectionsCounter--;
+    emit activeConnectionsChanged(activeConnectionsCounter);
 }

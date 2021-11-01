@@ -20,15 +20,27 @@ public:
                          QObject *parent = nullptr);
     ~MultithreadTcpServer();
 signals:
+    /// Сигнал, высылаемый, когда сервер перестаёт прослушивать входящие соединения
     void serverStopped();
+    /// Сигнал, высылаемый каждый раз, когда количество активных соединений с
+    /// сервером изменяется. Вместе с сигналом высылается текущее количество
+    /// активных соединений
+    void activeConnectionsChanged(int currentActiveConnectionQuantity);
+
 public slots:
     /// Запускает работу сервера: прослушивание входящих соединений
     void start();
     /// Останавливает работу сервера
     void stop();
+
 protected:
     /// Вызывается сервером каждый раз, когда имеется входящее соединение
     void incomingConnection(qintptr socketDescriptor);
+private slots:
+    /// Увеличивает счётчик активных соединений на 1
+    void increaseActiveConnectionsCounter();
+    /// Уменьшает счётчик активных соединений на 1
+    void decreaseActiveConnectionsCounter();
 private:
     /// Создаёт оптимальное количество рабочих, по которым будет распределена
     /// нагрузка входящих соединений, основываясь на значении possibleThreadNumber
@@ -47,7 +59,9 @@ private:
 
     /// Счётчик входящих соединений. Используется для равномерной балансировки нагрузки на сервер между
     /// серверными рабочими по алгоритму Round Robin (кусочек каждому)
-    unsigned int incomingConnectionsCounter;
+    unsigned int totalIncomingConnectionsCounter;
+    /// Счётчик активных в данный моменть подключений
+    unsigned int activeConnectionsCounter;
     /// Список рабочих, обрабатывающих в отдельных потоках
     /// пользовательские соединения
     QVector<ServerWorker*> serverWorkers;

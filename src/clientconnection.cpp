@@ -14,7 +14,7 @@ ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : 
 ClientConnection::~ClientConnection()
 {
     socket->close();
-    emit finished();
+    emit closed();
     delete socket;
     delete stream;
     qDebug() << "Клиентское подключение разорвано!";
