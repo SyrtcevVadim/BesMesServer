@@ -13,9 +13,15 @@ class ServerWorker : public QThread
     Q_OBJECT
 public:
     ServerWorker(QObject *parent = nullptr);
+    /// Добавляет в данный серверный поток обработки новое клиентское
+    /// соединение
+    void addClientConnection(qintptr socketDescriptor);
 
 protected:
     void run();
+private slots:
+    /// Обрабатывает сообщение пользователя об аутентификации
+    void processHelloMessage(QString userName, QString password);
 private:
     /// Счётчик созданных объектов
     static unsigned int createdObjectCounter;

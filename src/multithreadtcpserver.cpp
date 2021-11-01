@@ -1,10 +1,12 @@
 #include<thread>
+#include<QTcpSocket>
 #include "multithreadtcpserver.h"
 
-size_t MultithreadTcpServer::optimalThreadNumber = std::thread::hardware_concurrency();
+size_t MultithreadTcpServer::threadsNumber = std::thread::hardware_concurrency();
 
 MultithreadTcpServer::MultithreadTcpServer(QObject *parent):QTcpServer(parent)
 {
+    incomingConnectionsCounter=0;
     initWorkers();
     for(ServerWorker *worker:serverWorkers)
     {
@@ -33,14 +35,22 @@ void MultithreadTcpServer::initWorkers()
      * Функция std::thread::hardware_concurrency() даёт лишь рекомендацию
      * об оптимальном количестве потоков. Тем не менее мы будем ей следовать
      */
-    if(optimalThreadNumber == 0)
+    if(threadsNumber == 0)
     {
-        optimalThreadNumber = DEFAULT_THREAD_NUMBER;
+        threadsNumber = DEFAULT_THREAD_NUMBER;
     }
     // Создаём потоки обработки входящих соединений
-    for(int i{0}; i < optimalThreadNumber; i++)
+    for(int i{0}; i < threadsNumber; i++)
     {
         ServerWorker *newWorker = new ServerWorker(this);
         serverWorkers.append(newWorker);
     }
+}
+
+void MultithreadTcpServer::incomingConnection(qintptr socketDescriptor)
+{
+    // Выбираем серверного рабочего, который будет ответственен за обработку сообщений от данного подключения
+    ServerWorker *currentWorker = serverWorkers[incomingConnectionsCounter%threadsNumber];
+    currentWorker->addClientConnection(socketDescriptor);
+    incomingConnectionsCounter++;
 }

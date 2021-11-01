@@ -9,11 +9,13 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/clientconnection.cpp \
     src/main.cpp \
     src/multithreadtcpserver.cpp \
     src/serverworker.cpp
 
 HEADERS += \
+    src/clientconnection.h \
     src/multithreadtcpserver.h \
     src/serverworker.h
 
