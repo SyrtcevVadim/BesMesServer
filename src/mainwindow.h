@@ -17,10 +17,11 @@ public:
     ~MainWindow();
 private slots:
     /// Устанавливает значение счётчика активных клиентских подключений
-    void setActiveConnectionsCounter(int counter);
+    void setActiveConnectionsCounter(unsigned long long counter);
 private:
     /// Связывает элементы графического интерфейса окна с соответствующим слотами
     void configureViews();
+    /// Сылается на объект представления окна серверного приложения
     Ui::MainWindow *ui;
 
     /// Многопоточный сервер, принимающий входящие пользовательские подключения

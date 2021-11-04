@@ -15,11 +15,11 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
 {
     ClientConnection *incomingConnection = new ClientConnection(socketDescriptor);
     // После разрыва пользовательского соединения уведомляем об этом рабочий поток
-    connect(incomingConnection, SIGNAL(closed()), SIGNAL(connectionClosed()));
+    connect(incomingConnection, SIGNAL(closed()), SIGNAL(clientConnectionClosed()));
     connect(incomingConnection, SIGNAL(helloSaid(QString,QString)),
             SLOT(processHelloMessage(QString,QString)));
     // При остановке рабочего потока должны быть разорваны все пользовательские соединения
-    connect(this, SIGNAL(workerStopped()),
+    connect(this, SIGNAL(stopped()),
             incomingConnection, SLOT(close()));
 
     incomingConnection->receiveServerResponse("Hello! Say the name and the pass pls\r\n");

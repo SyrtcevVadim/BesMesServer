@@ -20,10 +20,10 @@ public:
 signals:
     /// Сигнал, отправляемый всем подключенным к данному потоку соединениям, уведомляющий о том, что
     /// нужно разорвать соединение
-    void workerStopped();
+    void stopped();
     /// Сигнал, высылаемый, когда клиентское соединение, обрабатываемое
     /// в данном потоке, разрывается
-    void connectionClosed();
+    void clientConnectionClosed();
 protected:
     void run();
 private slots:

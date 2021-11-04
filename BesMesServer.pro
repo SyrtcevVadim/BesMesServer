@@ -13,12 +13,14 @@ SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
     src/multithreadtcpserver.cpp \
+    src/serverstatisticscounter.cpp \
     src/serverworker.cpp
 
 HEADERS += \
     src/clientconnection.h \
     src/mainwindow.h \
     src/multithreadtcpserver.h \
+    src/serverstatisticscounter.h \
     src/serverworker.h
 
 # Default rules for deployment.

@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    // Создаём многопоточный сервер
     server = new MultithreadTcpServer(QHostAddress::Any, 1234);
     configureViews();
 
@@ -26,11 +26,12 @@ void MainWindow::configureViews()
     connect(ui->stopServerBtn, SIGNAL(clicked()), server, SLOT(stop()));
 
     // Когда количество активных подключений изменяется, обновляем счётчик в GUI
-    connect(server, SIGNAL(activeConnectionsChanged(int)),
-            SLOT(setActiveConnectionsCounter(int)));
+    connect(server, SIGNAL(activeConnectionsCounterChanged(unsigned long long)),
+            SLOT(setActiveConnectionsCounter(unsigned long long)));
 }
 
-void MainWindow::setActiveConnectionsCounter(int counter)
+void MainWindow::setActiveConnectionsCounter(unsigned long long counter)
 {
+    // Обновляем счётчик активных подключений
     ui->activeConnectionsCounter->setText(QString("%1").setNum(counter));
 }
