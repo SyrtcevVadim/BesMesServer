@@ -106,12 +106,21 @@ void MultithreadTcpServer::initWorkers()
 void MultithreadTcpServer::incomingConnection(qintptr socketDescriptor)
 {
     /*
-     * Значение общего числа подключений к серверу за текущий сеанс используется для балансировки нагрузки
-     * от новых подключений между рабочими потоками сервера по алгоритму Round Robin
+     * Балансируем нагрузку между рабочими потоками следующим образом:
+     * Новое соединение начинает обрабатывать наименее загруженный поток
      */
-    unsigned long long totalEstablishedConnectionsCounter = statisticsCounter->getTotalEstablishedConnectionsCounter();
-    /// Номер потока, который будет обрабатывать данное подключение
-    int handlingThreadNumber = totalEstablishedConnectionsCounter%workerThreadsNumber;
+
+    // Номер потока, который будет обрабатывать данное подключение
+    int handlingThreadNumber=0;
+    for(int i{1}; i < serverWorkers.length(); i++)
+    {
+        // Находим наименее загруженный поток
+        if(serverWorkers[i]->getHandlingConnectionsCounter() < serverWorkers[handlingThreadNumber]->getHandlingConnectionsCounter())
+        {
+            handlingThreadNumber=i;
+        }
+    }
+
     qDebug() << QString("Получено новое соединение|Новое подключение обрабатывается потоком %1").arg(handlingThreadNumber);
     // Выбираем серверный рабочий поток, который будет ответственен за обработку сообщений от нового подключения
     ServerWorker *currentWorker = serverWorkers[handlingThreadNumber];
