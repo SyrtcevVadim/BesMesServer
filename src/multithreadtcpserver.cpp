@@ -48,7 +48,7 @@ void MultithreadTcpServer::start()
 {
     // Начинаем слушать входящие соединения
     listen(serverIPAddress, serverPort);
-    logSystem->logToFile("Сервер начал слушать входящие соединения");
+    logSystem->logToFile("Сервер включён");
     // Запускает рабочие потоки
     for(ServerWorker *worker:serverWorkers)
     {
@@ -63,7 +63,7 @@ void MultithreadTcpServer::stop()
     close();
     // Отправляем сигнал о том, что нужно остановить рабочие потоки (отключаем все соединения от них)
     emit stopped ();
-    logSystem->logToFile("Сервер перестал слушать входящие соединения");
+    logSystem->logToFile("Сервер отсключён");
 }
 
 void MultithreadTcpServer::removeWorkers()
@@ -99,7 +99,6 @@ void MultithreadTcpServer::initWorkers()
         // Пробрасываем сигнал о разрыве клиентского соединения "во вне"
         connect(newWorker, SIGNAL(clientConnectionClosed()), SIGNAL(clientConnectionClosed()));
         // Пробрасываем сигнал о регистрации сообщения в журнале сообщений
-        connect(newWorker, SIGNAL(logMessage(QString)), SIGNAL(logMessage(QString)));
         serverWorkers.append(newWorker);
     }
 }
@@ -113,8 +112,7 @@ void MultithreadTcpServer::incomingConnection(qintptr socketDescriptor)
     unsigned long long totalEstablishedConnectionsCounter = statisticsCounter->getTotalEstablishedConnectionsCounter();
     /// Номер потока, который будет обрабатывать данное подключение
     int handlingThreadNumber = totalEstablishedConnectionsCounter%workerThreadsNumber;
-    logSystem->logToFile(QString("Получено новое соединение|Новое подключение обрабатывается потоком %1")
-                         .arg(QString().setNum(handlingThreadNumber)));
+    qDebug() << QString("Получено новое соединение|Новое подключение обрабатывается потоком %1").arg(handlingThreadNumber);
     // Выбираем серверный рабочий поток, который будет ответственен за обработку сообщений от нового подключения
     ServerWorker *currentWorker = serverWorkers[handlingThreadNumber];
     currentWorker->addClientConnection(socketDescriptor);

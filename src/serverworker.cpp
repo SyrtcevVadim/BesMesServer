@@ -22,16 +22,19 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     connect(this, SIGNAL(stopWorker()),
             incomingConnection, SLOT(close()));
 
-    incomingConnection->receiveServerResponse("Hello! Say the name and the pass pls\r\n");
+    incomingConnection->receiveServerResponse("Hello! Say the name and the pass\r\n");
 }
 
 void ServerWorker::processHelloMessage(QString userName, QString password)
 {
-    emit logMessage(QString("Пользователь %1 сказал привет!").arg(userName));
+    qDebug() << QString("Пользователь %1 сказал привет!").arg(userName);
+    ClientConnection *client = (ClientConnection*)sender();
+    client->receiveServerResponse(QString("HELLO you were logged in\r\n"));
+
 }
 
 void ServerWorker::run()
 {
-    emit logMessage(QString("Поток %1 запущен!").arg(id));
+    qDebug() << QString("Поток %1 запущен").arg(id);
     exec();
 }
