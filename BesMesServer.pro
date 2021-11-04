@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     src/clientconnection.cpp \
+    src/logsystem.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/multithreadtcpserver.cpp \
@@ -18,6 +19,7 @@ SOURCES += \
 
 HEADERS += \
     src/clientconnection.h \
+    src/logsystem.h \
     src/mainwindow.h \
     src/multithreadtcpserver.h \
     src/serverstatisticscounter.h \

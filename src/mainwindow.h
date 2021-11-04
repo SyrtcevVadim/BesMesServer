@@ -1,6 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
+// Автор: Сырцев Вадим Игоревич
 #include <QMainWindow>
 #include "multithreadtcpserver.h"
 

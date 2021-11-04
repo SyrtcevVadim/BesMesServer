@@ -1,6 +1,6 @@
 #ifndef CLIENTCONNECTION_H
 #define CLIENTCONNECTION_H
-
+// Автор: Сырцев Вадим Игоревич
 #include<QObject>
 #include<QTcpSocket>
 #include<QTextStream>

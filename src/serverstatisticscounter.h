@@ -1,10 +1,10 @@
 #ifndef SERVERSTATISTICSCOUNTER_H
 #define SERVERSTATISTICSCOUNTER_H
-
+// Автор: Сырцев Вадим Игоревич
 #include <QThread>
 
 ///
-/// Объекты данного класса будут хранить значение счётчиков всех параметров
+/// Объекты данного класса будут хранить значение счётчиков некоторых параметров
 /// сервера: количество активных подключений, количество обработанных запросов
 ///
 class ServerStatisticsCounter : public QThread

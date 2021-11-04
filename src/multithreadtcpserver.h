@@ -1,12 +1,12 @@
-// Автор: Сырцев Вадим Игоревич
 #ifndef MULTITHREADTCPSERVER_H
 #define MULTITHREADTCPSERVER_H
-
+// Автор: Сырцев Вадим Игоревич
 #include <QTcpServer>
 #include <QVector>
 
 #include "serverworker.h"
 #include "serverstatisticscounter.h"
+#include "logsystem.h"
 
 /**
  * Описывает многопоточный TCP-сервер, способный принимать входящие подключения
@@ -22,15 +22,16 @@ public:
     ~MultithreadTcpServer();
 signals:
     /// Сигнал, высылаемый, когда сервер перестаёт прослушивать входящие соединения
-    void serverStopped();
+    void stopped();
     /// Сигнал, высылаемый после открытия нового соединения с клиентским приложением
     void clientConnectionOpenned();
     /// Сигнал, высылаемый после разрыва соединения с клиентским приложением
     void clientConnectionClosed();
-    /// Высылается после открытия или разрыва клиентского соединения
+    /// Сигнал, высылаемый после открытия или разрыва клиентского соединения
     /// activeConnectionsCounter - количество активных соединений
     void activeConnectionsCounterChanged(unsigned long long activeConnectionsCounter);
-
+    /// Сигнал о намерении зарегистрировать сообщение в файле
+    void logMessage(QString message);
 public slots:
     /// Запускает работу сервера: прослушивание входящих соединений
     void start();
@@ -52,6 +53,8 @@ private:
 
     /// Связывает сигналы и слоты, необходимые для ведения статистического учёта объектом-счётчиком
     void configureStatisticsCounter();
+    /// Связывает сигналы и слоты, необходимые для корректной работы системы регистрации сообщений
+    void configureLogSystem();
 private:
     /// Хранит количество потоков, которые физически(и в теории) могут выполняться независимо
     /// на разных ядрах процессора, т.е. оптимальное количество потоков. Ровно столько серверных рабочих
@@ -64,9 +67,12 @@ private:
     /// Список рабочих, обрабатывающих в отдельных потоках
     /// пользовательские соединения
     QVector<ServerWorker*> serverWorkers;
-
     /// Объект, подсчитывающий статистику сервера во время его работы
     ServerStatisticsCounter *statisticsCounter;
+    /// Логгирующая система, записывающая все действия, выполняемые сервером,
+    /// в отдельный файл
+    LogSystem *logSystem;
+
 
     /// IP-адрес устройства, на котором запущен сервер
     QHostAddress serverIPAddress;

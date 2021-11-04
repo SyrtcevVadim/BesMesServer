@@ -11,12 +11,14 @@ MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
 {
    initWorkers();
    configureStatisticsCounter();
+   configureLogSystem();
 }
 
 MultithreadTcpServer::~MultithreadTcpServer()
 {
     removeWorkers();
     delete statisticsCounter;
+    delete logSystem;
 }
 
 void MultithreadTcpServer::configureStatisticsCounter()
@@ -35,11 +37,18 @@ void MultithreadTcpServer::configureStatisticsCounter()
             SIGNAL(activeConnectionsCounterChanged(unsigned long long)));
 }
 
+void MultithreadTcpServer::configureLogSystem()
+{
+    logSystem = new LogSystem("latest.txt", this);
+    connect(this, SIGNAL(logMessage(QString)),
+            logSystem, SLOT(logToFile(QString)));
+}
+
 void MultithreadTcpServer::start()
 {
     // Начинаем слушать входящие соединения
     listen(serverIPAddress, serverPort);
-    qDebug() << "Сервер прослушивает входящие соединения!";
+    logSystem->logToFile("Сервер начал слушать входящие соединения");
     // Запускает рабочие потоки
     for(ServerWorker *worker:serverWorkers)
     {
@@ -53,8 +62,8 @@ void MultithreadTcpServer::stop()
     // Приостанавливаем прослушивание входящих соединений
     close();
     // Отправляем сигнал о том, что нужно остановить рабочие потоки (отключаем все соединения от них)
-    emit serverStopped();
-    qDebug() << "Сервер не прослушивает входящие соединения";
+    emit stopped ();
+    logSystem->logToFile("Сервер перестал слушать входящие соединения");
 }
 
 void MultithreadTcpServer::removeWorkers()
@@ -86,14 +95,14 @@ void MultithreadTcpServer::initWorkers()
          * Объекты подключения, получив данный сигнал, разрывают своё соединение с сервером. Таким образом, нагрузка на рабочий поток
          * останавливается. Сервер после этого можно считать простаивающим
          */
-        connect(this, SIGNAL(serverStopped()), newWorker, SIGNAL(stopped()));
+        connect(this, SIGNAL(stopped()), newWorker, SIGNAL(stopWorker()));
         // Пробрасываем сигнал о разрыве клиентского соединения "во вне"
         connect(newWorker, SIGNAL(clientConnectionClosed()), SIGNAL(clientConnectionClosed()));
+        // Пробрасываем сигнал о регистрации сообщения в журнале сообщений
+        connect(newWorker, SIGNAL(logMessage(QString)), SIGNAL(logMessage(QString)));
         serverWorkers.append(newWorker);
     }
 }
-
-
 
 void MultithreadTcpServer::incomingConnection(qintptr socketDescriptor)
 {
@@ -102,10 +111,12 @@ void MultithreadTcpServer::incomingConnection(qintptr socketDescriptor)
      * от новых подключений между рабочими потоками сервера по алгоритму Round Robin
      */
     unsigned long long totalEstablishedConnectionsCounter = statisticsCounter->getTotalEstablishedConnectionsCounter();
-    qDebug() << "Общее количество подключений за сеанс: " << totalEstablishedConnectionsCounter;
-    qDebug() << "Направляем новое подключение потоку "<< totalEstablishedConnectionsCounter%workerThreadsNumber;
+    /// Номер потока, который будет обрабатывать данное подключение
+    int handlingThreadNumber = totalEstablishedConnectionsCounter%workerThreadsNumber;
+    logSystem->logToFile(QString("Получено новое соединение|Новое подключение обрабатывается потоком %1")
+                         .arg(QString().setNum(handlingThreadNumber)));
     // Выбираем серверный рабочий поток, который будет ответственен за обработку сообщений от нового подключения
-    ServerWorker *currentWorker = serverWorkers[totalEstablishedConnectionsCounter%workerThreadsNumber];
+    ServerWorker *currentWorker = serverWorkers[handlingThreadNumber];
     currentWorker->addClientConnection(socketDescriptor);
     emit clientConnectionOpenned();
 }
