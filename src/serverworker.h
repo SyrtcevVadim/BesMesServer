@@ -20,10 +20,12 @@ public:
 signals:
     /// Сигнал, отправляемый всем подключенным к данному потоку соединениям, уведомляющий о том, что
     /// нужно разорвать соединение
-    void workerStopped();
+    void stopWorker();
     /// Сигнал, высылаемый, когда клиентское соединение, обрабатываемое
     /// в данном потоке, разрывается
-    void connectionClosed();
+    void clientConnectionClosed();
+    /// Сигнал, высылаемый, когда рабочий поток выполняет любой запрос клиента
+    void logMessage(QString message);
 protected:
     void run();
 private slots:

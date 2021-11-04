@@ -1,6 +1,6 @@
 #ifndef CLIENTCONNECTION_H
 #define CLIENTCONNECTION_H
-
+// Автор: Сырцев Вадим Игоревич
 #include<QObject>
 #include<QTcpSocket>
 #include<QTextStream>
@@ -27,7 +27,7 @@ signals:
     /// Отправляется, когда пользователь отправил команду ПРИВЕТ и передал
     /// имя пользователя и пароль от аккаунта
     void helloSaid(QString userName, QString password);
-    /// Отправляется после отключения клиента от сервера
+    /// Отправляется после разрыва клиентского соединения с сервером
     void closed();
 private slots:
     /// Обрабатывает входящую команду пользователя. В зависимости
