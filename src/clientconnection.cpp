@@ -27,7 +27,7 @@ void ClientConnection::close()
 
 void ClientConnection::receiveServerResponse(QString response)
 {
-    *stream << response << "\r\n";
+    *stream << response;
     stream->flush();
 }
 
@@ -39,7 +39,7 @@ void ClientConnection::processIncomingMessage()
      */
     static QString clientMessage="";
     clientMessage += socket->readAll();
-    if(!clientMessage.endsWith("\r\n"))
+    if(!clientMessage.endsWith(END_OF_COMMAND))
     {
         return;
     }

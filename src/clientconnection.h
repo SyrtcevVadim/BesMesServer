@@ -5,6 +5,9 @@
 #include<QTcpSocket>
 #include<QTextStream>
 
+
+
+#define END_OF_COMMAND "\r\n"
 // Команда, отсылаемая серверу для аутентификации пользователя
 #define HELLO_COMMAND "HELLO"
 
