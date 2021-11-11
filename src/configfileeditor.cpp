@@ -81,6 +81,15 @@ void ConfigFileEditor::setParameterValue(const QString &parameterName, const QSt
     }
 }
 
+QString ConfigFileEditor::getParameterValue(const QString &parameterName)
+{
+    if(parameters.contains(parameterName))
+    {
+        return parameters[parameterName];
+    }
+    return "";
+}
+
 void ConfigFileEditor::createEmptyConfigFile(const QString &configFileName)
 {
     QFile newConfigFile(configFileName);

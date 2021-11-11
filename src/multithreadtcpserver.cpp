@@ -9,12 +9,14 @@ size_t MultithreadTcpServer::workerThreadsNumber = std::thread::hardware_concurr
 MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
                                            qint16 serverPort,
                                            QObject *parent):
-    QTcpServer(parent), serverIPAddress(serverIPAddress), serverPort(serverPort)
+    QTcpServer(parent),
+    serverIPAddress(serverIPAddress),
+    serverPort(serverPort)
 {
-   initWorkers();
-   configureStatisticsCounter();
-   configureLogSystem();
-   configEditor = new ConfigFileEditor();
+    configEditor = new ConfigFileEditor();
+    initWorkers();
+    configureStatisticsCounter();
+    configureLogSystem();
 }
 
 MultithreadTcpServer::~MultithreadTcpServer()
@@ -89,10 +91,23 @@ void MultithreadTcpServer::initWorkers()
     {
         workerThreadsNumber = DEFAULT_THREAD_NUMBER;
     }
+    // Получаем значения параметров, необходимых рабочему потоку
+    QString databaseAddress = configEditor->getParameterValue("database_address");
+    int databasePort = configEditor->getParameterValue("database_port").toInt();
+    QString userName = configEditor->getParameterValue("user_name");
+    QString password = configEditor->getParameterValue("password");
+    qDebug() << "Адрес базы данных: "<<databaseAddress;
+    qDebug() << "Порт базы данных: "<<databasePort;
+    qDebug() << "Имя пользователя рабочего потока: "<<userName;
+    qDebug() << "Пароль от аккаунта рабочего потока: "<<password;
     // Создаём потоки обработки входящих соединений
     for(int i{0}; i < workerThreadsNumber; i++)
     {
-        ServerWorker *newWorker = new ServerWorker(this);
+        ServerWorker *newWorker = new ServerWorker(databaseAddress,
+                                                   databasePort,
+                                                   userName,
+                                                   password,
+                                                   this);
         /* Когда работа сервера останавливается, рабочим потокам отправляется сигнал
          * Мы отправляем именно сигнал, а не слот, поскольку рабочий поток не хранит объекты подключений в коллекции
          * Объекты подключения, получив данный сигнал, разрывают своё соединение с сервером. Таким образом, нагрузка на рабочий поток

@@ -12,7 +12,11 @@ class ServerWorker : public QThread
 {
     Q_OBJECT
 public:
-    ServerWorker(QObject *parent = nullptr);
+    ServerWorker(const QString &databaseAddress,
+                 const int databasePort,
+                 const QString &userName,
+                 const QString &password,
+                 QObject *parent = nullptr);
     /// Добавляет в данный серверный поток обработки новое клиентское
     /// соединение
     void addClientConnection(qintptr socketDescriptor);
@@ -34,12 +38,21 @@ private slots:
     /// Уменьшает счётчик клиентских соединений, обрабатываемых текущим потоком
     void decreaseHandlingConnectionsCounter();
 private:
+    inline void initCounters();
     /// Счётчик созданных объектов
     static unsigned int createdObjectCounter;
     /// Номер потока, работающего в рамках серверного приложения
     unsigned int id;
     /// Счётчик соединений, обрабатываемых данным рабочим потоком
     unsigned long long handlingConnectionsCounter;
+    /// IP-адрес базы данных, к которой сервер будет подключаться
+    QString databaseAddress;
+    /// Порт, прослушиваемый базой данных
+    int databasePort;
+    /// Имя пользователя, под которым рабочий поток будет подключаться к базе данных
+    QString userName;
+    /// Пароль от этого аккаунта рабочего потока в базе данных
+    QString password;
 
 };
 

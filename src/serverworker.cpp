@@ -6,10 +6,19 @@
 // Изначально нет созданных объектов серверных рабочих
 unsigned int ServerWorker::createdObjectCounter = 0;
 
-ServerWorker::ServerWorker(QObject *parent): QThread(parent)
+ServerWorker::ServerWorker(const QString &databaseAddress,
+                           const int databasePort,
+                           const QString &userName,
+                           const QString &password,
+                           QObject *parent):
+    QThread(parent),
+    databaseAddress(databaseAddress),
+    databasePort(databasePort),
+    userName(userName),
+    password(password)
 {
     id = createdObjectCounter++;
-    handlingConnectionsCounter=0;
+    initCounters();
 }
 
 unsigned long long ServerWorker::getHandlingConnectionsCounter()
@@ -56,4 +65,9 @@ void ServerWorker::run()
 {
     qDebug() << QString("Поток %1 запущен").arg(id);
     exec();
+}
+
+void ServerWorker::initCounters()
+{
+    handlingConnectionsCounter=0;
 }
