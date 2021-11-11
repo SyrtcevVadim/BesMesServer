@@ -1,5 +1,7 @@
 #include "clientconnection.h"
 
+#include<QRegExp>
+
 ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : QObject(parent)
 {
     socket = new QTcpSocket();
@@ -46,8 +48,20 @@ void ClientConnection::processIncomingMessage()
     // Сообщение полностью получено
     qDebug() << "Пользователь отправил сообщение: "<<clientMessage;
 
-    QStringList args = clientMessage.split(" ");
-    if(args[0] == HELLO_COMMAND)
+    // Разбиваем входящую строку на фрагменты: команда и аргументы
+    QStringList args;
+    // Избавляемся от "\r\n"
+    clientMessage = clientMessage.trimmed();
+    QTextStream argStream(&clientMessage);
+    while(!argStream.atEnd())
+    {
+        QString arg;
+        argStream >> arg;
+        args.append(arg);
+    }
+    qDebug() << args;
+    // Команда HELLO всегда содержит 3 части: команда, имя, пароль
+    if(args.length() == 3 && args[0]==HELLO_COMMAND)
     {
         qDebug() << "Отпралена команда для аутентификации";
         // Обработкой этого сигнала займётся серверный рабочий поток
