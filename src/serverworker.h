@@ -2,7 +2,7 @@
 #ifndef SERVERWORKER_H
 #define SERVERWORKER_H
 
-#include "configfileeditor.h"
+#include "databaseconnection.h"
 #include <QThread>
 
 /**
@@ -45,14 +45,8 @@ private:
     unsigned int id;
     /// Счётчик соединений, обрабатываемых данным рабочим потоком
     unsigned long long handlingConnectionsCounter;
-    /// IP-адрес базы данных, к которой сервер будет подключаться
-    QString databaseAddress;
-    /// Порт, прослушиваемый базой данных
-    int databasePort;
-    /// Имя пользователя, под которым рабочий поток будет подключаться к базе данных
-    QString userName;
-    /// Пароль от этого аккаунта рабочего потока в базе данных
-    QString password;
+    /// Объект подключения к базе данных
+    DatabaseConnection *dbConnection;
 
 };
 

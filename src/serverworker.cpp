@@ -11,14 +11,17 @@ ServerWorker::ServerWorker(const QString &databaseAddress,
                            const QString &userName,
                            const QString &password,
                            QObject *parent):
-    QThread(parent),
-    databaseAddress(databaseAddress),
-    databasePort(databasePort),
-    userName(userName),
-    password(password)
+    QThread(parent)
 {
+
     id = createdObjectCounter++;
     initCounters();
+    // Открываем соединение с базой данных
+    dbConnection = new DatabaseConnection(QString("%1%2").arg(userName, QString().setNum(id)));
+    dbConnection->setDatabaseAddress(databaseAddress, databasePort);
+    dbConnection->setUser(userName, password);
+    dbConnection->setDatabaseName();
+
 }
 
 unsigned long long ServerWorker::getHandlingConnectionsCounter()
@@ -64,6 +67,7 @@ void ServerWorker::processHelloMessage(QString userName, QString password)
 void ServerWorker::run()
 {
     qDebug() << QString("Поток %1 запущен").arg(id);
+    dbConnection->open();
     exec();
 }
 

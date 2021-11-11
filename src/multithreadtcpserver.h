@@ -7,6 +7,7 @@
 #include "serverworker.h"
 #include "serverstatisticscounter.h"
 #include "logsystem.h"
+#include "configfileeditor.h"
 
 /**
  * Описывает многопоточный TCP-сервер, способный принимать входящие подключения
