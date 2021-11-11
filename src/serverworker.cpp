@@ -9,7 +9,6 @@ unsigned int ServerWorker::createdObjectCounter = 0;
 ServerWorker::ServerWorker(QObject *parent): QThread(parent)
 {
     id = createdObjectCounter++;
-
     handlingConnectionsCounter=0;
 }
 

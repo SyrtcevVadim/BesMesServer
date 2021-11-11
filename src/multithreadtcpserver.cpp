@@ -1,6 +1,8 @@
 #include<thread>
 #include<QTcpSocket>
+#include<QMessageBox>
 #include "multithreadtcpserver.h"
+#include "configfileeditor.h"
 
 size_t MultithreadTcpServer::workerThreadsNumber = std::thread::hardware_concurrency();
 
@@ -12,6 +14,7 @@ MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
    initWorkers();
    configureStatisticsCounter();
    configureLogSystem();
+   configEditor = new ConfigFileEditor();
 }
 
 MultithreadTcpServer::~MultithreadTcpServer()

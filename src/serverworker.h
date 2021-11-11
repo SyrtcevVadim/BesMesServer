@@ -2,6 +2,7 @@
 #ifndef SERVERWORKER_H
 #define SERVERWORKER_H
 
+#include "configfileeditor.h"
 #include <QThread>
 
 /**
@@ -39,6 +40,7 @@ private:
     unsigned int id;
     /// Счётчик соединений, обрабатываемых данным рабочим потоком
     unsigned long long handlingConnectionsCounter;
+
 };
 
 #endif // SERVERWORKER_H
