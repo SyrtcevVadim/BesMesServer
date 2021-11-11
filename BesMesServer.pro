@@ -1,4 +1,4 @@
-QT       += network core gui
+QT       += sql network core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -10,6 +10,8 @@ CONFIG += c++17
 
 SOURCES += \
     src/clientconnection.cpp \
+    src/configfileeditor.cpp \
+    src/databaseconnection.cpp \
     src/logsystem.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
@@ -19,6 +21,8 @@ SOURCES += \
 
 HEADERS += \
     src/clientconnection.h \
+    src/configfileeditor.h \
+    src/databaseconnection.h \
     src/logsystem.h \
     src/mainwindow.h \
     src/multithreadtcpserver.h \

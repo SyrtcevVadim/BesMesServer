@@ -7,6 +7,7 @@
 #include "serverworker.h"
 #include "serverstatisticscounter.h"
 #include "logsystem.h"
+#include "configfileeditor.h"
 
 /**
  * Описывает многопоточный TCP-сервер, способный принимать входящие подключения
@@ -72,6 +73,8 @@ private:
     /// Логгирующая система, записывающая все действия, выполняемые сервером,
     /// в отдельный файл
     LogSystem *logSystem;
+    /// Редактирует настройки в файле конфигурации и позволяет их получать
+    ConfigFileEditor *configEditor;
 
 
     /// IP-адрес устройства, на котором запущен сервер
