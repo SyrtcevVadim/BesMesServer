@@ -27,7 +27,7 @@ void ClientConnection::close()
     socket->close();
 }
 
-void ClientConnection::receiveServerResponse(QString response)
+void ClientConnection::processServerResponse(QString response)
 {
     *stream << response;
     stream->flush();

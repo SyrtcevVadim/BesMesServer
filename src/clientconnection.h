@@ -24,7 +24,7 @@ public:
     explicit ClientConnection(qintptr socketDescriptor,QObject *parent = nullptr);
     ~ClientConnection();
 public slots:
-    void receiveServerResponse(QString response);
+    void processServerResponse(QString response);
     void close();
 signals:
     /// Отправляется, когда пользователь отправил команду ПРИВЕТ и передал

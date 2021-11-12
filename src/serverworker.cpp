@@ -45,7 +45,7 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     connect(this, SIGNAL(stopWorker()),
             incomingConnection, SLOT(close()));
 
-    incomingConnection->receiveServerResponse("Hello! Say the name and the pass\r\n");
+    incomingConnection->processServerResponse("Hello! Say the name and the pass\r\n");
 }
 
 void ServerWorker::decreaseHandlingConnectionsCounter()
@@ -60,7 +60,7 @@ void ServerWorker::processHelloMessage(QString userName, QString password)
     qDebug() << QString("Пользователь %1 сказал привет!").arg(userName);
     ClientConnection *client = (ClientConnection*)sender();
     // TODO Проверяем, есть ли такой пользователь в БД
-    client->receiveServerResponse(QString("SUCCESS you were logged in\r\n"));
+    client->processServerResponse(QString("SUCCESS you were logged in\r\n"));
 
 }
 
