@@ -38,9 +38,14 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     connect(incomingConnection, SIGNAL(closed()), SIGNAL(clientConnectionClosed()));
     // После разрыва пользовательского соединения уменьшаем счётчик
     connect(incomingConnection, SIGNAL(closed()), SLOT(decreaseHandlingConnectionsCounter()));
-    // Обрабатываем команду приветствия
+
+    // Обрабатывает команду аутентификации
     connect(incomingConnection, SIGNAL(logInCommandSent(QString,QString)),
             SLOT(processLogInCommand(QString,QString)));
+    // Обрабатывает команду регистрации
+    connect(incomingConnection, SIGNAL(registrationCommandSend(QString,QString,QString,QString)),
+            SLOT(processRegistrationCommand(QString,QString,QString,QString)));
+
     // При остановке рабочего потока должны быть разорваны все пользовательские соединения
     connect(this, SIGNAL(stopWorker()),
             incomingConnection, SLOT(close()));
@@ -61,6 +66,15 @@ void ServerWorker::processLogInCommand(QString userName, QString password)
     ClientConnection *client = (ClientConnection*)sender();
     // TODO Проверяем, есть ли такой пользователь в БД
     client->sendResponse(QString("+ Вы успешно вошли в систему\r\n"));
+}
+
+void ServerWorker::processRegistrationCommand(QString firstName, QString lastName,
+                                              QString email, QString password)
+{
+    qDebug() << QString("Обрабатываем команду регистрации для пользвоателя %1 %2").arg(firstName, lastName);
+    // TODO Проверяем, зарегистрирован ли уже пользователь с такой почтой
+    ClientConnection *client = (ClientConnection*)sender();
+    client->sendResponse(QString("+ Вы успешно зарегистрировали новый аккаунт!"));
 }
 
 void ServerWorker::run()

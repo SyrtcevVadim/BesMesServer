@@ -31,9 +31,13 @@ public slots:
     void sendResponse(QString response);
     void close();
 signals:
-    /// Отправляется, когда пользователь отправил команду ПРИВЕТ и передал
+    /// Отправляется, когда пользователь отправил команду аутентификации и передал
     /// адрес электронной почты и пароль от аккаунта
     void logInCommandSent(QString userName, QString password);
+    /// Отправляется, когда пользователь отправил команду регистрации и передал
+    /// имя, фамилию, адрес электронной почты и пароль для нового аккаунта
+    void registrationCommandSent(QString firstName, QString lastName,
+                                 QString email, QString password);
     /// Отправляется после разрыва клиентского соединения с сервером
     void closed();
 private slots:

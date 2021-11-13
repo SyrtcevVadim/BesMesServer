@@ -105,7 +105,16 @@ void ClientConnection::processCommand(QStringList messageParts)
         }
         case CommandType::Registration:
         {
+            // Команда регистрации принимает 4 параметра
+            if(messageParts.length() == 5)
+            {
 
+            }
+            else
+            {
+                qDebug() << "В команде регистрации указано неверное количество аргументов";
+                sendResponse("- неверное количество аргументов\r\n");
+            }
             break;
         }
         case CommandType::Unspecified:
