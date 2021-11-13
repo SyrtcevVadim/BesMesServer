@@ -10,8 +10,9 @@
 #define END_OF_COMMAND "\r\n"
 // Команда, отсылаемая серверу для аутентификации пользователя
 #define LOGIN_COMMAND "ПРИВЕТ"
+#define REGISTRATION_COMMAND "РЕГИСТРАЦИЯ"
 
-enum class CommandType{LogIn, Unspecified};
+enum class CommandType{LogIn, Registration, Unspecified};
 
 /**
  * Описываем входщящее клиентское соединение, которое будет обрабатываться одним из
@@ -50,6 +51,9 @@ private:
     QStringList parseMessage(QString clientMessage);
     /// По названию команды возвращает её тип
     CommandType getCommandType(const QString &commandName);
+    /// Обрабатывает команду клиента в зависимости от ее типа.
+    /// Вместе с командой передаются её аргументы
+    void processCommand(QStringList messageParts);
     /// Сокет, через который клиентское приложение подключено к серверу
     QTcpSocket *socket;
     /// Текстовый поток, связанный с этим сокетом

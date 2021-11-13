@@ -73,9 +73,46 @@ CommandType ClientConnection::getCommandType(const QString &commandName)
     {
         return CommandType::LogIn;
     }
+    else if(commandName == REGISTRATION_COMMAND)
+    {
+        return CommandType::Registration;
+    }
     else
     {
         return CommandType::Unspecified;
+    }
+}
+
+void ClientConnection::processCommand(QStringList messageParts)
+{
+    CommandType command = getCommandType(messageParts[0]);
+    switch(command)
+    {
+        case CommandType::LogIn:
+        {
+            // Команда аутентификации принимает два параметра
+            if(messageParts.length() == 3)
+            {
+                qDebug() << "Отправлена команда аутентификации";
+                emit logInCommandSent(messageParts[1], messageParts[2]);
+            }
+            else
+            {
+                qDebug() << "В команде аутентификации указано неверное количество аргументов";
+                sendResponse("- неверное количество аргументов\r\n");
+            }
+            break;
+        }
+        case CommandType::Registration:
+        {
+
+            break;
+        }
+        case CommandType::Unspecified:
+        {
+            qDebug() << "Получена неизвестная команда "<< messageParts[0];
+            break;
+        }
     }
 }
 
@@ -94,29 +131,10 @@ void ClientConnection::processIncomingMessage()
     QStringList messageParts = parseMessage(clientMessage);
     qDebug() << messageParts;
 
-    CommandType command = getCommandType(messageParts[0]);
-
-    switch(command)
+    // Пустые команды не обрабатываем
+    if(messageParts.length() > 1)
     {
-        case CommandType::LogIn:
-        {
-            // Команда аутентификации принимает два параметра
-            if(messageParts.length() == 3)
-            {
-                qDebug() << "Отправлена команда аутентификации";
-                emit logInCommandSent(messageParts[1], messageParts[2]);
-            }
-            else
-            {
-                qDebug() << "В команде аутентификации указано неверное количество аргументов";
-                sendResponse("- неверное количество аргументов\r\n");
-            }
-            break;
-        }
-        case CommandType::Unspecified:
-        {
-            qDebug() << "Получена неизвестная команда "<< messageParts[0];
-        }
+        processCommand(messageParts);
     }
 }
 
