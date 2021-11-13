@@ -33,8 +33,8 @@ signals:
 protected:
     void run();
 private slots:
-    /// Обрабатывает сообщение пользователя об аутентификации
-    void processHelloMessage(QString userName, QString password);
+    /// Обрабатывает команду аутентификации
+    void processLogInCommand(QString userName, QString password);
     /// Уменьшает счётчик клиентских соединений, обрабатываемых текущим потоком
     void decreaseHandlingConnectionsCounter();
 private:

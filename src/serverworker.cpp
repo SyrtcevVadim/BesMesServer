@@ -39,13 +39,13 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     // После разрыва пользовательского соединения уменьшаем счётчик
     connect(incomingConnection, SIGNAL(closed()), SLOT(decreaseHandlingConnectionsCounter()));
     // Обрабатываем команду приветствия
-    connect(incomingConnection, SIGNAL(helloSaid(QString,QString)),
-            SLOT(processHelloMessage(QString,QString)));
+    connect(incomingConnection, SIGNAL(logInCommandSent(QString,QString)),
+            SLOT(processLogInCommand(QString,QString)));
     // При остановке рабочего потока должны быть разорваны все пользовательские соединения
     connect(this, SIGNAL(stopWorker()),
             incomingConnection, SLOT(close()));
 
-    incomingConnection->processServerResponse("Hello! Say the name and the pass\r\n");
+    incomingConnection->sendResponse("+ Привет! Вы подключены к сереверу BesMesServer\r\n");
 }
 
 void ServerWorker::decreaseHandlingConnectionsCounter()
@@ -55,13 +55,12 @@ void ServerWorker::decreaseHandlingConnectionsCounter()
                 .arg(QString().setNum(id), QString().setNum(handlingConnectionsCounter));
 }
 
-void ServerWorker::processHelloMessage(QString userName, QString password)
+void ServerWorker::processLogInCommand(QString userName, QString password)
 {
-    qDebug() << QString("Пользователь %1 сказал привет!").arg(userName);
+    qDebug() << QString("Пользователь %1 хочет войти в систему!").arg(userName);
     ClientConnection *client = (ClientConnection*)sender();
     // TODO Проверяем, есть ли такой пользователь в БД
-    client->processServerResponse(QString("SUCCESS you were logged in\r\n"));
-
+    client->sendResponse(QString("+ Вы успешно вошли в систему\r\n"));
 }
 
 void ServerWorker::run()
