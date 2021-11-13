@@ -60,21 +60,39 @@ void ServerWorker::decreaseHandlingConnectionsCounter()
                 .arg(QString().setNum(id), QString().setNum(handlingConnectionsCounter));
 }
 
-void ServerWorker::processLogInCommand(QString userName, QString password)
+void ServerWorker::processLogInCommand(QString email, QString password)
 {
-    qDebug() << QString("Пользователь %1 хочет войти в систему!").arg(userName);
+    qDebug() << QString("Пользователь %1 хочет войти в систему!").arg(email);
     ClientConnection *client = (ClientConnection*)sender();
-    // TODO Проверяем, есть ли такой пользователь в БД
-    client->sendResponse(QString("+ Вы успешно вошли в систему\r\n"));
+    // Проверяем, есть ли такой пользователь в БД
+    if(dbConnection->userExists(email, password))
+    {
+        client->sendResponse(QString("+ Вы успешно вошли в систему\r\n"));
+    }
+    else
+    {
+        client->sendResponse(QString("- Не существует аккаунта с таким логином и паролем\r\n"));
+    }
 }
 
 void ServerWorker::processRegistrationCommand(QString firstName, QString lastName,
                                               QString email, QString password)
 {
     qDebug() << QString("Обрабатываем команду регистрации для пользвоателя %1 %2").arg(firstName, lastName);
-    // TODO Проверяем, зарегистрирован ли уже пользователь с такой почтой
-    ClientConnection *client = (ClientConnection*)sender();
-    client->sendResponse(QString("+ Вы успешно зарегистрировали новый аккаунт!"));
+    // Регистрируем пользователя, если нет пользователей с такой почтой
+    if(!dbConnection->userExists(email))
+    {
+        ClientConnection *client = (ClientConnection*)sender();
+        if(dbConnection->addNewUser(firstName, lastName, email, password))
+        {
+            client->sendResponse("+ Вы успешно зарегистрировали новый аккаунт\r\n");
+        }
+        else
+        {
+            client->sendResponse("- Не удалось зарегистрировать новый аккаунт\r\n");
+        }
+    }
+
 }
 
 void ServerWorker::run()

@@ -2,7 +2,7 @@
 #define DATABASECONNECTION_H
 
 #include<QSqlDatabase>
-
+#include"user.h"
 
 #define USING_PLUGIN "QMYSQL"
 #define DEFAULT_DATABASE "besmesdb"
@@ -20,6 +20,14 @@ public:
     void setUser(const QString &userName, const QString &password);
     /// Открывате физическое подключение с базой данных
     void open();
+    /// Проверяет, существует ли пользователь с таким адресом электронной почты
+    bool userExists(const QString &email);
+    /// Проверяет, существует ли пользователь с таким адресом электронной почты
+    /// и паролем
+    bool userExists(const QString &email, const QString &password);
+    /// Добавляет нового пользователя в базу данных
+    bool addNewUser(const QString &firstName, const QString &lastName,
+                    const QString &email, const QString &password);
 private:
     /// Подключение к базе данных проекта BesMes
     QSqlDatabase besMesDatabase;

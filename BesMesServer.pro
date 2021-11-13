@@ -27,7 +27,8 @@ HEADERS += \
     src/mainwindow.h \
     src/multithreadtcpserver.h \
     src/serverstatisticscounter.h \
-    src/serverworker.h
+    src/serverworker.h \
+    src/user.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

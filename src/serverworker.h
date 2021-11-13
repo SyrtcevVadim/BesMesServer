@@ -34,7 +34,7 @@ protected:
     void run();
 private slots:
     /// Обрабатывает команду аутентификации
-    void processLogInCommand(QString userName, QString password);
+    void processLogInCommand(QString email, QString password);
     void processRegistrationCommand(QString firstName, QString last_name,
                                     QString email, QString password);
     /// Уменьшает счётчик клиентских соединений, обрабатываемых текущим потоком

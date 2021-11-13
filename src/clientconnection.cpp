@@ -77,10 +77,7 @@ CommandType ClientConnection::getCommandType(const QString &commandName)
     {
         return CommandType::Registration;
     }
-    else
-    {
-        return CommandType::Unspecified;
-    }
+    return CommandType::Unspecified;
 }
 
 void ClientConnection::processCommand(QStringList messageParts)
@@ -93,7 +90,7 @@ void ClientConnection::processCommand(QStringList messageParts)
             // Команда аутентификации принимает два параметра
             if(messageParts.length() == 3)
             {
-                qDebug() << "Отправлена команда аутентификации";
+                qDebug() << "Обрабатываем команду аутентификации";
                 emit logInCommandSent(messageParts[1], messageParts[2]);
             }
             else
@@ -105,10 +102,14 @@ void ClientConnection::processCommand(QStringList messageParts)
         }
         case CommandType::Registration:
         {
-            // Команда регистрации принимает 4 параметра
+            /* Команда регистрации принимает 4 параметра
+             * имя, фамилия, адрес электронной почты, пароль
+             */
             if(messageParts.length() == 5)
             {
-
+                qDebug() << "Обрабатываем команду регистрации";
+                emit registrationCommandSent(messageParts[1], messageParts[2],
+                        messageParts[3], messageParts[4]);
             }
             else
             {
