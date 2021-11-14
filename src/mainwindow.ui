@@ -129,14 +129,35 @@
       <x>417</x>
       <y>30</y>
       <width>255</width>
-      <height>128</height>
+      <height>157</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="0" colspan="2">
-      <widget class="QLabel" name="label_3">
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>Параметры подключения к базе данных:</string>
+        <string>Порт:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="databaseAddressEdit">
+       <property name="toolTip">
+        <string>IP-адрес машины, на которой запущена база данных</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="databaseUserNameEdit">
+       <property name="toolTip">
+        <string>Имя аккаунта, под которым сервер будет делать запросы на сервер</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0" colspan="2">
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
@@ -147,27 +168,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="lineEdit">
-       <property name="toolTip">
-        <string>IP-адрес машины, на которой запущена база данных</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Порт:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="lineEdit_2">
-       <property name="toolTip">
-        <string>Порт, прослушиваемый базой данных</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="0">
       <widget class="QLabel" name="label_6">
        <property name="text">
@@ -175,10 +175,24 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="lineEdit_3">
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="databasePortEdit">
        <property name="toolTip">
-        <string>Имя аккаунта, под которым сервер будет делать запросы на сервер</string>
+        <string>Порт, прослушиваемый базой данных</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="2">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Параметры подключения к базе данных:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="databaseUserPasswordEdit">
+       <property name="toolTip">
+        <string>Пароль от аккаунта в базе данных. После установки сразу же пропадает</string>
        </property>
       </widget>
      </item>
@@ -189,21 +203,14 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
-      <widget class="QLineEdit" name="lineEdit_4">
-       <property name="toolTip">
-        <string>Пароль от аккаунта в базе данных</string>
+     <item row="5" column="1">
+      <widget class="QPushButton" name="saveConfigParametersBtn">
+       <property name="text">
+        <string>Сохранить</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="0" colspan="2">
-      <widget class="Line" name="line_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2" rowspan="5">
+     <item row="0" column="2" rowspan="6">
       <widget class="Line" name="line_6">
        <property name="orientation">
         <enum>Qt::Vertical</enum>

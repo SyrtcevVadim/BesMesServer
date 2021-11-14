@@ -117,3 +117,9 @@ bool ConfigFileEditor::areParametersSet()
     }
     return true;
 }
+
+
+QString& ConfigFileEditor::operator[](const QString &key)
+{
+    return parameters[key];
+}

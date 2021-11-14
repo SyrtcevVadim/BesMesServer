@@ -10,6 +10,9 @@ MainWindow::MainWindow(QWidget *parent) :
     configureServer();
     configureViews();
 
+    // Отображаем в UI параметры конфигурации, записанные в файле
+    showConfigParameters();
+
 }
 
 MainWindow::~MainWindow()
@@ -27,6 +30,9 @@ void MainWindow::configureViews()
     // Когда количество активных подключений изменяется, обновляем счётчик в GUI
     connect(server, SIGNAL(activeConnectionsCounterChanged(unsigned long long)),
             SLOT(setActiveConnectionsCounter(unsigned long long)));
+
+
+    connect(ui->saveConfigParametersBtn, SIGNAL(clicked()), SLOT(saveConfigParameters()));
 }
 
 void MainWindow::setActiveConnectionsCounter(unsigned long long counter)
@@ -53,3 +59,32 @@ void MainWindow::configureServer()
     connect(server, SIGNAL(started()), SLOT(showServerStateAsActive()));
     connect(server, SIGNAL(stopped()), SLOT(showServerStateAsPassive()));
 }
+
+void MainWindow::showConfigParameters()
+{
+    ui->databaseAddressEdit->setText(config["database_address"]);
+    ui->databasePortEdit->setText(config["database_port"]);
+    ui->databaseUserNameEdit->setText(config["user_name"]);
+    // Пароль не отображаем в целях безопасности :)
+}
+
+void MainWindow::saveConfigParameters()
+{
+    qDebug() << "Сохраняем данные в конфигурационный файл";
+    // Нельзя допустить сохранения пустых значений параметров
+    QString databaseAddress = ui->databaseAddressEdit->text();
+    QString databasePort = ui->databasePortEdit->text();
+    QString userName = ui->databaseUserNameEdit->text();
+    QString password = ui->databaseUserPasswordEdit->text();
+    // TODO Если какое-либо поле пустое, нужно заблокировать кнопку сохранения результатов!
+    config["database_address"]=databaseAddress;
+    config["database_port"]=databasePort;
+    config["user_name"]=userName;
+    if(!password.isEmpty())
+    {
+        config["password"]=password;
+    }
+    // Сохраняем данные в файл конфигурации
+    config.updateConfigFile();
+}
+

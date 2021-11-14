@@ -12,6 +12,9 @@
 class ConfigFileEditor
 {
 public:
+    /// При создании объект начинает сразу считывать данные из файла
+    /// конфигурации. Поэтому после создания сразу можно получать необходимые
+    /// данные
     ConfigFileEditor(const QString &configFileName=STANDART_CONFIG_FILE_NAME);
     /// По названию параметра возвращает его значение из конфигурационного файла
     QString getParameterValue(const QString &parameterName);
@@ -20,12 +23,16 @@ public:
     /// Проверяет, установлено ли значение параметров. True, если установлено.
     /// Иначе, false. Параметр считается установленым, если его значение отличается от -1
     bool areParametersSet();
+    /// Перезаписывает файл конфигурации
+    void updateConfigFile();
+    /// Используется для доступа к значениям параметров
+    QString& operator[] (const QString &key);
+
 private:
     /// Создаёт пустой файл конфигурации со значениями, определяемыми
     /// макросом STANDART_PARAMETER_VALUE
     void createEmptyConfigFile(const QString &configFileName);
-    /// Перезаписывает файл конфигурации
-    void updateConfigFile();
+
     /// Путь к файлу конфигурации
     QString configFileName;
     /// Параметры, сохранённые в файл конфигурации
