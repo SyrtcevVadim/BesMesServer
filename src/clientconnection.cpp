@@ -54,10 +54,11 @@ QString ClientConnection::receiveIncomingMessage()
 
 QStringList ClientConnection::parseMessage(QString clientMessage)
 {
-    QStringList result;
     // Избавляемся от ненужных пустых символов
     clientMessage = clientMessage.trimmed();
     QTextStream argStream(&clientMessage);
+    QStringList result;
+    // Разбиваем сообщение на фрагмента: команду и ее аргументы
     while(!argStream.atEnd())
     {
         QString arg;
