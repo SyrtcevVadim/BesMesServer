@@ -1,3 +1,4 @@
+#include<QMessageBox>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "multithreadtcpserver.h"
@@ -77,14 +78,23 @@ void MainWindow::saveConfigParameters()
     QString userName = ui->databaseUserNameEdit->text();
     QString password = ui->databaseUserPasswordEdit->text();
     // TODO Если какое-либо поле пустое, нужно заблокировать кнопку сохранения результатов!
-    config["database_address"]=databaseAddress;
-    config["database_port"]=databasePort;
-    config["user_name"]=userName;
-    if(!password.isEmpty())
+    if(databaseAddress.isEmpty() || databasePort.isEmpty() ||
+        userName.isEmpty())
     {
-        config["password"]=password;
+        QMessageBox::critical(this, tr("Ошибка изменения параметров конфигурации"),
+                              tr("Нельзя оставлять поле ввода параметра пустым(кроме пароля)"), QMessageBox::Ok);
     }
-    // Сохраняем данные в файл конфигурации
-    config.updateConfigFile();
+    else
+    {
+        config["database_address"]=databaseAddress;
+        config["database_port"]=databasePort;
+        config["user_name"]=userName;
+        if(!password.isEmpty())
+        {
+            config["password"]=password;
+        }
+        // Сохраняем данные в файл конфигурации
+        config.updateConfigFile();
+    }
 }
 
