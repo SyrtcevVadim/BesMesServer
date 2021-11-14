@@ -37,22 +37,22 @@ void DatabaseConnection::open()
     {
         qDebug() << "Ошибка "<< besMesDatabase.lastError().text();
     }
+    else
+    {
+        qDebug() << "Соединение с бд установлено";
+    }
 }
 
 bool DatabaseConnection::userExists(const QString &email)
 {
     QSqlQuery query(besMesDatabase);
-    query.prepare("SELECT email FROM :user_table");
-    query.bindValue(0, USER_TABLE);
-    query.exec();
+    QString strQuery = QString("SELECT email FROM %1 WHERE email='%2'").arg(USER_TABLE, email);
+
+    query.exec(strQuery);
     // Если пользователя с таким адресом эл. почты не существует
     while(query.next())
     {
-        // Сравниваем кажду почту с предоставленной
-        if(query.value(0).toString() == email)
-        {
-            return true;
-        }
+        return true;
     }
     return false;
 }
@@ -60,17 +60,13 @@ bool DatabaseConnection::userExists(const QString &email)
 bool DatabaseConnection::userExists(const QString &email, const QString &password)
 {
     QSqlQuery query(besMesDatabase);
-    query.prepare("SELECT email,password FROM :user_table");
-    query.bindValue(0, USER_TABLE);
-    query.exec();
-    // Если пользователя с таким адресом эл. почты не существует
+    QString strQuery = QString("SELECT email, password FROM %1 WHERE email='%2' AND password='%3'").
+            arg(USER_TABLE, email, password);
+    query.exec(strQuery);
+
     while(query.next())
     {
-        // Сравниваем кажду почту с предоставленной
-        if(query.value(0).toString() == email && query.value(1).toString()==password)
-        {
-            return true;
-        }
+        return true;
     }
     return false;
 }

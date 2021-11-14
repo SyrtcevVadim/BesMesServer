@@ -77,10 +77,12 @@ void ServerWorker::processLogInCommand(QString email, QString password)
     // Проверяем, есть ли такой пользователь в БД
     if(dbConnection->userExists(email, password))
     {
+        qDebug() << "Пользователь вошел в аккаунт";
         client->sendResponse(QString("+ Вы успешно вошли в систему\r\n"));
     }
     else
     {
+        qDebug() << "Пользователь не вошел в аккаунт";
         client->sendResponse(QString("- Не существует аккаунта с таким логином и паролем\r\n"));
     }
 }
