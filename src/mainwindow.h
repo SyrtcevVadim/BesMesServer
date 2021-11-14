@@ -37,6 +37,10 @@ private slots:
     void saveConfigParameters();
     /// Отображает в UI текущие параметры конфигураци
     void showConfigParameters();
+
+    /// Переключает состояние кнопок запуска и отсановки сервера.
+    /// Меняет состояние кнопок местами
+    void toggleStartStopBtns();
 private:
     /// Связывает элементы графического интерфейса окна с соответствующим слотами
     void configureViews();

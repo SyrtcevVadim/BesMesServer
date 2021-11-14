@@ -1,4 +1,5 @@
 #include<QMessageBox>
+#include<QPushButton>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "multithreadtcpserver.h"
@@ -25,8 +26,10 @@ void MainWindow::configureViews()
 {
     // Запускает работу сервера
     connect(ui->startServerBtn, SIGNAL(clicked()), server, SLOT(start()));
+    connect(ui->startServerBtn, SIGNAL(clicked()), SLOT(toggleStartStopBtns()));
     // Останавливает работу сервера
     connect(ui->stopServerBtn, SIGNAL(clicked()), server, SLOT(stop()));
+    connect(ui->stopServerBtn, SIGNAL(clicked()), SLOT(toggleStartStopBtns()));
 
     // Когда количество активных подключений изменяется, обновляем счётчик в GUI
     connect(server, SIGNAL(activeConnectionsCounterChanged(unsigned long long)),
@@ -98,4 +101,26 @@ void MainWindow::saveConfigParameters()
         emit configParametersChanged();
     }
 }
+
+
+void MainWindow::toggleStartStopBtns()
+{
+    // Изначально кнопка запуска сервера активна и нажать могут только
+    // на неё
+    static bool startBtnEnabled=true;
+    if(startBtnEnabled)
+    {
+        // Блокируем кнопку запуска сервера и активируем кнопку остановки
+        ui->startServerBtn->setEnabled(false);
+        ui->stopServerBtn->setEnabled(true);
+    }
+    else
+    {
+        // Блокируем кнопку остановки и активируем кнопку запуска
+        ui->stopServerBtn->setEnabled(false);
+        ui->startServerBtn->setEnabled(true);
+    }
+    startBtnEnabled=ui->startServerBtn->isEnabled();
+}
+
 
