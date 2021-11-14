@@ -14,7 +14,6 @@ ConfigFileEditor::ConfigFileEditor(const QString &configFileName)
     QFileInfo configFileInfo(configFileName);
     if(configFileInfo.exists())
     {
-        qDebug() << "Файл конфигов существует!";
         // Готовимся считывать данные из файла конфигурации
         QFile configFile(configFileName);
         configFile.open(QIODevice::ReadOnly);
@@ -39,7 +38,6 @@ ConfigFileEditor::ConfigFileEditor(const QString &configFileName)
                parameters.insert(key, value);
             }
         }
-        qDebug() << parameters;
     }
     else
     {
@@ -116,4 +114,10 @@ bool ConfigFileEditor::areParametersSet()
         }
     }
     return true;
+}
+
+
+QString& ConfigFileEditor::operator[](const QString &key)
+{
+    return parameters[key];
 }

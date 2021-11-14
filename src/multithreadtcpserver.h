@@ -19,9 +19,12 @@ class MultithreadTcpServer : public QTcpServer
 public:
     MultithreadTcpServer(QHostAddress serverIPAddress,
                          qint16 serverPort,
+                         ConfigFileEditor* configParameters,
                          QObject *parent = nullptr);
     ~MultithreadTcpServer();
 signals:
+    /// Сигнал, высылаемый, когда сервер начинает прослушивать входящие соединения
+    void started();
     /// Сигнал, высылаемый, когда сервер перестаёт прослушивать входящие соединения
     void stopped();
     /// Сигнал, высылаемый после открытия нового соединения с клиентским приложением
@@ -31,7 +34,7 @@ signals:
     /// Сигнал, высылаемый после открытия или разрыва клиентского соединения
     /// activeConnectionsCounter - количество активных соединений
     void activeConnectionsCounterChanged(unsigned long long activeConnectionsCounter);
-    /// Сигнал о намерении зарегистрировать сообщение в файле
+    /// Сигнал о намерении зарегистрировать сообщение в файле. TODO переделать
     void logMessage(QString message);
 public slots:
     /// Запускает работу сервера: прослушивание входящих соединений
@@ -47,7 +50,7 @@ private slots:
 private:
     /// Создаёт оптимальное количество рабочих потоков, по которым будет распределена
     /// нагрузка входящих соединений, основываясь на значении possibleThreadNumber
-    void initWorkers();
+    void initWorkers(ConfigFileEditor *configParameters);
     /// Освобождает ресурсы, выделенные для рабочих, обрабатывающих входящие
     /// сообщения
     void removeWorkers();
@@ -60,10 +63,10 @@ private:
     /// Хранит количество потоков, которые физически(и в теории) могут выполняться независимо
     /// на разных ядрах процессора, т.е. оптимальное количество потоков. Ровно столько серверных рабочих
     /// будет создано в serverWorkers
-    static size_t workerThreadsNumber;
+    static int workerThreadsNumber;
     /// Стандартное количество потоков, которые создаст сервер в случае, если он не сможет определить оптимальное
     /// количество потоков на рабочем устройстве
-    static const size_t DEFAULT_THREAD_NUMBER=8;
+    static const int DEFAULT_THREAD_NUMBER=8;
 
     /// Список рабочих, обрабатывающих в отдельных потоках
     /// пользовательские соединения
@@ -74,7 +77,7 @@ private:
     /// в отдельный файл
     LogSystem *logSystem;
     /// Редактирует настройки в файле конфигурации и позволяет их получать
-    ConfigFileEditor *configEditor;
+    ConfigFileEditor *configParameters;
 
 
     /// IP-адрес устройства, на котором запущен сервер

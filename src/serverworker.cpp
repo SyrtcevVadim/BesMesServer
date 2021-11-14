@@ -6,22 +6,32 @@
 // Изначально нет созданных объектов серверных рабочих
 unsigned int ServerWorker::createdObjectCounter = 0;
 
-ServerWorker::ServerWorker(const QString &databaseAddress,
-                           const int databasePort,
-                           const QString &userName,
-                           const QString &password,
+ServerWorker::ServerWorker(ConfigFileEditor *configParameters,
                            QObject *parent):
-    QThread(parent)
+    QThread(parent),
+    configParameters(configParameters)
 {
 
     id = createdObjectCounter++;
     initCounters();
-    // Открываем соединение с базой данных
-    dbConnection = new DatabaseConnection(QString("%1%2").arg(userName, QString().setNum(id)));
-    dbConnection->setDatabaseAddress(databaseAddress, databasePort);
-    dbConnection->setUser(userName, password);
-    dbConnection->setDatabaseName();
+    // Создаём соединение с базой данных
+    dbConnection = new DatabaseConnection(QString("%1%2").arg((*configParameters)["user_name"], QString().setNum(id)));
+    configureDBConnection();
+}
 
+void ServerWorker::configureDBConnection()
+{
+    dbConnection->setDatabaseAddress((*configParameters)["database_address"],
+            (*configParameters)["database_port"].toInt());
+    dbConnection->setUser((*configParameters)["user_name"], (*configParameters)["password"]);
+    dbConnection->setDatabaseName();
+}
+
+void ServerWorker::reinitializeDBConnections()
+{
+    // Создаём соединение с базой данных заново
+    configureDBConnection();
+    dbConnection->open();
 }
 
 unsigned long long ServerWorker::getHandlingConnectionsCounter()
@@ -38,14 +48,19 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     connect(incomingConnection, SIGNAL(closed()), SIGNAL(clientConnectionClosed()));
     // После разрыва пользовательского соединения уменьшаем счётчик
     connect(incomingConnection, SIGNAL(closed()), SLOT(decreaseHandlingConnectionsCounter()));
-    // Обрабатываем команду приветствия
-    connect(incomingConnection, SIGNAL(helloSaid(QString,QString)),
-            SLOT(processHelloMessage(QString,QString)));
+
+    // Обрабатывает команду аутентификации
+    connect(incomingConnection, SIGNAL(logInCommandSent(QString,QString)),
+            SLOT(processLogInCommand(QString,QString)));
+    // Обрабатывает команду регистрации
+    connect(incomingConnection, SIGNAL(registrationCommandSent(QString,QString,QString,QString)),
+            SLOT(processRegistrationCommand(QString,QString,QString,QString)));
+
     // При остановке рабочего потока должны быть разорваны все пользовательские соединения
     connect(this, SIGNAL(stopWorker()),
             incomingConnection, SLOT(close()));
 
-    incomingConnection->receiveServerResponse("Hello! Say the name and the pass\r\n");
+    incomingConnection->sendResponse("+ Привет! Вы подключены к сереверу BesMesServer\r\n");
 }
 
 void ServerWorker::decreaseHandlingConnectionsCounter()
@@ -55,12 +70,40 @@ void ServerWorker::decreaseHandlingConnectionsCounter()
                 .arg(QString().setNum(id), QString().setNum(handlingConnectionsCounter));
 }
 
-void ServerWorker::processHelloMessage(QString userName, QString password)
+void ServerWorker::processLogInCommand(QString email, QString password)
 {
-    qDebug() << QString("Пользователь %1 сказал привет!").arg(userName);
+    qDebug() << QString("Пользователь %1 хочет войти в систему!").arg(email);
     ClientConnection *client = (ClientConnection*)sender();
-    // TODO Проверяем, есть ли такой пользователь в БД
-    client->receiveServerResponse(QString("SUCCESS you were logged in\r\n"));
+    // Проверяем, есть ли такой пользователь в БД
+    if(dbConnection->userExists(email, password))
+    {
+        qDebug() << "Пользователь вошел в аккаунт";
+        client->sendResponse(QString("+ Вы успешно вошли в систему\r\n"));
+    }
+    else
+    {
+        qDebug() << "Пользователь не вошел в аккаунт";
+        client->sendResponse(QString("- Не существует аккаунта с таким логином и паролем\r\n"));
+    }
+}
+
+void ServerWorker::processRegistrationCommand(QString firstName, QString lastName,
+                                              QString email, QString password)
+{
+    qDebug() << QString("Обрабатываем команду регистрации для пользвоателя %1 %2").arg(firstName, lastName);
+    // Регистрируем пользователя, если нет пользователей с такой почтой
+    if(!dbConnection->userExists(email))
+    {
+        ClientConnection *client = (ClientConnection*)sender();
+        if(dbConnection->addNewUser(firstName, lastName, email, password))
+        {
+            client->sendResponse("+ Вы успешно зарегистрировали новый аккаунт\r\n");
+        }
+        else
+        {
+            client->sendResponse("- Не удалось зарегистрировать новый аккаунт\r\n");
+        }
+    }
 
 }
 

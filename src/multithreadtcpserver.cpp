@@ -4,17 +4,19 @@
 #include "multithreadtcpserver.h"
 #include "configfileeditor.h"
 
-size_t MultithreadTcpServer::workerThreadsNumber = std::thread::hardware_concurrency();
+int MultithreadTcpServer::workerThreadsNumber = std::thread::hardware_concurrency();
 
 MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
                                            qint16 serverPort,
+                                           ConfigFileEditor *configParameters,
                                            QObject *parent):
     QTcpServer(parent),
+    configParameters(configParameters),
     serverIPAddress(serverIPAddress),
     serverPort(serverPort)
+
 {
-    configEditor = new ConfigFileEditor();
-    initWorkers();
+    initWorkers(configParameters);
     configureStatisticsCounter();
     configureLogSystem();
 }
@@ -53,12 +55,16 @@ void MultithreadTcpServer::start()
 {
     // Начинаем слушать входящие соединения
     listen(serverIPAddress, serverPort);
-    logSystem->logToFile("Сервер включён");
     // Запускает рабочие потоки
     for(ServerWorker *worker:serverWorkers)
     {
+        // Пересоздаёт соединение с базой данных, поскольку параметры конфигурации могли быть изменены пользователем
+        worker->reinitializeDBConnections();
         worker->start();
     }
+    // Сообщаем, что сервер начал свою работу
+    emit started();
+    logSystem->logToFile("Сервер включён");
 
 }
 
@@ -79,7 +85,7 @@ void MultithreadTcpServer::removeWorkers()
     }
 }
 
-void MultithreadTcpServer::initWorkers()
+void MultithreadTcpServer::initWorkers(ConfigFileEditor *configParameters)
 {
     /* Значение possibleThreadNumber может оказаться равным нулю.
      * Это может произойти, если это значение изначально неопределено или не поддаётся расчёту.
@@ -92,10 +98,10 @@ void MultithreadTcpServer::initWorkers()
         workerThreadsNumber = DEFAULT_THREAD_NUMBER;
     }
     // Получаем значения параметров, необходимых рабочему потоку
-    QString databaseAddress = configEditor->getParameterValue("database_address");
-    int databasePort = configEditor->getParameterValue("database_port").toInt();
-    QString userName = configEditor->getParameterValue("user_name");
-    QString password = configEditor->getParameterValue("password");
+    QString databaseAddress = configParameters->getParameterValue("database_address");
+    int databasePort = configParameters->getParameterValue("database_port").toInt();
+    QString userName = configParameters->getParameterValue("user_name");
+    QString password = configParameters->getParameterValue("password");
     qDebug() << "Адрес базы данных: "<<databaseAddress;
     qDebug() << "Порт базы данных: "<<databasePort;
     qDebug() << "Имя пользователя рабочего потока: "<<userName;
@@ -103,11 +109,7 @@ void MultithreadTcpServer::initWorkers()
     // Создаём потоки обработки входящих соединений
     for(int i{0}; i < workerThreadsNumber; i++)
     {
-        ServerWorker *newWorker = new ServerWorker(databaseAddress,
-                                                   databasePort,
-                                                   userName,
-                                                   password,
-                                                   this);
+        ServerWorker *newWorker = new ServerWorker(configParameters,this);
         /* Когда работа сервера останавливается, рабочим потокам отправляется сигнал
          * Мы отправляем именно сигнал, а не слот, поскольку рабочий поток не хранит объекты подключений в коллекции
          * Объекты подключения, получив данный сигнал, разрывают своё соединение с сервером. Таким образом, нагрузка на рабочий поток
@@ -145,4 +147,6 @@ void MultithreadTcpServer::incomingConnection(qintptr socketDescriptor)
     currentWorker->addClientConnection(socketDescriptor);
     emit clientConnectionOpenned();
 }
+
+
 
