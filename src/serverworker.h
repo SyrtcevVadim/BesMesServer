@@ -3,6 +3,7 @@
 #define SERVERWORKER_H
 
 #include "databaseconnection.h"
+#include "configfileeditor.h"
 #include <QThread>
 
 /**
@@ -12,16 +13,15 @@ class ServerWorker : public QThread
 {
     Q_OBJECT
 public:
-    ServerWorker(const QString &databaseAddress,
-                 const int databasePort,
-                 const QString &userName,
-                 const QString &password,
+    ServerWorker(ConfigFileEditor *configParameters,
                  QObject *parent = nullptr);
     /// Добавляет в данный серверный поток обработки новое клиентское
     /// соединение
     void addClientConnection(qintptr socketDescriptor);
     /// Возвращает количество клиентских подключений, обрабатываем текущим рабочим потоком
     unsigned long long getHandlingConnectionsCounter();
+    /// Пересоздаёт соединения с базой данных с новыми параметрами
+    void reinitializeDBConnections();
 
 signals:
     /// Сигнал, отправляемый всем подключенным к данному потоку соединениям, уведомляющий о том, что
@@ -41,6 +41,8 @@ private slots:
     void decreaseHandlingConnectionsCounter();
 private:
     inline void initCounters();
+    /// Настраивает подключение к базе данных в рабочем потоке
+    void configureDBConnection();
     /// Счётчик созданных объектов
     static unsigned int createdObjectCounter;
     /// Номер потока, работающего в рамках серверного приложения
@@ -49,7 +51,8 @@ private:
     unsigned long long handlingConnectionsCounter;
     /// Объект подключения к базе данных
     DatabaseConnection *dbConnection;
-
+    /// Хранит параметры из файла конфигурации
+    ConfigFileEditor *configParameters;
 };
 
 #endif // SERVERWORKER_H

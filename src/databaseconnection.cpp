@@ -9,6 +9,11 @@ DatabaseConnection::DatabaseConnection(const QString &connectionName)
     besMesDatabase = QSqlDatabase::addDatabase(USING_PLUGIN, connectionName);
 }
 
+void DatabaseConnection::close()
+{
+    besMesDatabase.close();
+}
+
 void DatabaseConnection::setDatabaseName(const QString &databaseName)
 {
     besMesDatabase.setDatabaseName(databaseName);
@@ -28,11 +33,7 @@ void DatabaseConnection::setUser(const QString &userName, const QString &passwor
 
 void DatabaseConnection::open()
 {
-    if(besMesDatabase.open())
-    {
-        qDebug() << "Подключение к базе данных успешно пройдено!";
-    }
-    else
+    if(!besMesDatabase.open())
     {
         qDebug() << "Ошибка "<< besMesDatabase.lastError().text();
     }

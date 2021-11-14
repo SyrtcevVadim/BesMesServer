@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    configureServer();
+    configureServer(&configParameters);
     configureViews();
 
     // Отображаем в UI параметры конфигурации, записанные в файле
@@ -52,10 +52,10 @@ void MainWindow::showServerStateAsPassive()
     ui->currentServerStateLbl->setText(PASSIVE_SERVER_STATE_TEXT);
 }
 
-void MainWindow::configureServer()
+void MainWindow::configureServer(ConfigFileEditor *configParameters)
 {
     // Создаём многопоточный сервер
-    server = new MultithreadTcpServer(QHostAddress::Any, 1234);
+    server = new MultithreadTcpServer(QHostAddress::Any, 1234, configParameters);
     // Как только сервер запустился, это будет отображено в UI
     connect(server, SIGNAL(started()), SLOT(showServerStateAsActive()));
     connect(server, SIGNAL(stopped()), SLOT(showServerStateAsPassive()));
@@ -63,9 +63,9 @@ void MainWindow::configureServer()
 
 void MainWindow::showConfigParameters()
 {
-    ui->databaseAddressEdit->setText(config["database_address"]);
-    ui->databasePortEdit->setText(config["database_port"]);
-    ui->databaseUserNameEdit->setText(config["user_name"]);
+    ui->databaseAddressEdit->setText(configParameters["database_address"]);
+    ui->databasePortEdit->setText(configParameters["database_port"]);
+    ui->databaseUserNameEdit->setText(configParameters["user_name"]);
     // Пароль не отображаем в целях безопасности :)
 }
 
@@ -86,15 +86,16 @@ void MainWindow::saveConfigParameters()
     }
     else
     {
-        config["database_address"]=databaseAddress;
-        config["database_port"]=databasePort;
-        config["user_name"]=userName;
+        configParameters["database_address"]=databaseAddress;
+        configParameters["database_port"]=databasePort;
+        configParameters["user_name"]=userName;
         if(!password.isEmpty())
         {
-            config["password"]=password;
+            configParameters["password"]=password;
         }
         // Сохраняем данные в файл конфигурации
-        config.updateConfigFile();
+        configParameters.updateConfigFile();
+        emit configParametersChanged();
     }
 }
 

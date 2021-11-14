@@ -28,6 +28,8 @@ public:
     /// Добавляет нового пользователя в базу данных
     bool addNewUser(const QString &firstName, const QString &lastName,
                     const QString &email, const QString &password);
+    /// Закрывает соединение с базой данных, освобождая все ресурсы
+    void close();
 private:
     /// Подключение к базе данных проекта BesMes
     QSqlDatabase besMesDatabase;

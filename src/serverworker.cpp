@@ -6,22 +6,32 @@
 // Изначально нет созданных объектов серверных рабочих
 unsigned int ServerWorker::createdObjectCounter = 0;
 
-ServerWorker::ServerWorker(const QString &databaseAddress,
-                           const int databasePort,
-                           const QString &userName,
-                           const QString &password,
+ServerWorker::ServerWorker(ConfigFileEditor *configParameters,
                            QObject *parent):
-    QThread(parent)
+    QThread(parent),
+    configParameters(configParameters)
 {
 
     id = createdObjectCounter++;
     initCounters();
-    // Открываем соединение с базой данных
-    dbConnection = new DatabaseConnection(QString("%1%2").arg(userName, QString().setNum(id)));
-    dbConnection->setDatabaseAddress(databaseAddress, databasePort);
-    dbConnection->setUser(userName, password);
-    dbConnection->setDatabaseName();
+    // Создаём соединение с базой данных
+    dbConnection = new DatabaseConnection(QString("%1%2").arg((*configParameters)["user_name"], QString().setNum(id)));
+    configureDBConnection();
+}
 
+void ServerWorker::configureDBConnection()
+{
+    dbConnection->setDatabaseAddress((*configParameters)["database_address"],
+            (*configParameters)["database_port"].toInt());
+    dbConnection->setUser((*configParameters)["user_name"], (*configParameters)["password"]);
+    dbConnection->setDatabaseName();
+}
+
+void ServerWorker::reinitializeDBConnections()
+{
+    // Создаём соединение с базой данных заново
+    configureDBConnection();
+    dbConnection->open();
 }
 
 unsigned long long ServerWorker::getHandlingConnectionsCounter()

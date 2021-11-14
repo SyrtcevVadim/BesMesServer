@@ -21,6 +21,11 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+signals:
+    /// Сигнал, высылаемый после изменения пользователем параметров конфигурации
+    /// в секции настроек
+    void configParametersChanged();
 private slots:
     /// Устанавливает значение счётчика активных клиентских подключений
     void setActiveConnectionsCounter(unsigned long long counter);
@@ -36,7 +41,7 @@ private:
     /// Связывает элементы графического интерфейса окна с соответствующим слотами
     void configureViews();
     /// Настраивает сервер и связывает его сигналы со слотами
-    void configureServer();
+    void configureServer(ConfigFileEditor *configParameters);
 
     /// Сылается на объект представления окна серверного приложения
     Ui::MainWindow *ui;
@@ -45,7 +50,7 @@ private:
     /// и обрабатывающий пользовательские команды
     MultithreadTcpServer *server;
     /// Обрабатывает параметры из файла конфигурации
-    ConfigFileEditor config;
+    ConfigFileEditor configParameters;
 };
 
 #endif // MAINWINDOW_H
