@@ -14,7 +14,7 @@ MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
     serverPort(serverPort)
 {
     configEditor = new ConfigFileEditor();
-    initWorkers();
+    initWorkers();\
     configureStatisticsCounter();
     configureLogSystem();
 }
@@ -53,12 +53,14 @@ void MultithreadTcpServer::start()
 {
     // Начинаем слушать входящие соединения
     listen(serverIPAddress, serverPort);
-    logSystem->logToFile("Сервер включён");
     // Запускает рабочие потоки
     for(ServerWorker *worker:serverWorkers)
     {
         worker->start();
     }
+    // Сообщаем, что сервер начал свою работу
+    emit started();
+    logSystem->logToFile("Сервер включён");
 
 }
 

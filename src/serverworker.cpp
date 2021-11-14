@@ -43,7 +43,7 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     connect(incomingConnection, SIGNAL(logInCommandSent(QString,QString)),
             SLOT(processLogInCommand(QString,QString)));
     // Обрабатывает команду регистрации
-    connect(incomingConnection, SIGNAL(registrationCommandSend(QString,QString,QString,QString)),
+    connect(incomingConnection, SIGNAL(registrationCommandSent(QString,QString,QString,QString)),
             SLOT(processRegistrationCommand(QString,QString,QString,QString)));
 
     // При остановке рабочего потока должны быть разорваны все пользовательские соединения
