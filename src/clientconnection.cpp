@@ -2,6 +2,9 @@
 
 ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : QObject(parent)
 {
+    // Обнуляем все флаги статуса
+    statusFlags=0;
+
     socket = new QTcpSocket();
     socket->setSocketDescriptor(socketDescriptor);
 
@@ -149,5 +152,9 @@ void ClientConnection::processIncomingMessage()
     }
 }
 
+void ClientConnection::setStatusFlag(unsigned long long flag)
+{
+    statusFlags |= flag;
+}
 
 

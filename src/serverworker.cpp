@@ -78,6 +78,8 @@ void ServerWorker::processLogInCommand(QString email, QString password)
     if(dbConnection->userExists(email, password))
     {
         qDebug() << "Пользователь вошел в аккаунт";
+        // Запоминаем в флаге статуса, что пользователь прошел процесс аутентификации
+        client->setStatusFlag(LOGGED_IN_SUCCESSFULLY);
         client->sendResponse(QString("+ Вы успешно вошли в систему\r\n"));
     }
     else
