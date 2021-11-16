@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // Отображаем в UI параметры конфигурации, записанные в файле
     showConfigParameters();
 
-    configureWorkingDurationTimer();
 }
 
 MainWindow::~MainWindow()
@@ -23,16 +22,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::configureWorkingDurationTimer()
-{
-    connect(&applicationWorkingTimeTimer, SIGNAL(timeout()), SLOT(updateApplicationWorkingTimeCounter()));
-    applicationWorkingTimeTimer.start(WORKING_TIME_COUNTER_UPDATE_TIME);
-}
 
-void MainWindow::updateApplicationWorkingTimeCounter()
+
+void MainWindow::updateServerWorkingTimeCounter(QString time)
 {
-    currentSessionWorkingTime.addSecond();
-    ui->currentSessionWorkingTimeLbl->setText(currentSessionWorkingTime.toString());
+    ui->currentSessionWorkingTimeLbl->setText(time);
 }
 
 void MainWindow::configureViews()
@@ -75,6 +69,9 @@ void MainWindow::configureServer(ConfigFileEditor *configParameters)
     // Как только сервер запустился, это будет отображено в UI
     connect(server, SIGNAL(started()), SLOT(showServerStateAsActive()));
     connect(server, SIGNAL(stopped()), SLOT(showServerStateAsPassive()));
+
+    connect(server, SIGNAL(workingTimeUpdated(QString)),
+            SLOT(updateServerWorkingTimeCounter(QString)));
 }
 
 void MainWindow::showConfigParameters()

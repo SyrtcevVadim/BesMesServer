@@ -19,6 +19,10 @@ MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
     initWorkers(configParameters);
     configureStatisticsCounter();
     configureLogSystem();
+
+    currentSessionWorkingTimeTimer.setInterval(WORKING_TIME_COUNTER_UPDATE_TIME);
+    connect(&currentSessionWorkingTimeTimer, SIGNAL(timeout()),
+            SLOT(updateWorkingTimeCounter()));
 }
 
 MultithreadTcpServer::~MultithreadTcpServer()
@@ -26,6 +30,12 @@ MultithreadTcpServer::~MultithreadTcpServer()
     removeWorkers();
     delete statisticsCounter;
     delete logSystem;
+}
+
+void MultithreadTcpServer::updateWorkingTimeCounter()
+{
+    currentSessionWorkingTime.addSecond();
+    emit workingTimeUpdated(currentSessionWorkingTime.toString());
 }
 
 void MultithreadTcpServer::configureStatisticsCounter()
@@ -62,6 +72,8 @@ void MultithreadTcpServer::start()
         worker->reinitializeDBConnections();
         worker->start();
     }
+    // Запускаем счётчик времени работы
+    currentSessionWorkingTimeTimer.start();
     // Сообщаем, что сервер начал свою работу
     emit started();
     logSystem->logToFile("Сервер включён");
@@ -72,6 +84,7 @@ void MultithreadTcpServer::stop()
 {
     // Приостанавливаем прослушивание входящих соединений
     close();
+    currentSessionWorkingTimeTimer.stop();
     // Отправляем сигнал о том, что нужно остановить рабочие потоки (отключаем все соединения от них)
     emit stopped ();
     logSystem->logToFile("Сервер отсключён");
