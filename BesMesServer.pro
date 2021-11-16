@@ -17,7 +17,8 @@ SOURCES += \
     src/mainwindow.cpp \
     src/multithreadtcpserver.cpp \
     src/serverstatisticscounter.cpp \
-    src/serverworker.cpp
+    src/serverworker.cpp \
+    src/timecounter.cpp
 
 HEADERS += \
     src/clientconnection.h \
@@ -28,6 +29,7 @@ HEADERS += \
     src/multithreadtcpserver.h \
     src/serverstatisticscounter.h \
     src/serverworker.h \
+    src/timecounter.h \
     src/user.h
 
 # Default rules for deployment.

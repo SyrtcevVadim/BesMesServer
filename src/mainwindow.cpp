@@ -15,11 +15,24 @@ MainWindow::MainWindow(QWidget *parent) :
     // Отображаем в UI параметры конфигурации, записанные в файле
     showConfigParameters();
 
+    configureWorkingDurationTimer();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::configureWorkingDurationTimer()
+{
+    connect(&applicationWorkingTimeTimer, SIGNAL(timeout()), SLOT(updateApplicationWorkingTimeCounter()));
+    applicationWorkingTimeTimer.start(WORKING_TIME_COUNTER_UPDATE_TIME);
+}
+
+void MainWindow::updateApplicationWorkingTimeCounter()
+{
+    currentSessionWorkingTime.addSecond();
+    ui->currentSessionWorkingTimeLbl->setText(currentSessionWorkingTime.toString());
 }
 
 void MainWindow::configureViews()
