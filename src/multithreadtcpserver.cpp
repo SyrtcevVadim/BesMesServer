@@ -73,7 +73,7 @@ void MultithreadTcpServer::start()
     currentSessionWorkingTimeTimer.start();
     // Сообщаем, что сервер начал свою работу
     emit started();
-    logSystem->logToFile("Сервер включён");
+    emit logMessage("Сервер включён");
 
 }
 
@@ -84,7 +84,7 @@ void MultithreadTcpServer::stop()
     currentSessionWorkingTimeTimer.stop();
     // Отправляем сигнал о том, что нужно остановить рабочие потоки (отключаем все соединения от них)
     emit stopped();
-    logSystem->logToFile("Сервер отключён");
+    emit logMessage("Сервер отключён");
 }
 
 void MultithreadTcpServer::removeWorkers()

@@ -39,7 +39,7 @@ signals:
     /// Сигнал, высылаемый после открытия или разрыва клиентского соединения
     /// activeConnectionsCounter - количество активных соединений
     void activeConnectionsCounterChanged(unsigned long long activeConnectionsCounter);
-    /// Сигнал о намерении зарегистрировать сообщение в файле. TODO переделать
+    /// Сигнал о намерении зарегистрировать сообщение в журнале
     void logMessage(QString message);
     /// Отправляется каждый раз, когда время работы сервера в текущей
     /// сессии обновляется

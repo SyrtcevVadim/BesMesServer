@@ -65,7 +65,7 @@ void ServerWorker::decreaseHandlingConnectionsCounter()
 
 void ServerWorker::processLogInCommand(QString email, QString password)
 {
-    emit logMessage(QString("Пользователь %1 хочет войти в систему!").arg(email));
+    emit logMessage(QString("Пользователь %1 хочет войти в систему").arg(email));
     ClientConnection *client = (ClientConnection*)sender();
     // Проверяем, есть ли такой пользователь в БД
     if(dbConnection->userExists(email, password))

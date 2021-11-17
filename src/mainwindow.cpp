@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Отображаем в UI параметры конфигурации, записанные в файле
     showConfigParameters();
 
+    connect(this, SIGNAL(logMessage(QString)), SLOT(logToJournal(QString)));
 }
 
 MainWindow::~MainWindow()
@@ -22,6 +23,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::logToJournal(QString message)
+{
+    ui->logJournal->append(QTime::currentTime().toString("hh:mm:ss")+":"+message);
+}
 
 
 void MainWindow::updateServerWorkingTimeCounter(QString time)
@@ -69,6 +74,8 @@ void MainWindow::configureServer(ConfigFileEditor *configParameters)
     // Как только сервер запустился, это будет отображено в UI
     connect(server, SIGNAL(started()), SLOT(showServerStateAsActive()));
     connect(server, SIGNAL(stopped()), SLOT(showServerStateAsPassive()));
+    // Прокидываем сообщение о регистрации сообщения в журнале
+    connect(server, SIGNAL(logMessage(QString)),SIGNAL(logMessage(QString)));
 
     connect(server, SIGNAL(workingTimeUpdated(QString)),
             SLOT(updateServerWorkingTimeCounter(QString)));
