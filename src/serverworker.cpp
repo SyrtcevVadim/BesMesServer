@@ -65,19 +65,19 @@ void ServerWorker::decreaseHandlingConnectionsCounter()
 
 void ServerWorker::processLogInCommand(QString email, QString password)
 {
-    qDebug() << QString("Пользователь %1 хочет войти в систему!").arg(email);
+    emit logMessage(QString("Пользователь %1 хочет войти в систему!").arg(email));
     ClientConnection *client = (ClientConnection*)sender();
     // Проверяем, есть ли такой пользователь в БД
     if(dbConnection->userExists(email, password))
     {
-        qDebug() << "Пользователь вошел в аккаунт";
+        emit logMessage(QString("Пользователь %1 успешно прошёл аутентификацию").arg(email));
         // Запоминаем в флаге статуса, что пользователь прошел процесс аутентификации
         client->setStatusFlag(LOGGED_IN_SUCCESSFULLY);
         client->sendResponse(QString("+ Вы успешно вошли в систему\r\n"));
     }
     else
     {
-        qDebug() << "Пользователь не вошел в аккаунт";
+        emit logMessage(QString("Пользователь %1 не прошёл аутентификацию").arg(email));
         client->sendResponse(QString("- Не существует аккаунта с таким логином и паролем\r\n"));
     }
 }
@@ -85,17 +85,20 @@ void ServerWorker::processLogInCommand(QString email, QString password)
 void ServerWorker::processRegistrationCommand(QString firstName, QString lastName,
                                               QString email, QString password)
 {
-    qDebug() << QString("Обрабатываем команду регистрации для пользвоателя %1 %2").arg(firstName, lastName);
+    emit logMessage(QString("Обрабатываем команду регистрации для пользвоателя %1 %2").arg(firstName, lastName));
     // Регистрируем пользователя, если нет пользователей с такой почтой
     if(!dbConnection->userExists(email))
     {
         ClientConnection *client = (ClientConnection*)sender();
         if(dbConnection->addNewUser(firstName, lastName, email, password))
         {
+            emit logMessage(QString("Зарегистрирован новый аккаунт на почту %1").arg(email));
             client->sendResponse("+ Вы успешно зарегистрировали новый аккаунт\r\n");
         }
         else
         {
+            emit logMessage(QString("Пользователь %1 %2 пытался зарегистрировать аккаунт на почту %3")
+                            .arg(firstName, lastName, email));
             client->sendResponse("- Не удалось зарегистрировать новый аккаунт\r\n");
         }
     }
@@ -107,6 +110,14 @@ void ServerWorker::run()
     qDebug() << QString("Поток %1 запущен").arg(id);
     configureDBConnection();
     dbConnection->open();
+    if(dbConnection->isActive())
+    {
+        emit logMessage(QString("Рабочий поток %1 установил соединение с БД").arg(id));
+    }
+    else
+    {
+        emit logMessage(QString("Рабочий поток %1 не смог установить соединение с БД").arg(id));
+    }
     exec();
 }
 

@@ -25,6 +25,8 @@ signals:
     /// Сигнал, высылаемый, когда клиентское соединение, обрабатываемое
     /// в данном потоке, разрывается
     void clientConnectionClosed();
+    /// Сигнал о намерении сделать запись в журнале (логе)
+    void logMessage(QString message);
 protected:
     void run();
 private slots:

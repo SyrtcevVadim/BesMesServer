@@ -118,6 +118,7 @@ void MultithreadTcpServer::initWorkers(ConfigFileEditor *configParameters)
          * останавливается. Сервер после этого можно считать простаивающим
          */
         connect(this, SIGNAL(stopped()), newWorker, SLOT(quit()));
+        connect(newWorker, SIGNAL(logMessage(QString)), SIGNAL(logMessage(QString)));
         // Пробрасываем сигнал о разрыве клиентского соединения "во вне"
         connect(newWorker, SIGNAL(clientConnectionClosed()), SIGNAL(clientConnectionClosed()));
         // Пробрасываем сигнал о регистрации сообщения в журнале сообщений

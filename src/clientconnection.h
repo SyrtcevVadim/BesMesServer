@@ -32,6 +32,7 @@ public:
 public slots:
     /// Отправляет клиенту сообщение
     void sendResponse(QString response);
+    /// Закрывает клиентское соединение
     void close();
     /// Устанавливает статусный флаг flag в единицу
     void setStatusFlag(unsigned long long flag);
