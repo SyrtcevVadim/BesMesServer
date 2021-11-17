@@ -1,7 +1,6 @@
 #include "configfileeditor.h"
 #include<QFileInfo>
 #include <QDebug>
-#include <QMessageBox>
 
 QStringList ConfigFileEditor::necessaryParameterNames{"database_address",
                                                       "database_port",
@@ -46,10 +45,6 @@ ConfigFileEditor::ConfigFileEditor(const QString &configFileName)
     }
     if(!areParametersSet())
     {
-        QMessageBox::critical(nullptr,
-                              QObject::tr("Пустой файл конфигурации"),
-                              QString(QObject::tr("Не заданы параметры в файле \"%1\"!")).arg(configFileName),
-                              QMessageBox::Abort);
         throw "Config file has been created but there're empty values";
     }
 }

@@ -1,6 +1,5 @@
 #include<thread>
 #include<QTcpSocket>
-#include<QMessageBox>
 #include "multithreadtcpserver.h"
 #include "configfileeditor.h"
 
@@ -68,9 +67,7 @@ void MultithreadTcpServer::start()
     // Запускает рабочие потоки
     for(ServerWorker *worker:serverWorkers)
     {
-        // Пересоздаёт соединение с базой данных, поскольку параметры конфигурации могли быть изменены пользователем
-        worker->reinitializeDBConnections();
-        worker->start();
+        worker->start(QThread::Priority::TimeCriticalPriority);
     }
     // Запускаем счётчик времени работы
     currentSessionWorkingTimeTimer.start();
@@ -86,8 +83,8 @@ void MultithreadTcpServer::stop()
     close();
     currentSessionWorkingTimeTimer.stop();
     // Отправляем сигнал о том, что нужно остановить рабочие потоки (отключаем все соединения от них)
-    emit stopped ();
-    logSystem->logToFile("Сервер отсключён");
+    emit stopped();
+    logSystem->logToFile("Сервер отключён");
 }
 
 void MultithreadTcpServer::removeWorkers()
@@ -110,15 +107,7 @@ void MultithreadTcpServer::initWorkers(ConfigFileEditor *configParameters)
     {
         workerThreadsNumber = DEFAULT_THREAD_NUMBER;
     }
-    // Получаем значения параметров, необходимых рабочему потоку
-    QString databaseAddress = configParameters->getParameterValue("database_address");
-    int databasePort = configParameters->getParameterValue("database_port").toInt();
-    QString userName = configParameters->getParameterValue("user_name");
-    QString password = configParameters->getParameterValue("password");
-    qDebug() << "Адрес базы данных: "<<databaseAddress;
-    qDebug() << "Порт базы данных: "<<databasePort;
-    qDebug() << "Имя пользователя рабочего потока: "<<userName;
-    qDebug() << "Пароль от аккаунта рабочего потока: "<<password;
+
     // Создаём потоки обработки входящих соединений
     for(int i{0}; i < workerThreadsNumber; i++)
     {
@@ -128,7 +117,7 @@ void MultithreadTcpServer::initWorkers(ConfigFileEditor *configParameters)
          * Объекты подключения, получив данный сигнал, разрывают своё соединение с сервером. Таким образом, нагрузка на рабочий поток
          * останавливается. Сервер после этого можно считать простаивающим
          */
-        connect(this, SIGNAL(stopped()), newWorker, SIGNAL(stopWorker()));
+        connect(this, SIGNAL(stopped()), newWorker, SLOT(quit()));
         // Пробрасываем сигнал о разрыве клиентского соединения "во вне"
         connect(newWorker, SIGNAL(clientConnectionClosed()), SIGNAL(clientConnectionClosed()));
         // Пробрасываем сигнал о регистрации сообщения в журнале сообщений

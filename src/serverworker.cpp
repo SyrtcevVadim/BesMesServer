@@ -16,7 +16,6 @@ ServerWorker::ServerWorker(ConfigFileEditor *configParameters,
     initCounters();
     // Создаём соединение с базой данных
     dbConnection = new DatabaseConnection(QString("%1%2").arg((*configParameters)["user_name"], QString().setNum(id)));
-    configureDBConnection();
 }
 
 void ServerWorker::configureDBConnection()
@@ -27,12 +26,6 @@ void ServerWorker::configureDBConnection()
     dbConnection->setDatabaseName();
 }
 
-void ServerWorker::reinitializeDBConnections()
-{
-    // Создаём соединение с базой данных заново
-    configureDBConnection();
-    dbConnection->open();
-}
 
 unsigned long long ServerWorker::getHandlingConnectionsCounter()
 {
@@ -57,10 +50,10 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
             SLOT(processRegistrationCommand(QString,QString,QString,QString)));
 
     // При остановке рабочего потока должны быть разорваны все пользовательские соединения
-    connect(this, SIGNAL(stopWorker()),
+    connect(this, SIGNAL(finished()),
             incomingConnection, SLOT(close()));
 
-    incomingConnection->sendResponse("+ Привет! Вы подключены к сереверу BesMesServer\r\n");
+    incomingConnection->sendResponse("+ Привет! Вы подключены к серверу BesMesServer\r\n");
 }
 
 void ServerWorker::decreaseHandlingConnectionsCounter()
@@ -112,6 +105,7 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
 void ServerWorker::run()
 {
     qDebug() << QString("Поток %1 запущен").arg(id);
+    configureDBConnection();
     dbConnection->open();
     exec();
 }
@@ -120,3 +114,4 @@ void ServerWorker::initCounters()
 {
     handlingConnectionsCounter=0;
 }
+
