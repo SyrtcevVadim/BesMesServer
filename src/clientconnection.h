@@ -12,6 +12,9 @@
 #define LOGIN_COMMAND "ПРИВЕТ"
 #define REGISTRATION_COMMAND "РЕГИСТРАЦИЯ"
 
+/// Флаг того, что клиент успешно прошел аутентификацию
+#define LOGGED_IN_SUCCESSFULLY (1<<0)
+
 enum class CommandType{LogIn, Registration, Unspecified};
 
 /**
@@ -29,7 +32,10 @@ public:
 public slots:
     /// Отправляет клиенту сообщение
     void sendResponse(QString response);
+    /// Закрывает клиентское соединение
     void close();
+    /// Устанавливает статусный флаг flag в единицу
+    void setStatusFlag(unsigned long long flag);
 signals:
     /// Отправляется, когда пользователь отправил команду аутентификации и передал
     /// адрес электронной почты и пароль от аккаунта
@@ -62,6 +68,10 @@ private:
     QTcpSocket *socket;
     /// Текстовый поток, связанный с этим сокетом
     QTextStream *stream;
+
+    /// Хранит различные флаги состояния клиентского соединения.
+    /// Например, здесь хранится инф. о том, были ли отправлены некоторые команды
+    unsigned long long statusFlags;
 };
 
 #endif // CLIENTCONNECTION_H

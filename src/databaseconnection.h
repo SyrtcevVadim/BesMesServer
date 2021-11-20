@@ -30,6 +30,8 @@ public:
                     const QString &email, const QString &password);
     /// Закрывает соединение с базой данных, освобождая все ресурсы
     void close();
+    /// Проверяет, является ли подключение к базе данных активным
+    bool isActive();
 private:
     /// Подключение к базе данных проекта BesMes
     QSqlDatabase besMesDatabase;

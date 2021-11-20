@@ -83,3 +83,8 @@ bool DatabaseConnection::addNewUser(const QString &firstName, const QString &las
     query.bindValue(4, QDate::currentDate());
     return query.exec();
 }
+
+bool DatabaseConnection::isActive()
+{
+    return besMesDatabase.isOpen();
+}

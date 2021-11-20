@@ -8,6 +8,7 @@ CONFIG += c++17
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+
 SOURCES += \
     src/clientconnection.cpp \
     src/configfileeditor.cpp \
@@ -17,7 +18,8 @@ SOURCES += \
     src/mainwindow.cpp \
     src/multithreadtcpserver.cpp \
     src/serverstatisticscounter.cpp \
-    src/serverworker.cpp
+    src/serverworker.cpp \
+    src/timecounter.cpp
 
 HEADERS += \
     src/clientconnection.h \
@@ -28,6 +30,7 @@ HEADERS += \
     src/multithreadtcpserver.h \
     src/serverstatisticscounter.h \
     src/serverworker.h \
+    src/timecounter.h \
     src/user.h
 
 # Default rules for deployment.
@@ -37,3 +40,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 FORMS += \
     src/mainwindow.ui
+
+SUBDIRS += \
+    tests/TestClientServerCommunication

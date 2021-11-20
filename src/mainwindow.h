@@ -5,10 +5,13 @@
 #include "multithreadtcpserver.h"
 #include "configfileeditor.h"
 
+
 // Текст, отображаемый в UI, если сервер работает
 #define ACTIVE_SERVER_STATE_TEXT QObject::tr("включён")
 // Текст, отображаемый в UI, если сервер отключён
 #define PASSIVE_SERVER_STATE_TEXT QObject::tr("выключен")
+
+
 
 namespace Ui {
 class MainWindow;
@@ -26,6 +29,7 @@ signals:
     /// Сигнал, высылаемый после изменения пользователем параметров конфигурации
     /// в секции настроек
     void configParametersChanged();
+    void logMessage(QString message);
 private slots:
     /// Устанавливает значение счётчика активных клиентских подключений
     void setActiveConnectionsCounter(unsigned long long counter);
@@ -41,11 +45,19 @@ private slots:
     /// Переключает состояние кнопок запуска и отсановки сервера.
     /// Меняет состояние кнопок местами
     void toggleStartStopBtns();
+    /// Обновляет в UI метку-счётчик, отвечающую за хранения времени работы
+    /// приложения в данной сессии
+    void updateServerWorkingTimeCounter(QString time);
+    /// Отображает запись в журнале сообщений
+    void logToJournal(QString message);
 private:
     /// Связывает элементы графического интерфейса окна с соответствующим слотами
     void configureViews();
     /// Настраивает сервер и связывает его сигналы со слотами
     void configureServer(ConfigFileEditor *configParameters);
+    /// Настраивает таймер, используемый для обновления в UI счётчика времени работы
+
+
 
     /// Сылается на объект представления окна серверного приложения
     Ui::MainWindow *ui;
@@ -55,6 +67,8 @@ private:
     MultithreadTcpServer *server;
     /// Обрабатывает параметры из файла конфигурации
     ConfigFileEditor configParameters;
+
+
 };
 
 #endif // MAINWINDOW_H

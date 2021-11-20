@@ -3,11 +3,16 @@
 // Автор: Сырцев Вадим Игоревич
 #include <QTcpServer>
 #include <QVector>
+#include <QTimer>
 
+#include "timecounter.h"
 #include "serverworker.h"
 #include "serverstatisticscounter.h"
 #include "logsystem.h"
 #include "configfileeditor.h"
+
+// Интервал обновления UI-счётчика времени работы приложения
+#define WORKING_TIME_COUNTER_UPDATE_TIME 1000
 
 /**
  * Описывает многопоточный TCP-сервер, способный принимать входящие подключения
@@ -34,8 +39,11 @@ signals:
     /// Сигнал, высылаемый после открытия или разрыва клиентского соединения
     /// activeConnectionsCounter - количество активных соединений
     void activeConnectionsCounterChanged(unsigned long long activeConnectionsCounter);
-    /// Сигнал о намерении зарегистрировать сообщение в файле. TODO переделать
+    /// Сигнал о намерении зарегистрировать сообщение в журнале
     void logMessage(QString message);
+    /// Отправляется каждый раз, когда время работы сервера в текущей
+    /// сессии обновляется
+    void workingTimeUpdated(QString time);
 public slots:
     /// Запускает работу сервера: прослушивание входящих соединений
     void start();
@@ -46,7 +54,8 @@ protected:
     /// Вызывается сервером каждый раз, когда имеется входящее соединение
     void incomingConnection(qintptr socketDescriptor);
 private slots:
-    // TODO
+    /// Обновляет счётчик времени работы сервера в текущей сессии
+    void updateWorkingTimeCounter();
 private:
     /// Создаёт оптимальное количество рабочих потоков, по которым будет распределена
     /// нагрузка входящих соединений, основываясь на значении possibleThreadNumber
@@ -84,6 +93,12 @@ private:
     QHostAddress serverIPAddress;
     /// Порт, прослушиваемый сервером
     qint16 serverPort;
+
+    /// Таймер, оповещающий UI, что следует обновить время работы
+    /// серверного приложения в текущей сессии (после запуска)
+    QTimer currentSessionWorkingTimeTimer;
+    /// Время работы приложения в текущей сессии
+    TimeCounter currentSessionWorkingTime;
 };
 
 #endif // MULTITHREADTCPSERVER_H

@@ -20,21 +20,19 @@ public:
     void addClientConnection(qintptr socketDescriptor);
     /// Возвращает количество клиентских подключений, обрабатываем текущим рабочим потоком
     unsigned long long getHandlingConnectionsCounter();
-    /// Пересоздаёт соединения с базой данных с новыми параметрами
-    void reinitializeDBConnections();
 
 signals:
-    /// Сигнал, отправляемый всем подключенным к данному потоку соединениям, уведомляющий о том, что
-    /// нужно разорвать соединение
-    void stopWorker();
     /// Сигнал, высылаемый, когда клиентское соединение, обрабатываемое
     /// в данном потоке, разрывается
     void clientConnectionClosed();
+    /// Сигнал о намерении сделать запись в журнале (логе)
+    void logMessage(QString message);
 protected:
     void run();
 private slots:
     /// Обрабатывает команду аутентификации
     void processLogInCommand(QString email, QString password);
+    /// Обрабатывает команду регистрации
     void processRegistrationCommand(QString firstName, QString last_name,
                                     QString email, QString password);
     /// Уменьшает счётчик клиентских соединений, обрабатываемых текущим потоком
