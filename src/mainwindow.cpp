@@ -4,12 +4,17 @@
 #include "multithreadtcpserver.h"
 #include "besconfigeditor.h"
 
+#define DATABASE_CONFIG_FILE_NAME "databaseConnectionConfig.json"
+#define SERVER_CONFIG_FILE_NAME "serverConfig.json"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    configureServer(&configParameters);
+    databaseConnectionConfigEditor = new BesConfigEditor(DATABASE_CONFIG_FILE_NAME);
+
+    configureServer();
     configureViews();
 
     // Отображаем в UI параметры конфигурации, записанные в файле
@@ -72,10 +77,10 @@ void MainWindow::showServerStateAsPassive()
     ui->currentServerStateLbl->setText(PASSIVE_SERVER_STATE_TEXT);
 }
 
-void MainWindow::configureServer(ConfigFileEditor *configParameters)
+void MainWindow::configureServer()
 {
     // Создаём многопоточный сервер
-    server = new MultithreadTcpServer(QHostAddress::Any, 1234, configParameters);
+    server = new MultithreadTcpServer(QHostAddress::Any, 1234, databaseConnectionConfigEditor);
     // Как только сервер запустился, это будет отображено в UI
     connect(server, SIGNAL(started()), SLOT(showServerStateAsActive()));
     connect(server, SIGNAL(stopped()), SLOT(showServerStateAsPassive()));
@@ -88,14 +93,15 @@ void MainWindow::configureServer(ConfigFileEditor *configParameters)
 
 void MainWindow::showConfigParameters()
 {
-    ui->databaseAddressEdit->setText(configParameters["database_address"]);
-    ui->databasePortEdit->setText(configParameters["database_port"]);
-    ui->databaseUserNameEdit->setText(configParameters["user_name"]);
+    ui->databaseAddressEdit->setText(databaseConnectionConfigEditor->getString("address"));
+    ui->databasePortEdit->setText(databaseConnectionConfigEditor->getString("port"));
+    ui->databaseUserNameEdit->setText(databaseConnectionConfigEditor->getString("userName"));
     // Пароль не отображаем в целях безопасности :)
 }
 
 void MainWindow::saveConfigParameters()
 {
+    // TODO
     qDebug() << "Сохраняем данные в конфигурационный файл";
     // Нельзя допустить сохранения пустых значений параметров
     QString databaseAddress = ui->databaseAddressEdit->text();
@@ -111,15 +117,15 @@ void MainWindow::saveConfigParameters()
     }
     else
     {
-        configParameters["database_address"]=databaseAddress;
-        configParameters["database_port"]=databasePort;
-        configParameters["user_name"]=userName;
+        databaseConnectionConfigEditor->setValue("address", databaseAddress);
+        databaseConnectionConfigEditor->setValue("port", databasePort);
+        databaseConnectionConfigEditor->setValue("userName", userName);
         if(!password.isEmpty())
         {
-            configParameters["password"]=password;
+            databaseConnectionConfigEditor->setValue("password", password);
         }
         // Сохраняем данные в файл конфигурации
-        configParameters.updateConfigFile();
+        databaseConnectionConfigEditor->updateConfigFile();
         emit configParametersChanged();
     }
 }

@@ -13,7 +13,6 @@ SOURCES += \
     src/besconfigeditor.cpp \
     src/clientconnection.cpp \
     src/configeditor.cpp \
-    src/configfileeditor.cpp \
     src/databaseconnection.cpp \
     src/logsystem.cpp \
     src/main.cpp \
@@ -27,7 +26,6 @@ HEADERS += \
     src/besconfigeditor.h \
     src/clientconnection.h \
     src/configeditor.h \
-    src/configfileeditor.h \
     src/databaseconnection.h \
     src/logsystem.h \
     src/mainwindow.h \

@@ -37,10 +37,6 @@ void DatabaseConnection::open()
     {
         qDebug() << "Ошибка "<< besMesDatabase.lastError().text();
     }
-    else
-    {
-        qDebug() << "Соединение с бд установлено";
-    }
 }
 
 bool DatabaseConnection::userExists(const QString &email)

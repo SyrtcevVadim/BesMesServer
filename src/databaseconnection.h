@@ -5,7 +5,6 @@
 #include"user.h"
 
 #define USING_PLUGIN "QMYSQL"
-#define DEFAULT_DATABASE "besmesdb"
 #define USER_TABLE "user"
 
 class DatabaseConnection
@@ -13,7 +12,7 @@ class DatabaseConnection
 public:
     DatabaseConnection(const QString &connectionName);
     /// Устанавливает имя используемой базы данных
-    void setDatabaseName(const QString &databaseName=DEFAULT_DATABASE);
+    void setDatabaseName(const QString &databaseName);
     /// Устанавливает данные об адресе и порте устройства, на котором находится база данных
     void setDatabaseAddress(const QString &databaseAddress, const int port);
     /// Устанавливает данные об используемом аккаунте в базе данных

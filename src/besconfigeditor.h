@@ -3,6 +3,7 @@
 // Автор: Сырцев Вадим Игоревич
 #include "configeditor.h"
 #include<QJsonValue>
+
 class BesConfigEditor : public ConfigEditor
 {
 public:

@@ -6,24 +6,27 @@
 // Изначально нет созданных объектов серверных рабочих
 unsigned int ServerWorker::createdObjectCounter = 0;
 
-ServerWorker::ServerWorker(ConfigFileEditor *configParameters,
+ServerWorker::ServerWorker(BesConfigEditor *databaseConnectionConfigEditor,
                            QObject *parent):
     QThread(parent),
-    configParameters(configParameters)
+    databaseConnectionConfigEditor(databaseConnectionConfigEditor)
 {
 
     id = createdObjectCounter++;
     initCounters();
     // Создаём соединение с базой данных
-    dbConnection = new DatabaseConnection(QString("%1%2").arg((*configParameters)["user_name"], QString().setNum(id)));
+    dbConnection = new DatabaseConnection(QString("%1%2")
+                                           .arg(databaseConnectionConfigEditor->getString("userName"), QString().setNum(id)));
 }
 
 void ServerWorker::configureDBConnection()
 {
-    dbConnection->setDatabaseAddress((*configParameters)["database_address"],
-            (*configParameters)["database_port"].toInt());
-    dbConnection->setUser((*configParameters)["user_name"], (*configParameters)["password"]);
-    dbConnection->setDatabaseName();
+    dbConnection->setDatabaseAddress(databaseConnectionConfigEditor->getString("address"),
+                                     databaseConnectionConfigEditor->getInt("port"));
+    dbConnection->setUser(databaseConnectionConfigEditor->getString("userName"),
+                          databaseConnectionConfigEditor->getString("password"));
+
+    dbConnection->setDatabaseName(databaseConnectionConfigEditor->getString("databaseName"));
 }
 
 

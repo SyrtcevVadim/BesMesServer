@@ -28,7 +28,7 @@ void BesConfigEditor::createEmptyDatabaseConfig(const QString &fileName)
      * userName - имя аккаунта, под которым рабочий поток будет подключаться к серверу
      * password - пароль от аккаунта
      */
-    QJsonDocument document(makeEmptyObject({"address", "port", "userName", "password"}));
+    QJsonDocument document(makeEmptyObject({"address", "port", "userName", "password","databaseName"}));
 
     // Создаём файл конфигурации
     writeToFile(document, fileName);
