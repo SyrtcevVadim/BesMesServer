@@ -2,7 +2,7 @@
 #define CLIENTCONNECTION_H
 // Автор: Сырцев Вадим Игоревич
 #include<QObject>
-#include<QTcpSocket>
+#include<QSslSocket>
 #include<QTextStream>
 
 
@@ -36,6 +36,7 @@ public slots:
     void close();
     /// Устанавливает статусный флаг flag в единицу
     void setStatusFlag(unsigned long long flag);
+
 signals:
     /// Отправляется, когда пользователь отправил команду аутентификации и передал
     /// адрес электронной почты и пароль от аккаунта
@@ -65,7 +66,7 @@ private:
     /// Вместе с командой передаются её аргументы
     void processCommand(QStringList messageParts);
     /// Сокет, через который клиентское приложение подключено к серверу
-    QTcpSocket *socket;
+    QSslSocket *socket;
     /// Текстовый поток, связанный с этим сокетом
     QTextStream *stream;
 

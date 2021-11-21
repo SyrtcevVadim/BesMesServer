@@ -1,18 +1,45 @@
+#include<QFile>
 #include "clientconnection.h"
+
+#define KEY_FILE_NAME "besmes.key"
+#define CERTIFICATE_FILE_NAME "besmes.crt"
+#define PASS_PHRASE "besmes"
 
 ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : QObject(parent)
 {
     // Обнуляем все флаги статуса
     statusFlags=0;
-
-    socket = new QTcpSocket();
+    // Создаём сокет защищённого уровня
+    socket = new QSslSocket();
     socket->setSocketDescriptor(socketDescriptor);
+    socket->setProtocol(QSsl::TlsV1_3OrLater);
 
+    // Устанавливаем открытый ключ и закрытый
+    socket->setLocalCertificate(CERTIFICATE_FILE_NAME);
+    socket->setPrivateKey(KEY_FILE_NAME, QSsl::Rsa, QSsl::Pem, PASS_PHRASE);
+    // Первыми инициализируем SSL-рукопожатие
+    socket->startServerEncryption();
     stream = new QTextStream(socket);
+
+
+    connect(socket, SIGNAL(encrypted()), SLOT([]()
+    {
+        qDebug() << "Запущено защищённое соединение!";
+    }));
+    connect(socket, SIGNAL(encryptedBytesWritten(qint64 written)),
+            SLOT([](qint64 written)
+            {
+                qDebug() <<QString("По защищённому соединению было передано %1 байт")
+                .arg(written);
+            }));
+
     connect(socket, SIGNAL(disconnected()), SLOT(deleteLater()));
     connect(socket, SIGNAL(readyRead()), SLOT(processIncomingMessage()));
+
     qDebug() << "Новое клиентское подключение создано!";
 }
+
+
 
 ClientConnection::~ClientConnection()
 {
