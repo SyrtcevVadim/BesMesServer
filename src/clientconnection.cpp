@@ -22,24 +22,24 @@ ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : 
     stream = new QTextStream(socket);
 
 
-    connect(socket, SIGNAL(encrypted()), SLOT([]()
-    {
-        qDebug() << "Запущено защищённое соединение!";
-    }));
+    connect(socket, SIGNAL(encrypted()), SLOT(showEncryptedState()));
+    // TODO Почему-то программа не видит этот сигнал
     connect(socket, SIGNAL(encryptedBytesWritten(qint64 written)),
-            SLOT([](qint64 written)
-            {
-                qDebug() <<QString("По защищённому соединению было передано %1 байт")
-                .arg(written);
-            }));
+            SLOT(showEncryptedBytes(qint64 written)));
 
     connect(socket, SIGNAL(disconnected()), SLOT(deleteLater()));
     connect(socket, SIGNAL(readyRead()), SLOT(processIncomingMessage()));
-
-    qDebug() << "Новое клиентское подключение создано!";
 }
 
+void ClientConnection::showEncryptedState()
+{
+    qDebug() << "Запущено защищённое соединение";
+}
 
+void ClientConnection::showEncryptedBytes(qint64 written)
+{
+    qDebug() << "Отправлено по защищённому соединению "<<written<<" байт";
+}
 
 ClientConnection::~ClientConnection()
 {

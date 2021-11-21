@@ -1,8 +1,8 @@
 #include<QMessageBox>
-#include<QPushButton>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "multithreadtcpserver.h"
+#include "besconfigeditor.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,6 +16,11 @@ MainWindow::MainWindow(QWidget *parent) :
     showConfigParameters();
 
     connect(this, SIGNAL(logMessage(QString)), SLOT(logToJournal(QString)));
+
+    // Создаём директорию для конфигурационных файлов
+    BesConfigEditor::createConfigDirectory();
+    BesConfigEditor::createEmptyDatabaseConfig("databaseConnectionConfig.json");
+    BesConfigEditor::createEmptyServerConfig("serverConfig.json");
 }
 
 MainWindow::~MainWindow()
