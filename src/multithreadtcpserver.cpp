@@ -6,14 +6,13 @@
 int MultithreadTcpServer::workerThreadsNumber = std::thread::hardware_concurrency();
 
 MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
-                                           qint16 serverPort,
+                                           BesConfigEditor *serverConfigEditor,
                                            BesConfigEditor *databaseConnectionConfigEditor,
                                            QObject *parent):
     QTcpServer(parent),
     databaseConnectionConfigEditor(databaseConnectionConfigEditor),
-    serverIPAddress(serverIPAddress),
-    serverPort(serverPort)
-
+    serverConfigEditor(serverConfigEditor),
+    serverIPAddress(serverIPAddress)
 {
     initWorkers();
     configureStatisticsCounter();
@@ -63,7 +62,7 @@ void MultithreadTcpServer::configureLogSystem()
 void MultithreadTcpServer::start()
 {
     // Начинаем слушать входящие соединения
-    listen(serverIPAddress, serverPort);
+    listen(serverIPAddress, serverConfigEditor->getInt("port"));
     // Запускает рабочие потоки
     for(ServerWorker *worker:serverWorkers)
     {

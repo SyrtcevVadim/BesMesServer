@@ -23,8 +23,8 @@ class MultithreadTcpServer : public QTcpServer
     Q_OBJECT
 public:
     MultithreadTcpServer(QHostAddress serverIPAddress,
-                         qint16 serverPort,
-                         BesConfigEditor* databaseConnectionConfigEditor,
+                         BesConfigEditor *serverConfigEditor,
+                         BesConfigEditor *databaseConnectionConfigEditor,
                          QObject *parent = nullptr);
     ~MultithreadTcpServer();
 signals:
@@ -85,14 +85,14 @@ private:
     /// Логгирующая система, записывающая все действия, выполняемые сервером,
     /// в отдельный файл
     LogSystem *logSystem;
-    /// Обрабатывает настройки подключения к базе данных в файле конфигурации
+    /// Обрабатывает настройки подключения к базе данных
     BesConfigEditor *databaseConnectionConfigEditor;
+    /// Обрабатывает настройки сервера
+    BesConfigEditor *serverConfigEditor;
 
 
     /// IP-адрес устройства, на котором запущен сервер
     QHostAddress serverIPAddress;
-    /// Порт, прослушиваемый сервером
-    qint16 serverPort;
 
     /// Таймер, оповещающий UI, что следует обновить время работы
     /// серверного приложения в текущей сессии (после запуска)

@@ -12,7 +12,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    /*
+     * Этот блок кода предназначен для обеспечения целостности конфигурационных файлов.
+    * При первом запуске программы создаются все необходимые файлы. Администратору программы
+    * остаётся лишь заполнить.
+    * Создаём директорию для конфигурационных файлов
+    */
+    BesConfigEditor::createConfigDirectory();
+    BesConfigEditor::createEmptyDatabaseConfig("databaseConnectionConfig.json");
+    BesConfigEditor::createEmptyServerConfig("serverConfig.json");
+
     databaseConnectionConfigEditor = new BesConfigEditor(DATABASE_CONFIG_FILE_NAME);
+    serverConfigEditor = new BesConfigEditor(SERVER_CONFIG_FILE_NAME);
 
     configureServer();
     configureViews();
@@ -22,15 +34,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this, SIGNAL(logMessage(QString)), SLOT(logToJournal(QString)));
 
-    // Создаём директорию для конфигурационных файлов
-    BesConfigEditor::createConfigDirectory();
-    BesConfigEditor::createEmptyDatabaseConfig("databaseConnectionConfig.json");
-    BesConfigEditor::createEmptyServerConfig("serverConfig.json");
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    // TODO очистить указатели
 }
 
 void MainWindow::logToJournal(QString message)
@@ -80,7 +90,7 @@ void MainWindow::showServerStateAsPassive()
 void MainWindow::configureServer()
 {
     // Создаём многопоточный сервер
-    server = new MultithreadTcpServer(QHostAddress::Any, 1234, databaseConnectionConfigEditor);
+    server = new MultithreadTcpServer(QHostAddress::Any, serverConfigEditor, databaseConnectionConfigEditor);
     // Как только сервер запустился, это будет отображено в UI
     connect(server, SIGNAL(started()), SLOT(showServerStateAsActive()));
     connect(server, SIGNAL(stopped()), SLOT(showServerStateAsPassive()));
