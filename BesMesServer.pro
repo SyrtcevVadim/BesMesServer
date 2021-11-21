@@ -10,8 +10,9 @@ CONFIG += c++17
 
 
 SOURCES += \
+    src/besconfigeditor.cpp \
     src/clientconnection.cpp \
-    src/configfileeditor.cpp \
+    src/configeditor.cpp \
     src/databaseconnection.cpp \
     src/logsystem.cpp \
     src/main.cpp \
@@ -22,8 +23,9 @@ SOURCES += \
     src/timecounter.cpp
 
 HEADERS += \
+    src/besconfigeditor.h \
     src/clientconnection.h \
-    src/configfileeditor.h \
+    src/configeditor.h \
     src/databaseconnection.h \
     src/logsystem.h \
     src/mainwindow.h \

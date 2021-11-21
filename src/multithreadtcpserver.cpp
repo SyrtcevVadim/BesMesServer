@@ -1,21 +1,20 @@
 #include<thread>
 #include<QTcpSocket>
 #include "multithreadtcpserver.h"
-#include "configfileeditor.h"
+
 
 int MultithreadTcpServer::workerThreadsNumber = std::thread::hardware_concurrency();
 
 MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
-                                           qint16 serverPort,
-                                           ConfigFileEditor *configParameters,
+                                           BesConfigEditor *serverConfigEditor,
+                                           BesConfigEditor *databaseConnectionConfigEditor,
                                            QObject *parent):
     QTcpServer(parent),
-    configParameters(configParameters),
-    serverIPAddress(serverIPAddress),
-    serverPort(serverPort)
-
+    databaseConnectionConfigEditor(databaseConnectionConfigEditor),
+    serverConfigEditor(serverConfigEditor),
+    serverIPAddress(serverIPAddress)
 {
-    initWorkers(configParameters);
+    initWorkers();
     configureStatisticsCounter();
     configureLogSystem();
 
@@ -63,7 +62,7 @@ void MultithreadTcpServer::configureLogSystem()
 void MultithreadTcpServer::start()
 {
     // Начинаем слушать входящие соединения
-    listen(serverIPAddress, serverPort);
+    listen(serverIPAddress, serverConfigEditor->getInt("port"));
     // Запускает рабочие потоки
     for(ServerWorker *worker:serverWorkers)
     {
@@ -81,6 +80,7 @@ void MultithreadTcpServer::stop()
 {
     // Приостанавливаем прослушивание входящих соединений
     close();
+    // Останавливаем счётчик времени работы сервера
     currentSessionWorkingTimeTimer.stop();
     // Отправляем сигнал о том, что нужно остановить рабочие потоки (отключаем все соединения от них)
     emit stopped();
@@ -95,7 +95,7 @@ void MultithreadTcpServer::removeWorkers()
     }
 }
 
-void MultithreadTcpServer::initWorkers(ConfigFileEditor *configParameters)
+void MultithreadTcpServer::initWorkers()
 {
     /* Значение possibleThreadNumber может оказаться равным нулю.
      * Это может произойти, если это значение изначально неопределено или не поддаётся расчёту.
@@ -111,7 +111,7 @@ void MultithreadTcpServer::initWorkers(ConfigFileEditor *configParameters)
     // Создаём потоки обработки входящих соединений
     for(int i{0}; i < workerThreadsNumber; i++)
     {
-        ServerWorker *newWorker = new ServerWorker(configParameters,this);
+        ServerWorker *newWorker = new ServerWorker(databaseConnectionConfigEditor,this);
         /* Когда работа сервера останавливается, рабочим потокам отправляется сигнал
          * Мы отправляем именно сигнал, а не слот, поскольку рабочий поток не хранит объекты подключений в коллекции
          * Объекты подключения, получив данный сигнал, разрывают своё соединение с сервером. Таким образом, нагрузка на рабочий поток

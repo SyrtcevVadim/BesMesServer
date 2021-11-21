@@ -36,7 +36,8 @@ public slots:
     void close();
     /// Устанавливает статусный флаг flag в единицу
     void setStatusFlag(unsigned long long flag);
-
+    void showEncryptedState();
+    void showEncryptedBytes(qint64);
 signals:
     /// Отправляется, когда пользователь отправил команду аутентификации и передал
     /// адрес электронной почты и пароль от аккаунта

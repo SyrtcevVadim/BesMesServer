@@ -3,7 +3,7 @@
 #define SERVERWORKER_H
 
 #include "databaseconnection.h"
-#include "configfileeditor.h"
+#include "besconfigeditor.h"
 #include <QThread>
 
 /**
@@ -13,7 +13,7 @@ class ServerWorker : public QThread
 {
     Q_OBJECT
 public:
-    ServerWorker(ConfigFileEditor *configParameters,
+    ServerWorker(BesConfigEditor *databaseConnectionConfigEditor,
                  QObject *parent = nullptr);
     /// Добавляет в данный серверный поток обработки новое клиентское
     /// соединение
@@ -49,8 +49,8 @@ private:
     unsigned long long handlingConnectionsCounter;
     /// Объект подключения к базе данных
     DatabaseConnection *dbConnection;
-    /// Хранит параметры из файла конфигурации
-    ConfigFileEditor *configParameters;
+    /// Обрабатывает параметры подключения к базе данных
+    BesConfigEditor *databaseConnectionConfigEditor;
 };
 
 #endif // SERVERWORKER_H

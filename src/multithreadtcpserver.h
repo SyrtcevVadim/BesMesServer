@@ -9,7 +9,7 @@
 #include "serverworker.h"
 #include "serverstatisticscounter.h"
 #include "logsystem.h"
-#include "configfileeditor.h"
+#include "besconfigeditor.h"
 
 // Интервал обновления UI-счётчика времени работы приложения
 #define WORKING_TIME_COUNTER_UPDATE_TIME 1000
@@ -23,8 +23,8 @@ class MultithreadTcpServer : public QTcpServer
     Q_OBJECT
 public:
     MultithreadTcpServer(QHostAddress serverIPAddress,
-                         qint16 serverPort,
-                         ConfigFileEditor* configParameters,
+                         BesConfigEditor *serverConfigEditor,
+                         BesConfigEditor *databaseConnectionConfigEditor,
                          QObject *parent = nullptr);
     ~MultithreadTcpServer();
 signals:
@@ -59,7 +59,7 @@ private slots:
 private:
     /// Создаёт оптимальное количество рабочих потоков, по которым будет распределена
     /// нагрузка входящих соединений, основываясь на значении possibleThreadNumber
-    void initWorkers(ConfigFileEditor *configParameters);
+    void initWorkers();
     /// Освобождает ресурсы, выделенные для рабочих, обрабатывающих входящие
     /// сообщения
     void removeWorkers();
@@ -85,14 +85,14 @@ private:
     /// Логгирующая система, записывающая все действия, выполняемые сервером,
     /// в отдельный файл
     LogSystem *logSystem;
-    /// Редактирует настройки в файле конфигурации и позволяет их получать
-    ConfigFileEditor *configParameters;
+    /// Обрабатывает настройки подключения к базе данных
+    BesConfigEditor *databaseConnectionConfigEditor;
+    /// Обрабатывает настройки сервера
+    BesConfigEditor *serverConfigEditor;
 
 
     /// IP-адрес устройства, на котором запущен сервер
     QHostAddress serverIPAddress;
-    /// Порт, прослушиваемый сервером
-    qint16 serverPort;
 
     /// Таймер, оповещающий UI, что следует обновить время работы
     /// серверного приложения в текущей сессии (после запуска)

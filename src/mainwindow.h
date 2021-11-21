@@ -3,7 +3,7 @@
 // Автор: Сырцев Вадим Игоревич
 #include <QMainWindow>
 #include "multithreadtcpserver.h"
-#include "configfileeditor.h"
+#include "besconfigeditor.h"
 
 
 // Текст, отображаемый в UI, если сервер работает
@@ -53,8 +53,8 @@ private slots:
 private:
     /// Связывает элементы графического интерфейса окна с соответствующим слотами
     void configureViews();
-    /// Настраивает сервер и связывает его сигналы со слотами
-    void configureServer(ConfigFileEditor *configParameters);
+    /// Настраивает многопоточный tls-сервер
+    void configureServer();
     /// Настраивает таймер, используемый для обновления в UI счётчика времени работы
 
 
@@ -65,8 +65,10 @@ private:
     /// Многопоточный сервер, принимающий входящие пользовательские подключения
     /// и обрабатывающий пользовательские команды
     MultithreadTcpServer *server;
-    /// Обрабатывает параметры из файла конфигурации
-    ConfigFileEditor configParameters;
+    /// Обрабатывает файл конфигурации подключения к базе данных
+    BesConfigEditor *databaseConnectionConfigEditor;
+    /// Обрабатывает файл конфигурации севера
+    BesConfigEditor *serverConfigEditor;
 
 
 };
