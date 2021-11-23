@@ -5,12 +5,9 @@
 #include<QSslSocket>
 #include<QTextStream>
 
+#include"BesProtocol.h"
 
 
-#define END_OF_COMMAND "\r\n"
-// Команда, отсылаемая серверу для аутентификации пользователя
-#define LOGIN_COMMAND "ПРИВЕТ"
-#define REGISTRATION_COMMAND "РЕГИСТРАЦИЯ"
 
 /// Флаг того, что клиент успешно прошел аутентификацию
 #define LOGGED_IN_SUCCESSFULLY (1<<0)

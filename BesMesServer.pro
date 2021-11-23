@@ -23,6 +23,7 @@ SOURCES += \
     src/timecounter.cpp
 
 HEADERS += \
+    src/BesProtocol.h \
     src/besconfigeditor.h \
     src/clientconnection.h \
     src/configeditor.h \
