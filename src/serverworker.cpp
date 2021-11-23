@@ -1,4 +1,5 @@
 #include <QDebug>
+#include<besProtocol.h>
 #include "serverworker.h"
 #include "clientconnection.h"
 
@@ -56,7 +57,7 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     connect(this, SIGNAL(finished()),
             incomingConnection, SLOT(close()));
 
-    incomingConnection->sendResponse("+ Привет! Вы подключены к серверу BesMesServer\r\n");
+    incomingConnection->sendResponse(QString("+ %1\r\n").arg(GREETING_MESSAGE));
 }
 
 void ServerWorker::decreaseHandlingConnectionsCounter()
@@ -76,12 +77,15 @@ void ServerWorker::processLogInCommand(QString email, QString password)
         emit logMessage(QString("Пользователь %1 успешно прошёл аутентификацию").arg(email));
         // Запоминаем в флаге статуса, что пользователь прошел процесс аутентификации
         client->setStatusFlag(LOGGED_IN_SUCCESSFULLY);
-        client->sendResponse(QString("+ Вы успешно вошли в систему\r\n"));
+        client->sendResponse(QString("+ Вы успешно вошли в систему%1")
+                             .arg(END_OF_MESSAGE));
     }
     else
     {
         emit logMessage(QString("Пользователь %1 не прошёл аутентификацию").arg(email));
-        client->sendResponse(QString("- Не существует аккаунта с таким логином и паролем\r\n"));
+        client->sendResponse(QString("- %1 Не существует аккаунта с таким логином и паролем%2")
+                             .arg(WRONG_USERNAME_OR_PASSWORD_ERROR,
+                                  END_OF_MESSAGE));
     }
 }
 
@@ -89,21 +93,32 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
                                               QString email, QString password)
 {
     emit logMessage(QString("Обрабатываем команду регистрации для пользвоателя %1 %2").arg(firstName, lastName));
+    ClientConnection *client = (ClientConnection*)sender();
     // Регистрируем пользователя, если нет пользователей с такой почтой
     if(!dbConnection->userExists(email))
     {
-        ClientConnection *client = (ClientConnection*)sender();
+
         if(dbConnection->addNewUser(firstName, lastName, email, password))
         {
             emit logMessage(QString("Зарегистрирован новый аккаунт на почту %1").arg(email));
-            client->sendResponse("+ Вы успешно зарегистрировали новый аккаунт\r\n");
+            client->sendResponse(QString("+ Вы успешно зарегистрировали новый аккаунт%1")
+                                 .arg(END_OF_MESSAGE));
         }
         else
         {
-            emit logMessage(QString("Пользователь %1 %2 пытался зарегистрировать аккаунт на почту %3")
+            emit logMessage(QString("Пользователбь %1 %2 пытался зарегистрировать аккаунт на почту %3."
+                                    " произошла внутренняя ошибка!")
                             .arg(firstName, lastName, email));
-            client->sendResponse("- Не удалось зарегистрировать новый аккаунт\r\n");
+            client->sendResponse(QString("- ?! Не удалось зарегистрировать новый аккаунт%1")
+                                 .arg(END_OF_MESSAGE));
         }
+    }
+    else
+    {
+        emit logMessage(QString("Пользователь %1 %2 пытается зарегистрировать аккаунт на занятую почту %3")
+                        .arg(firstName, lastName, email));
+        client->sendResponse(QString("- %1 На данную почту уже зарегистрирован аккаунт%2")
+                             .arg(EMAIL_OCCUPIED_ERROR, END_OF_MESSAGE));
     }
 
 }
