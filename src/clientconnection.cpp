@@ -119,7 +119,7 @@ void ClientConnection::processCommand(QStringList messageParts)
         case CommandType::LogIn:
         {
             // Команда аутентификации принимает два параметра
-            if(messageParts.length() == 3)
+            if(messageParts.length() == LOGIN_REQUIRED_ARGS+1)
             {
                 qDebug() << "Обрабатываем команду аутентификации";
                 emit logInCommandSent(messageParts[1], messageParts[2]);
@@ -127,7 +127,8 @@ void ClientConnection::processCommand(QStringList messageParts)
             else
             {
                 qDebug() << "В команде аутентификации указано неверное количество аргументов";
-                sendResponse("- неверное количество аргументов\r\n");
+                sendResponse(QString("- %1 неверное количество аргументов%2")
+                             .arg(NOT_ENOUGH_ARGS_ERROR, END_OF_MESSAGE));
             }
             break;
         }
@@ -136,7 +137,7 @@ void ClientConnection::processCommand(QStringList messageParts)
             /* Команда регистрации принимает 4 параметра
              * имя, фамилия, адрес электронной почты, пароль
              */
-            if(messageParts.length() == 5)
+            if(messageParts.length() == REGISTRATION_REQUIRED_ARGS+1)
             {
                 qDebug() << "Обрабатываем команду регистрации";
                 emit registrationCommandSent(messageParts[1], messageParts[2],
@@ -145,7 +146,8 @@ void ClientConnection::processCommand(QStringList messageParts)
             else
             {
                 qDebug() << "В команде регистрации указано неверное количество аргументов";
-                sendResponse("- неверное количество аргументов\r\n");
+                sendResponse(QString("- %1 неверное количество аргументов%2")
+                             .arg(NOT_ENOUGH_ARGS_ERROR, END_OF_MESSAGE));
             }
             break;
         }
