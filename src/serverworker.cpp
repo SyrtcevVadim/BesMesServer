@@ -56,6 +56,8 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     connect(incomingConnection, SIGNAL(registrationCommandSent(QString,QString,QString,QString)),
             SLOT(processRegistrationCommand(QString,QString,QString,QString)));
 
+    connect(incomingConnection, SIGNAL(verificationCommandSent(QString)),
+            SLOT(processVerificationCommand(QString)));
     // При остановке рабочего потока должны быть разорваны все пользовательские соединения
     connect(this, SIGNAL(finished()),
             incomingConnection, SLOT(close()));
@@ -111,10 +113,13 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
     {
         // Генерируем код верификации для пользователя
         QString verificationCode = generateVerificationCode();
-        emit logMessage(QString("Пользователю отправлен код подтверждения регистрации: %1")
+        emit logMessage(QString("Пользователь должен отправить код подтверждения регистрации: %1")
                         .arg(verificationCode));
-        client->sendResponse(QString("+ %1%2")
-                             .arg(verificationCode, END_OF_MESSAGE));
+        client->sendResponse(QString("+ Вам на почту отправлен код подтверждения регистрации%1")
+                             .arg(END_OF_MESSAGE));
+        EmailSender *emailSender = new EmailSender(email, emailSenderConfigEditor);
+        emailSender->sendVerificationCode(firstName, verificationCode);
+
         // Сохраняем пользовательские данные
         User &clientData = client->user;
         clientData.firstName = firstName;

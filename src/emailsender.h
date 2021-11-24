@@ -41,7 +41,6 @@ protected:
 private slots:
     /// Обрабатывает ответы от smtp-сервера
     void processAnswer();
-
 private:
     /// Устанавливает подключение с SMTP-сервером
     void connectToSmtpServer();

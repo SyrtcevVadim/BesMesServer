@@ -24,8 +24,8 @@ ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : 
 
     connect(socket, SIGNAL(encrypted()), SLOT(showEncryptedState()));
     // TODO Почему-то программа не видит этот сигнал
-    connect(socket, SIGNAL(encryptedBytesWritten(qint64 written)),
-            SLOT(showEncryptedBytes(qint64 written)));
+//    connect(socket, SIGNAL(encryptedBytesWritten(qint64 written)),
+//            SLOT(showEncryptedBytes(qint64 written)));
 
     connect(socket, SIGNAL(disconnected()), SLOT(deleteLater()));
     connect(socket, SIGNAL(readyRead()), SLOT(processIncomingMessage()));

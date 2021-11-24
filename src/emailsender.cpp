@@ -20,17 +20,22 @@ EmailSender::EmailSender(const QString &recipientEmail,
     // Индекс почты отправителя в ассоциативном массиве
     int chosenSenderIndex = generator.bounded(0,senders.keys().length());
     int counter{0};
+    //TODO ПЕРЕДЕЛАТЬ, ИТЕРАТОРЫ НЕ РАБОТАЮТ БЕЗ БРЯКИ
     for(auto it{senders.keys().begin()}; it != senders.keys().end(); it++)
     {
+        qDebug() << "Мы в цикле выбора почты "<< *it;
         if(counter == chosenSenderIndex)
         {
             senderEmail = *it;
             senderPassword = senders[senderEmail];
+            qDebug() << "Устанавливаем почту "<<senderEmail <<" " << senderPassword;
+            break;
         }
         ++counter;
     }
+    qDebug() << "Для отправки выбрана почта "<<senderEmail;
 
-    connect(socket, SIGNAL(readyRead()), SLOT(processAnswer));
+    connect(socket, SIGNAL(readyRead()), SLOT(processAnswer()));
 }
 
 EmailSender::~EmailSender()
@@ -43,7 +48,7 @@ void EmailSender::connectToSmtpServer()
 {
     socket->connectToHostEncrypted(emailSenderConfigEditor->getString("smtpServerAddress"),
                                    emailSenderConfigEditor->getInt("smtpServerPort"));
-    if(!socket->waitForConnected(10000))
+    if(!socket->waitForConnected(2000))
     {
         qDebug() << "Ошибка! Не получается подключиться к "<<emailSenderConfigEditor->getString("smtpServerAddress")<<": "<<
                     emailSenderConfigEditor->getInt("smtpServerPort");
@@ -57,8 +62,10 @@ void EmailSender::sendVerificationCode(const QString &userName,
     currentEmailType = EmailType::EmailWithVerificationCode;
     this->userName=userName;
     this->verificationCode=verificationCode;
+
     // Подключаемся к smtp-серверу
     connectToSmtpServer();
+    start();
 }
 
 
@@ -76,7 +83,7 @@ QString EmailSender::getMessage()
     {
         case EmailType::EmailWithVerificationCode:
         {
-            result += "Subject: "+emailSenderConfigEditor->getString("verificationEmailTitle");
+            result += "Subject: "+emailSenderConfigEditor->getString("verificationEmailTitle")+"\r\n";
 
             // Формируем тело сообщения
             QString body{};
@@ -106,9 +113,10 @@ void EmailSender::processAnswer()
     qDebug() << "От сервера получен ответ: "<<response;
 
     currentInputLine.truncate(3);
+    qDebug() << currentInputLine;
     SmtpAnswerCode responseCode = (SmtpAnswerCode)currentInputLine.toInt();
 
-    if(responseCode == SmtpAnswerCode::SUCCESS &&
+    if(responseCode == SmtpAnswerCode::READY &&
             currentState == CommunicationStates::INITIALIZATION)
     {
         *stream<< "EHLO BesMes\r\n";
@@ -169,6 +177,7 @@ void EmailSender::processAnswer()
     {
         *stream << "QUIT\r\n";
         stream->flush();
+        exit();
         deleteLater();
     }
 }
