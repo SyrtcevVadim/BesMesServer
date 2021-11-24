@@ -59,6 +59,9 @@ private:
     BesConfigEditor *databaseConnectionConfigEditor;
     /// Обрабатывает параметры отправителя email-писем
     BesConfigEditor *emailSenderConfigEditor;
+    /// Генератор псевдослучайных чисел. Используется для генерации
+    /// кодов верификации
+    static QRandomGenerator generator;
 };
 
 #endif // SERVERWORKER_H

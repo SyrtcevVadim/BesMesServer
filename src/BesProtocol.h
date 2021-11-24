@@ -38,6 +38,8 @@
 #define VERIFICATION_COMMAND "КОДРЕГ"
 // Количество необходимых аргументов для команды
 #define VERIFICATION_REQUIRED_ARGS 1
+// Длина кода верификации регистрации
+#define VERIFICATION_CODE_LENGTH 6
 // Возможные ошибки:
 // Получен неправильный код верификации регистрации
 #define ERROR_VERIFICATION_CODE_ERROR "3"

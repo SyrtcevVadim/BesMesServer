@@ -5,6 +5,8 @@
 #include <QSslSocket>
 #include <QTextStream>
 
+#include <QRandomGenerator>
+
 #include"besconfigeditor.h"
 
 enum class  SmtpAnswerCode{READY=220,
@@ -74,7 +76,9 @@ private:
 
     /// Текущая ступень общения с smtp-сервером
     CommunicationStates currentState;
-
+    /// Генератор псевдослучайных чисел. Используется для выбора почты,
+    /// с которой будет отправлено сообщение пользователю
+    static QRandomGenerator generator;
 };
 
 #endif // EMAILSENDER_H

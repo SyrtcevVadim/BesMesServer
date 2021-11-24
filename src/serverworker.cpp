@@ -7,6 +7,7 @@
 
 // Изначально нет созданных объектов серверных рабочих
 unsigned int ServerWorker::createdObjectCounter = 0;
+QRandomGenerator ServerWorker::generator(QDateTime::currentSecsSinceEpoch());
 
 ServerWorker::ServerWorker(BesConfigEditor *databaseConnectionConfigEditor,
                            BesConfigEditor *emailSenderConfigEditor,
@@ -96,10 +97,9 @@ void ServerWorker::processLogInCommand(QString email, QString password)
 
 QString ServerWorker::generateVerificationCode()
 {
-    // TODO Длину кода верификации устанавливать в конфиге
-    QRandomGenerator generator;
     // Допустим, сейчас код будет состоять из 6 знаков
-    qint32 result = generator.bounded((int)pow(10,5), (int)pow(10,6)-1);
+    qint32 result = generator.bounded((int)pow(10, VERIFICATION_CODE_LENGTH-1),
+                                      (int)pow(10,VERIFICATION_CODE_LENGTH)-1);
     return QString().setNum(result);
 }
 

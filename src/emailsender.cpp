@@ -1,7 +1,7 @@
 #include "emailsender.h"
 
-#include<QRandomGenerator>
 
+QRandomGenerator EmailSender::generator(QDateTime::currentSecsSinceEpoch());
 
 EmailSender::EmailSender(const QString &recipientEmail,
                          BesConfigEditor *emailSenderConfigEditor,
@@ -13,7 +13,6 @@ EmailSender::EmailSender(const QString &recipientEmail,
     socket = new QSslSocket();
     stream = new QTextStream(socket);
 
-    QRandomGenerator generator;
     // Выбираем почту для отправки сообщений
     QMap<QString, QString> senders = emailSenderConfigEditor->getMap("senderEmails");
     qDebug() << senders;
@@ -21,18 +20,17 @@ EmailSender::EmailSender(const QString &recipientEmail,
     int chosenSenderIndex = generator.bounded(0,senders.keys().length());
     int counter{0};
     //TODO ПЕРЕДЕЛАТЬ, ИТЕРАТОРЫ НЕ РАБОТАЮТ БЕЗ БРЯКИ
-    for(auto it{senders.keys().begin()}; it != senders.keys().end(); it++)
+    for(const QString &sender: senders.keys())
     {
-        qDebug() << "Мы в цикле выбора почты "<< *it;
         if(counter == chosenSenderIndex)
         {
-            senderEmail = *it;
+            senderEmail = sender;
             senderPassword = senders[senderEmail];
             qDebug() << "Устанавливаем почту "<<senderEmail <<" " << senderPassword;
             break;
         }
-        ++counter;
     }
+
     qDebug() << "Для отправки выбрана почта "<<senderEmail;
 
     connect(socket, SIGNAL(readyRead()), SLOT(processAnswer()));
