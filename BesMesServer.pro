@@ -14,20 +14,23 @@ SOURCES += \
     src/clientconnection.cpp \
     src/configeditor.cpp \
     src/databaseconnection.cpp \
+    src/emailsender.cpp \
     src/logsystem.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/multithreadtcpserver.cpp \
     src/serverstatisticscounter.cpp \
     src/serverworker.cpp \
-    src/timecounter.cpp
+    src/timecounter.cpp \
+    src/user.cpp
 
 HEADERS += \
-    src/BesProtocol.h \
+    src/besProtocol.h \
     src/besconfigeditor.h \
     src/clientconnection.h \
     src/configeditor.h \
     src/databaseconnection.h \
+    src/emailsender.h \
     src/logsystem.h \
     src/mainwindow.h \
     src/multithreadtcpserver.h \

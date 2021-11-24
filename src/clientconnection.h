@@ -5,15 +5,18 @@
 #include<QSslSocket>
 #include<QTextStream>
 
-#include"BesProtocol.h"
-
+#include"besProtocol.h"
+#include"user.h"
 
 
 /// Флаг того, что клиент успешно прошел аутентификацию
 #define LOGGED_IN_SUCCESSFULLY (1<<0)
 
-enum class CommandType{LogIn, Registration, Unspecified};
-
+enum class Command{LogIn,
+                       Registration,
+                       Verification,
+                       Unspecified};
+enum class Error{None,Not_enought_args};
 /**
  * Описываем входщящее клиентское соединение, которое будет обрабатываться одним из
  * серверных рабочих потоков. Инкапсулирует запросы клиента методами
@@ -35,6 +38,12 @@ public slots:
     void setStatusFlag(unsigned long long flag);
     void showEncryptedState();
     void showEncryptedBytes(qint64);
+
+    /// Устанавливает код верификации, который данный пользователь должен отправить
+    /// для успешного окончания регистрации
+    void setVerificationCode(const QString &code);
+    /// Проверяет, совпадает ли код регистрации
+    bool checkVerificationCode(const QString &code);
 signals:
     /// Отправляется, когда пользователь отправил команду аутентификации и передал
     /// адрес электронной почты и пароль от аккаунта
@@ -43,6 +52,9 @@ signals:
     /// имя, фамилию, адрес электронной почты и пароль для нового аккаунта
     void registrationCommandSent(QString firstName, QString lastName,
                                  QString email, QString password);
+    /// Отправляется, когда пользователь отправляет на сервер код верификации регистрации
+    /// code - код верификации, который был передан вместе с командой
+    void verificationCommandSent(QString code);
     /// Отправляется после разрыва клиентского соединения с сервером
     void closed();
 private slots:
@@ -59,7 +71,7 @@ private:
     /// символам. Вовзращает список фрагментов (команда и её аргументы)
     QStringList parseMessage(QString clientMessage);
     /// По названию команды возвращает её тип
-    CommandType getCommandType(const QString &commandName);
+    Command getCommandType(const QString &commandName);
     /// Обрабатывает команду клиента в зависимости от ее типа.
     /// Вместе с командой передаются её аргументы
     void processCommand(QStringList messageParts);
@@ -68,9 +80,19 @@ private:
     /// Текстовый поток, связанный с этим сокетом
     QTextStream *stream;
 
+    /// Код подтверждения регистрации, который должен отправить пользователь,
+    /// чтобы успешно завершить регистрацию
+    QString verificationCode;
+
     /// Хранит различные флаги состояния клиентского соединения.
     /// Например, здесь хранится инф. о том, были ли отправлены некоторые команды
     unsigned long long statusFlags;
+    /// Структура, хранящая информацию о пользователе
+    User user;
+
+    /// Объекты класса ClientConnection "живут" в объектах класса ServerWorker. Так что будет разумным
+    /// дать объектам этого класса доступ к внутренним переменным
+    friend class ServerWorker;
 };
 
 #endif // CLIENTCONNECTION_H

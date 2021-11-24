@@ -40,6 +40,36 @@ int ConfigEditor::getInt(const QString &key)
     return -1;
 }
 
+QMap<QString, QString> ConfigEditor::getMap(const QString &key)
+{
+    if(parameters.contains(key))
+    {
+        QMap<QString, QVariant> initial = parameters[key].toMap();
+        QMap<QString, QString> result;
+        for(const QString &k: initial.keys())
+        {
+            result[k] = initial[k].toString();
+        }
+        return result;
+    }
+    return QMap<QString, QString>();
+}
+
+QStringList ConfigEditor::getStringList(const QString &key)
+{
+    if(parameters.contains(key))
+    {
+        QList<QVariant> initial = parameters[key].toList();
+        QStringList result;
+        for(const QVariant &value: initial)
+        {
+            result.push_back(value.toString());
+        }
+        return result;
+    }
+    return QStringList();
+}
+
 void ConfigEditor::createConfigDirectory(const QString &configDirName)
 {
     QDir currentDirectory = QDir::currentPath();

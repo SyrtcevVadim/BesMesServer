@@ -24,8 +24,8 @@ ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : 
 
     connect(socket, SIGNAL(encrypted()), SLOT(showEncryptedState()));
     // TODO Почему-то программа не видит этот сигнал
-    connect(socket, SIGNAL(encryptedBytesWritten(qint64 written)),
-            SLOT(showEncryptedBytes(qint64 written)));
+//    connect(socket, SIGNAL(encryptedBytesWritten(qint64 written)),
+//            SLOT(showEncryptedBytes(qint64 written)));
 
     connect(socket, SIGNAL(disconnected()), SLOT(deleteLater()));
     connect(socket, SIGNAL(readyRead()), SLOT(processIncomingMessage()));
@@ -71,7 +71,7 @@ QString ClientConnection::receiveIncomingMessage()
     static QString clientMessage="";
     clientMessage += stream->readAll();
 
-    if(!clientMessage.endsWith(END_OF_COMMAND))
+    if(!clientMessage.endsWith(END_OF_MESSAGE))
     {
         // Пустая строка означает, что сообщение принято не до конца
         return "";
@@ -98,28 +98,34 @@ QStringList ClientConnection::parseMessage(QString clientMessage)
     return result;
 }
 
-CommandType ClientConnection::getCommandType(const QString &commandName)
+Command ClientConnection::getCommandType(const QString &commandName)
 {
     if(commandName == LOGIN_COMMAND)
     {
-        return CommandType::LogIn;
+        return Command::LogIn;
     }
     else if(commandName == REGISTRATION_COMMAND)
     {
-        return CommandType::Registration;
+        return Command::Registration;
     }
-    return CommandType::Unspecified;
+    else if(commandName == VERIFICATION_COMMAND)
+    {
+        return Command::Verification;
+    }
+    return Command::Unspecified;
 }
 
 void ClientConnection::processCommand(QStringList messageParts)
 {
-    CommandType command = getCommandType(messageParts[0]);
+    Command command = getCommandType(messageParts[0]);
+    Error occuredError=Error::None;
+
     switch(command)
     {
-        case CommandType::LogIn:
+        case Command::LogIn:
         {
             // Команда аутентификации принимает два параметра
-            if(messageParts.length() == 3)
+            if(messageParts.length() == LOGIN_REQUIRED_ARGS+1)
             {
                 qDebug() << "Обрабатываем команду аутентификации";
                 emit logInCommandSent(messageParts[1], messageParts[2]);
@@ -127,16 +133,16 @@ void ClientConnection::processCommand(QStringList messageParts)
             else
             {
                 qDebug() << "В команде аутентификации указано неверное количество аргументов";
-                sendResponse("- неверное количество аргументов\r\n");
+                occuredError = Error::Not_enought_args;
             }
             break;
         }
-        case CommandType::Registration:
+        case Command::Registration:
         {
             /* Команда регистрации принимает 4 параметра
              * имя, фамилия, адрес электронной почты, пароль
              */
-            if(messageParts.length() == 5)
+            if(messageParts.length() == REGISTRATION_REQUIRED_ARGS+1)
             {
                 qDebug() << "Обрабатываем команду регистрации";
                 emit registrationCommandSent(messageParts[1], messageParts[2],
@@ -145,14 +151,36 @@ void ClientConnection::processCommand(QStringList messageParts)
             else
             {
                 qDebug() << "В команде регистрации указано неверное количество аргументов";
-                sendResponse("- неверное количество аргументов\r\n");
+                occuredError = Error::Not_enought_args;
             }
             break;
         }
-        case CommandType::Unspecified:
+        case Command::Verification:
+        {
+            if(messageParts.length() == VERIFICATION_REQUIRED_ARGS+1)
+            {
+                qDebug() << "Обрабатываем команду с кодом верификации регистрации";
+                emit verificationCommandSent(messageParts[1]);
+            }
+            else
+            {
+                qDebug() << "В команде регистрации указано неверное количество аргументов";
+                occuredError=Error::Not_enought_args;
+            }
+        }
+        case Command::Unspecified:
         {
             qDebug() << "Получена неизвестная команда "<< messageParts[0];
             break;
+        }
+    }
+    // Блок обработки ошибок
+    switch(occuredError)
+    {
+        case Error::Not_enought_args:
+        {
+            sendResponse(QString("- %1 неверное количество аргументов%2")
+                         .arg(NOT_ENOUGH_ARGS_ERROR, END_OF_MESSAGE));
         }
     }
 }
@@ -185,3 +213,13 @@ void ClientConnection::setStatusFlag(unsigned long long flag)
 }
 
 
+void ClientConnection::setVerificationCode(const QString &code)
+{
+    verificationCode = code;
+}
+
+
+bool ClientConnection::checkVerificationCode(const QString &code)
+{
+    return code == verificationCode;
+}

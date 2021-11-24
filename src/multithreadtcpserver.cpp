@@ -8,10 +8,12 @@ int MultithreadTcpServer::workerThreadsNumber = std::thread::hardware_concurrenc
 MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
                                            BesConfigEditor *serverConfigEditor,
                                            BesConfigEditor *databaseConnectionConfigEditor,
+                                           BesConfigEditor *emailSenderConfigEditor,
                                            QObject *parent):
     QTcpServer(parent),
     databaseConnectionConfigEditor(databaseConnectionConfigEditor),
     serverConfigEditor(serverConfigEditor),
+    emailSenderConfigEditor(emailSenderConfigEditor),
     serverIPAddress(serverIPAddress)
 {
     initWorkers();
@@ -111,7 +113,8 @@ void MultithreadTcpServer::initWorkers()
     // Создаём потоки обработки входящих соединений
     for(int i{0}; i < workerThreadsNumber; i++)
     {
-        ServerWorker *newWorker = new ServerWorker(databaseConnectionConfigEditor,this);
+        ServerWorker *newWorker = new ServerWorker(databaseConnectionConfigEditor,
+                                                   emailSenderConfigEditor,this);
         /* Когда работа сервера останавливается, рабочим потокам отправляется сигнал
          * Мы отправляем именно сигнал, а не слот, поскольку рабочий поток не хранит объекты подключений в коллекции
          * Объекты подключения, получив данный сигнал, разрывают своё соединение с сервером. Таким образом, нагрузка на рабочий поток
