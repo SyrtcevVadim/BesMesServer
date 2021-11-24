@@ -16,6 +16,7 @@ EmailSender::EmailSender(const QString &recipientEmail,
     QRandomGenerator generator;
     // Выбираем почту для отправки сообщений
     QMap<QString, QString> senders = emailSenderConfigEditor->getMap("senderEmails");
+    qDebug() << senders;
     // Индекс почты отправителя в ассоциативном массиве
     int chosenSenderIndex = generator.bounded(0,senders.keys().length());
     int counter{0};
@@ -119,52 +120,52 @@ void EmailSender::processAnswer()
     {
         *stream << "AUTH LOGIN\r\n";
         stream->flush();
-        currentState = CommunicationStates::SEND_USER_NAME;
+        currentState = CommunicationStates::SENDING_USER_NAME;
     }
     else if(responseCode == SmtpAnswerCode::SEND_LOGIN &&
-            currentState == CommunicationStates::SEND_USER_NAME)
+            currentState == CommunicationStates::SENDING_USER_NAME)
     {
         *stream << senderEmail.toUtf8().toBase64()<<"\r\n";
         stream->flush();
-        currentState = CommunicationStates::SEND_USER_PASSWORD;
+        currentState = CommunicationStates::SENDING_USER_PASSWORD;
     }
     else if(responseCode == SmtpAnswerCode::SEND_PASSWORD &&
-            currentState == CommunicationStates::SEND_USER_PASSWORD)\
+            currentState == CommunicationStates::SENDING_USER_PASSWORD)\
     {
         *stream << senderPassword.toUtf8().toBase64()<<"\r\n";
         stream->flush();
-        currentState = CommunicationStates::SEND_SENDER_MAIL;
+        currentState = CommunicationStates::SENDING_SENDER_MAIL;
     }
     else if(responseCode == SmtpAnswerCode::START_SENDING_EMAIL&&
-            currentState == CommunicationStates::SEND_SENDER_MAIL)
+            currentState == CommunicationStates::SENDING_SENDER_MAIL)
     {
         *stream << "MAIL FROM:<"<<senderEmail<<">\r\n";
         stream->flush();
-        currentState = CommunicationStates::SEND_RECIPIENT_MAIL;
+        currentState = CommunicationStates::SENDING_RECIPIENT_MAIL;
     }
     else if(responseCode == SmtpAnswerCode::SUCCESS &&
-            currentState == CommunicationStates::SEND_RECIPIENT_MAIL)
+            currentState == CommunicationStates::SENDING_RECIPIENT_MAIL)
     {
         *stream << "RCPT TO:<"<<recipientEmail<<">\r\n";
         stream->flush();
-        currentState = CommunicationStates::SEND_DATA;
+        currentState = CommunicationStates::PREPARING_FOR_SENDING;
     }
     else if(responseCode == SmtpAnswerCode::SUCCESS &&
-            currentState == CommunicationStates::SEND_DATA)
+            currentState == CommunicationStates::PREPARING_FOR_SENDING)
     {
         *stream << "DATA\r\n";
         stream->flush();
-        currentState = CommunicationStates::SEND_BODY;
+        currentState = CommunicationStates::SENDING_EMAIL;
     }
     else if(responseCode == SmtpAnswerCode::SEND_MESSAGE &&
-            currentState == CommunicationStates::SEND_BODY)
+            currentState == CommunicationStates::SENDING_EMAIL)
     {
         *stream << getMessage();
         stream->flush();
-        currentState = CommunicationStates::CLOSE;
+        currentState = CommunicationStates::CLOSING_CONNECTION;
     }
     else if(responseCode == SmtpAnswerCode::SUCCESS &&
-            currentState == CommunicationStates::CLOSE)
+            currentState == CommunicationStates::CLOSING_CONNECTION)
     {
         *stream << "QUIT\r\n";
         stream->flush();

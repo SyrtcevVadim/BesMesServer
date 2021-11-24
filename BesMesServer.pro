@@ -21,7 +21,8 @@ SOURCES += \
     src/multithreadtcpserver.cpp \
     src/serverstatisticscounter.cpp \
     src/serverworker.cpp \
-    src/timecounter.cpp
+    src/timecounter.cpp \
+    src/user.cpp
 
 HEADERS += \
     src/besProtocol.h \

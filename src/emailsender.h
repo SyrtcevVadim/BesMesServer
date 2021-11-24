@@ -13,8 +13,16 @@ enum class  SmtpAnswerCode{READY=220,
                            SEND_PASSWORD=334,
                            SEND_MESSAGE=354,
                            START_SENDING_EMAIL=235};
-enum class  CommunicationStates{INITIALIZATION, HANDSHAKE, AUTHORIZATION, SEND_USER_NAME, SEND_USER_PASSWORD,
-                                SEND_SENDER_MAIL, SEND_RECIPIENT_MAIL, SEND_DATA, SEND_BODY, CLOSE};
+
+enum class  CommunicationStates{INITIALIZATION,
+                                AUTHORIZATION,
+                                SENDING_USER_NAME,
+                                SENDING_USER_PASSWORD,
+                                SENDING_SENDER_MAIL,
+                                SENDING_RECIPIENT_MAIL,
+                                PREPARING_FOR_SENDING,
+                                SENDING_EMAIL,
+                                CLOSING_CONNECTION};
 class EmailSender : public QThread
 {
     Q_OBJECT

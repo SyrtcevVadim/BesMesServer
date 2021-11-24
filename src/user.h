@@ -11,15 +11,15 @@ public:
     QString firstName;
     /// Фамилия
     QString lastName;
-    /// Пол
-    QString gender;
-    /// Адрес электронной почты
+    /// Почта
     QString email;
-    /// Пароль от аккаунта пользователя
+    /// Пароль от аккаунта в системе BesMes
     QString password;
-    /// Дата рождения
-    QDate birthdate;
 
+    QString gender;
+    QDate birthdate;
+    /// Очищает все поля структуры
+    void clear();
 };
 
 #endif // USER_H
