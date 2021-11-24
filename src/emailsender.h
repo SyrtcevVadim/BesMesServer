@@ -2,14 +2,72 @@
 #define EMAILSENDER_H
 // Автор: Сырцев Вадим Игоревич
 #include <QThread>
+#include <QSslSocket>
+#include <QTextStream>
 
+#include"besconfigeditor.h"
+
+enum class  SmtpAnswerCode{READY=220,
+                           SUCCESS=250,
+                           SEND_LOGIN=334,
+                           SEND_PASSWORD=334,
+                           SEND_MESSAGE=354,
+                           START_SENDING_EMAIL=235};
+enum class  CommunicationStates{INITIALIZATION, HANDSHAKE, AUTHORIZATION, SEND_USER_NAME, SEND_USER_PASSWORD,
+                                SEND_SENDER_MAIL, SEND_RECIPIENT_MAIL, SEND_DATA, SEND_BODY, CLOSE};
 class EmailSender : public QThread
 {
     Q_OBJECT
 public:
-    EmailSender(QObject *parent = nullptr);
+    EmailSender(const QString &recipientEmail,
+                BesConfigEditor *emailSenderConfigEditor,
+                QObject *parent = nullptr);
+    ~EmailSender();
+    /// Сообщает объекту, что нужно отправить на почту получателя сообщение с кодом
+    /// верификации
+    void sendVerificationCode(const QString &userName,
+                              const QString &verificationCode);
+
+protected:
+    void run();
+private slots:
+    /// Обрабатывает ответы от smtp-сервера
+    void processAnswer();
 
 private:
+    /// Устанавливает подключение с SMTP-сервером
+    void connectToSmtpServer();
+    /// Формирует из файла конфигурации текст письма
+    QString getMessage();
+    enum class EmailType {EmailWithVerificationCode};
+
+    /// Имя пользователя
+    QString userName;
+    /// Код верификации регистрации, который нужно отправить в письме
+    QString verificationCode;
+
+    /// Тип письма, которое будет отправлено в текуще сессии
+    EmailType currentEmailType;
+
+    /// Обрабатывает параметры отправителя email
+    BesConfigEditor *emailSenderConfigEditor;
+
+
+    /// Почта, с которой будет отправлено сообщение
+    QString senderEmail;
+    /// Пароль от почты отправителя
+    QString senderPassword;
+    /// Адрес электронной почты получателя
+    QString recipientEmail;
+
+    /// Сокет, по которому отправитель соединяется с smtp-сервером
+    QSslSocket *socket;
+    /// Текстовый поток, связанный с сокетом
+    QTextStream *stream;
+
+    /// Текущая ступень общения с smtp-сервером
+    CommunicationStates currentState;
+
 };
 
 #endif // EMAILSENDER_H

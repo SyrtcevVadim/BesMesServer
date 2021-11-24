@@ -2,6 +2,7 @@
 #include "besProtocol.h"
 #include "serverworker.h"
 #include "clientconnection.h"
+#include "emailsender.h"
 
 
 // Изначально нет созданных объектов серверных рабочих
