@@ -71,7 +71,7 @@ QString ClientConnection::receiveIncomingMessage()
     static QString clientMessage="";
     clientMessage += stream->readAll();
 
-    if(!clientMessage.endsWith(END_OF_COMMAND))
+    if(!clientMessage.endsWith(END_OF_MESSAGE))
     {
         // Пустая строка означает, что сообщение принято не до конца
         return "";

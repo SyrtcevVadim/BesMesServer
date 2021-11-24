@@ -4,8 +4,7 @@
 #include "multithreadtcpserver.h"
 #include "besconfigeditor.h"
 
-#define DATABASE_CONFIG_FILE_NAME "databaseConnectionConfig.json"
-#define SERVER_CONFIG_FILE_NAME "serverConfig.json"
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,11 +19,13 @@ MainWindow::MainWindow(QWidget *parent) :
     * Создаём директорию для конфигурационных файлов
     */
     BesConfigEditor::createConfigDirectory();
-    BesConfigEditor::createEmptyDatabaseConfig("databaseConnectionConfig.json");
-    BesConfigEditor::createEmptyServerConfig("serverConfig.json");
+    BesConfigEditor::createEmptyDatabaseConnectionConfig(DATABASE_CONFIG_FILE_NAME);
+    BesConfigEditor::createEmptyServerConfig(SERVER_CONFIG_FILE_NAME);
+    BesConfigEditor::createEmptyEmailSenderConfig(EMAIL_SENDER_CONFIG_FILE_NAME);
 
     databaseConnectionConfigEditor = new BesConfigEditor(DATABASE_CONFIG_FILE_NAME);
     serverConfigEditor = new BesConfigEditor(SERVER_CONFIG_FILE_NAME);
+    emailSenderConfigEditor = new BesConfigEditor(EMAIL_SENDER_CONFIG_FILE_NAME);
 
     configureServer();
     configureViews();
@@ -90,7 +91,10 @@ void MainWindow::showServerStateAsPassive()
 void MainWindow::configureServer()
 {
     // Создаём многопоточный сервер
-    server = new MultithreadTcpServer(QHostAddress::Any, serverConfigEditor, databaseConnectionConfigEditor);
+    server = new MultithreadTcpServer(QHostAddress::Any,
+                                      serverConfigEditor,
+                                      databaseConnectionConfigEditor,
+                                      emailSenderConfigEditor);
     // Как только сервер запустился, это будет отображено в UI
     connect(server, SIGNAL(started()), SLOT(showServerStateAsActive()));
     connect(server, SIGNAL(stopped()), SLOT(showServerStateAsPassive()));

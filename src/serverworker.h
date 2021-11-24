@@ -51,6 +51,8 @@ private:
     DatabaseConnection *dbConnection;
     /// Обрабатывает параметры подключения к базе данных
     BesConfigEditor *databaseConnectionConfigEditor;
+
+    BesConfigEditor *emailSenderConfigEditor;
 };
 
 #endif // SERVERWORKER_H

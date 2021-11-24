@@ -14,6 +14,7 @@ SOURCES += \
     src/clientconnection.cpp \
     src/configeditor.cpp \
     src/databaseconnection.cpp \
+    src/emailsender.cpp \
     src/logsystem.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
@@ -28,6 +29,7 @@ HEADERS += \
     src/clientconnection.h \
     src/configeditor.h \
     src/databaseconnection.h \
+    src/emailsender.h \
     src/logsystem.h \
     src/mainwindow.h \
     src/multithreadtcpserver.h \

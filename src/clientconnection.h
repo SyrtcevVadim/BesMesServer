@@ -5,7 +5,7 @@
 #include<QSslSocket>
 #include<QTextStream>
 
-#include"BesProtocol.h"
+#include"besProtocol.h"
 
 
 

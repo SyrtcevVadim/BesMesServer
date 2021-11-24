@@ -8,10 +8,12 @@ int MultithreadTcpServer::workerThreadsNumber = std::thread::hardware_concurrenc
 MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
                                            BesConfigEditor *serverConfigEditor,
                                            BesConfigEditor *databaseConnectionConfigEditor,
+                                           BesConfigEditor *emailSenderConfigEditor,
                                            QObject *parent):
     QTcpServer(parent),
     databaseConnectionConfigEditor(databaseConnectionConfigEditor),
     serverConfigEditor(serverConfigEditor),
+    emailSenderConfigEditor(emailSenderConfigEditor),
     serverIPAddress(serverIPAddress)
 {
     initWorkers();

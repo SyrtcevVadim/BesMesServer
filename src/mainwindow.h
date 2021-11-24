@@ -69,6 +69,8 @@ private:
     BesConfigEditor *databaseConnectionConfigEditor;
     /// Обрабатывает файл конфигурации севера
     BesConfigEditor *serverConfigEditor;
+    /// Обрабатывает параметры отправителя email-писем
+    BesConfigEditor *emailSenderConfigEditor;
 
 
 };

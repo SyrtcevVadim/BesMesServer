@@ -1,6 +1,7 @@
 #include "besconfigeditor.h"
 #include<QJsonObject>
 #include<QJsonDocument>
+#include<QJsonArray>
 #include<QTextStream>
 #include<QFileInfo>
 
@@ -14,7 +15,7 @@ bool BesConfigEditor::exists(const QString &fileName)
     return QFileInfo::exists(pathToConfigDirectory+"/"+fileName);
 }
 
-void BesConfigEditor::createEmptyDatabaseConfig(const QString &fileName)
+void BesConfigEditor::createEmptyDatabaseConnectionConfig(const QString &fileName)
 {
     // Если файл конфигурации с таким именем существует, не пересоздаём его
     if(exists(fileName))
@@ -28,7 +29,18 @@ void BesConfigEditor::createEmptyDatabaseConfig(const QString &fileName)
      * userName - имя аккаунта, под которым рабочий поток будет подключаться к серверу
      * password - пароль от аккаунта
      */
-    QJsonDocument document(makeEmptyObject({"address", "port", "userName", "password","databaseName"}));
+
+
+    QJsonObject newObject;
+    // Объект называется пустым, потому что значение каждого из ключа - недействительное значение,
+    // которое должно быть заменено чем-нибудь осмысленным
+    newObject["address"]="";
+    newObject["port"]=0;
+    newObject["userName"]="";
+    newObject["password"]="";
+    newObject["databaseName"]="";
+
+    QJsonDocument document(newObject);
 
     // Создаём файл конфигурации
     writeToFile(document, fileName);
@@ -45,23 +57,41 @@ void BesConfigEditor::createEmptyServerConfig(const QString &fileName)
      * В файле конфигурации сервера хранятся следующие данные:
      * port - прослушиваемый сервером порт
      */
+
+    QJsonObject newObject;
+    newObject["port"]=0;
     // Создаём конфигурационный json-файл
-    QJsonDocument document(makeEmptyObject({"port"}));
+    QJsonDocument document(newObject);
     // Сохраняем его в файловой системе под именем fileName
     writeToFile(document, fileName);
 
 }
 
-QJsonObject BesConfigEditor::makeEmptyObject(const QStringList &keys, const QJsonValue &defaultValue)
+void BesConfigEditor::createEmptyEmailSenderConfig(const QString &fileName)
 {
-    QJsonObject newObject;
-    // Объект называется пустым, потому что значение каждого из ключа - недействительное значение,
-    // которое должно быть заменено чем-нибудь осмысленным
-    for(const QString &key: keys)
+    if(exists(fileName))
     {
-        newObject[key] = defaultValue;
+        return;
     }
-    return newObject;
+    /*
+     * В файле конфигурации системы отправки писем на электронную почту хранятся следующие данные:
+     * smtpServerAddress - ip-адрес smpt-сервера, который используется при отправке письма
+     * smptServerPort - порт, прослушиваемый этим сервером
+     *
+     * senderEmails - ассоциативный массив. Ключи в нём - адреса электронных почт, используемых
+     * для отправки сообщений на почты пользователей, а значения - пароли от этих почт.
+     * verificationEmailBody - шаблон тела письма для отправки кода верификации регистрации
+     * verificationEmailTitle - заголовок тела письма для отправки кода верификации регистрации
+     */
+    QJsonObject newObject;
+    newObject["smtpServerAddress"]="";
+    newObject["smtpServerPort"]=0;
+    newObject["senderEmails"]=QJsonObject::fromVariantMap(QMap<QString,QVariant>());
+    newObject["verificationEmailBody"]= QJsonArray();
+    newObject["verificationEmailTitle"] ="";
+
+    QJsonDocument document(newObject);
+    writeToFile(document, fileName);
 }
 
 void BesConfigEditor::writeToFile(const QJsonDocument &jsonDocument, const QString &fileName)

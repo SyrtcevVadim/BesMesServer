@@ -25,6 +25,7 @@ public:
     MultithreadTcpServer(QHostAddress serverIPAddress,
                          BesConfigEditor *serverConfigEditor,
                          BesConfigEditor *databaseConnectionConfigEditor,
+                         BesConfigEditor *emailSenderConfigEditor,
                          QObject *parent = nullptr);
     ~MultithreadTcpServer();
 signals:
@@ -89,6 +90,8 @@ private:
     BesConfigEditor *databaseConnectionConfigEditor;
     /// Обрабатывает настройки сервера
     BesConfigEditor *serverConfigEditor;
+    /// Обрабатывает настройки отправителя email-писем
+    BesConfigEditor *emailSenderConfigEditor;
 
 
     /// IP-адрес устройства, на котором запущен сервер
