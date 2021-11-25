@@ -16,6 +16,7 @@ public:
     ServerWorker(BesConfigEditor *databaseConnectionConfigEditor,
                  BesConfigEditor *emailSenderConfigEditor,
                  QObject *parent = nullptr);
+    ~ServerWorker();
     /// Добавляет в данный серверный поток обработки новое клиентское
     /// соединение
     void addClientConnection(qintptr socketDescriptor);

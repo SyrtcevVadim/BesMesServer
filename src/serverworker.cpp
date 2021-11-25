@@ -24,6 +24,11 @@ ServerWorker::ServerWorker(BesConfigEditor *databaseConnectionConfigEditor,
                                            .arg(databaseConnectionConfigEditor->getString("userName"), QString().setNum(id)));
 }
 
+ServerWorker::~ServerWorker()
+{
+    delete dbConnection;
+}
+
 void ServerWorker::configureDBConnection()
 {
     dbConnection->setDatabaseAddress(databaseConnectionConfigEditor->getString("address"),
