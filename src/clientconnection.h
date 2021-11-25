@@ -11,11 +11,13 @@
 
 /// Флаг того, что клиент успешно прошел аутентификацию
 #define LOGGED_IN_SUCCESSFULLY (1<<0)
+#define IS_ADMINISTRATOR (1<<1)
 
 enum class Command{LogIn,
-                       Registration,
-                       Verification,
-                       Unspecified};
+                   SuperLogIn,
+                   Registration,
+                   Verification,
+                   Unspecified};
 enum class Error{None,Not_enought_args};
 /**
  * Описываем входщящее клиентское соединение, которое будет обрабатываться одним из
@@ -30,14 +32,14 @@ public:
     explicit ClientConnection(qintptr socketDescriptor,QObject *parent = nullptr);
     ~ClientConnection();
 public slots:
-    /// Отправляет клиенту сообщение
+    /// Отправляет клиенту сообщение. К сообщению автоматически добавляется символ
+    /// конца сообщения. Самому его добавлять не надо
     void sendResponse(QString response);
     /// Закрывает клиентское соединение
     void close();
     /// Устанавливает статусный флаг flag в единицу
     void setStatusFlag(unsigned long long flag);
     void showEncryptedState();
-    void showEncryptedBytes(qint64);
 
     /// Устанавливает код верификации, который данный пользователь должен отправить
     /// для успешного окончания регистрации
@@ -55,6 +57,11 @@ signals:
     /// Отправляется, когда пользователь отправляет на сервер код верификации регистрации
     /// code - код верификации, который был передан вместе с командой
     void verificationCommandSent(QString code);
+
+    /// Отправляется, когда администратор отправляет запрос на авторизацию
+    /// login - логин суперпользователя, password - пароль от аккаунта суперпользователя
+    void superLogInCommandSent(QString login, QString password);
+
     /// Отправляется после разрыва клиентского соединения с сервером
     void closed();
 private slots:

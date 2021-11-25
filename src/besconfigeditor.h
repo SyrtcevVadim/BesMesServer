@@ -8,6 +8,12 @@
 #define SERVER_CONFIG_FILE_NAME "serverConfig.json"
 #define EMAIL_SENDER_CONFIG_FILE_NAME "emailSenderConfig.json"
 
+// Стандартные значения для полей
+#define STANDART_STRING ""
+#define STANDART_NUMBER -1
+#define STANDART_LIST QJsonArray()
+#define STANDART_MAP QJsonObject::fromVariantMap(QMap<QString, QVariant>())
+
 class BesConfigEditor : public ConfigEditor
 {
 public:

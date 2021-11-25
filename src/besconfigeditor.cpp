@@ -34,11 +34,11 @@ void BesConfigEditor::createEmptyDatabaseConnectionConfig(const QString &fileNam
     QJsonObject newObject;
     // Объект называется пустым, потому что значение каждого из ключа - недействительное значение,
     // которое должно быть заменено чем-нибудь осмысленным
-    newObject["address"]="";
-    newObject["port"]=0;
-    newObject["userName"]="";
-    newObject["password"]="";
-    newObject["databaseName"]="";
+    newObject["address"]=STANDART_STRING;
+    newObject["port"]=STANDART_NUMBER;
+    newObject["userName"]=STANDART_STRING;
+    newObject["password"]=STANDART_STRING;
+    newObject["databaseName"]=STANDART_STRING;
 
     QJsonDocument document(newObject);
 
@@ -59,7 +59,10 @@ void BesConfigEditor::createEmptyServerConfig(const QString &fileName)
      */
 
     QJsonObject newObject;
-    newObject["port"]=0;
+    newObject["port"]=STANDART_NUMBER;
+    newObject["superUserLogin"]=STANDART_STRING;
+    newObject["superUserPassword"]=STANDART_STRING;
+
     // Создаём конфигурационный json-файл
     QJsonDocument document(newObject);
     // Сохраняем его в файловой системе под именем fileName
@@ -84,11 +87,11 @@ void BesConfigEditor::createEmptyEmailSenderConfig(const QString &fileName)
      * verificationEmailTitle - заголовок тела письма для отправки кода верификации регистрации
      */
     QJsonObject newObject;
-    newObject["smtpServerAddress"]="";
-    newObject["smtpServerPort"]=0;
-    newObject["senderEmails"]=QJsonObject::fromVariantMap(QMap<QString,QVariant>());
-    newObject["verificationEmailBody"]= QJsonArray();
-    newObject["verificationEmailTitle"] ="";
+    newObject["smtpServerAddress"]=STANDART_STRING;
+    newObject["smtpServerPort"]=STANDART_NUMBER;
+    newObject["senderEmails"]=STANDART_MAP;
+    newObject["verificationEmailBody"]= STANDART_LIST;
+    newObject["verificationEmailTitle"] =STANDART_STRING;
 
     QJsonDocument document(newObject);
     writeToFile(document, fileName);

@@ -13,9 +13,11 @@ class ServerWorker : public QThread
 {
     Q_OBJECT
 public:
-    ServerWorker(BesConfigEditor *databaseConnectionConfigEditor,
+    ServerWorker(BesConfigEditor *serverConfigEditor,
+                 BesConfigEditor *databaseConnectionConfigEditor,
                  BesConfigEditor *emailSenderConfigEditor,
                  QObject *parent = nullptr);
+    ~ServerWorker();
     /// Добавляет в данный серверный поток обработки новое клиентское
     /// соединение
     void addClientConnection(qintptr socketDescriptor);
@@ -38,6 +40,8 @@ private slots:
                                     QString email, QString password);
     /// Обрабатывает команду верификации регистрации
     void processVerificationCommand(QString code);
+    /// Обрабатывает команду авторизации администратора
+    void processSuperLogInCommand(QString login, QString password);
     /// Уменьшает счётчик клиентских соединений, обрабатываемых текущим потоком
     void decreaseHandlingConnectionsCounter();
 private:
@@ -57,6 +61,8 @@ private:
     DatabaseConnection *dbConnection;
     /// Обрабатывает параметры подключения к базе данных
     BesConfigEditor *databaseConnectionConfigEditor;
+    /// Обрабатывает параметры сервера
+    BesConfigEditor *serverConfigEditor;
     /// Обрабатывает параметры отправителя email-писем
     BesConfigEditor *emailSenderConfigEditor;
     /// Генератор псевдослучайных чисел. Используется для генерации

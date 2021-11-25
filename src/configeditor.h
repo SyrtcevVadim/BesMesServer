@@ -27,13 +27,15 @@ public:
     /// Возвращает список строк.
     /// Если предоставленного ключа не существует, возвращает пустой список
     QStringList getStringList(const QString &key);
-
     /// Устанавливает для ключа key значение value. Если такого ключа не существует, ничего не
     /// проиходит
     void setValue(const QString &key, const QVariant &value);
+    /// Сохраняет параметры конфигурации в файле
+    void saveToFile();
+    /// Считывает параметры из файла конфигурации
+    void retrieveParameters();
 
-    /// Обновляет параметры конфигурации в файле
-    void updateConfigFile();
+
     /// Создаёт директорию для конфигурационных файлов. В качетстве аргумента можно указать
     /// имя создаваемой директории. По умолчанию оно определено макросом STANDART_CONFIG_DIR
     static void createConfigDirectory(const QString &configDirName=STANDART_CONFIG_DIR);
@@ -46,6 +48,7 @@ protected:
     /// Путь к директории с файлами конфигурации. По умолчанию
     /// папка с конфигурациями определяется макросом STANDART_CONFIG_DIR
     static QString pathToConfigDirectory;
+
 };
 
 #endif // CONFIGEDITOR_H

@@ -14,10 +14,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /*
      * Этот блок кода предназначен для обеспечения целостности конфигурационных файлов.
-    * При первом запуске программы создаются все необходимые файлы. Администратору программы
-    * остаётся лишь заполнить.
-    * Создаём директорию для конфигурационных файлов
-    */
+     * При первом запуске программы создаются все необходимые файлы. Администратору программы
+     * остаётся лишь заполнить.
+     * Создаём директорию для конфигурационных файлов
+     */
     BesConfigEditor::createConfigDirectory();
     BesConfigEditor::createEmptyDatabaseConnectionConfig(DATABASE_CONFIG_FILE_NAME);
     BesConfigEditor::createEmptyServerConfig(SERVER_CONFIG_FILE_NAME);
@@ -41,7 +41,10 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-    // TODO очистить указатели
+    delete server;
+    delete databaseConnectionConfigEditor;
+    delete serverConfigEditor;
+    delete emailSenderConfigEditor;
 }
 
 void MainWindow::logToJournal(QString message)
@@ -115,7 +118,6 @@ void MainWindow::showConfigParameters()
 
 void MainWindow::saveConfigParameters()
 {
-    // TODO
     qDebug() << "Сохраняем данные в конфигурационный файл";
     // Нельзя допустить сохранения пустых значений параметров
     QString databaseAddress = ui->databaseAddressEdit->text();
@@ -139,7 +141,7 @@ void MainWindow::saveConfigParameters()
             databaseConnectionConfigEditor->setValue("password", password);
         }
         // Сохраняем данные в файл конфигурации
-        databaseConnectionConfigEditor->updateConfigFile();
+        databaseConnectionConfigEditor->saveToFile();
         emit configParametersChanged();
     }
 }

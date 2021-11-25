@@ -47,5 +47,3 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 FORMS += \
     src/mainwindow.ui
 
-SUBDIRS += \
-    tests/TestClientServerCommunication
