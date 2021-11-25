@@ -69,6 +69,10 @@ void MultithreadTcpServer::start()
     for(ServerWorker *worker:serverWorkers)
     {
         worker->start(QThread::Priority::TimeCriticalPriority);
+        // Считываем параметры из файлов конфигурации, т.к. они могли измениться
+        databaseConnectionConfigEditor->retrieveParameters();
+        serverConfigEditor->retrieveParameters();
+        emailSenderConfigEditor->retrieveParameters();
     }
     // Запускаем счётчик времени работы
     currentSessionWorkingTimeTimer.start();

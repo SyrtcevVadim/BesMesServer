@@ -141,7 +141,7 @@ void MainWindow::saveConfigParameters()
             databaseConnectionConfigEditor->setValue("password", password);
         }
         // Сохраняем данные в файл конфигурации
-        databaseConnectionConfigEditor->updateConfigFile();
+        databaseConnectionConfigEditor->saveToFile();
         emit configParametersChanged();
     }
 }

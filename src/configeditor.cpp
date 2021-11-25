@@ -11,15 +11,7 @@ QString ConfigEditor::pathToConfigDirectory{QDir::currentPath()+"/"+STANDART_CON
 ConfigEditor::ConfigEditor(const QString &configFileName)
 {
     pathToConfigFile = pathToConfigDirectory+"/"+configFileName;
-    QFile configFile(pathToConfigFile);
-    configFile.open(QIODevice::ReadOnly);
-    // Считываем "сырые" данные из файла конфигурации
-    QByteArray configData = configFile.readAll();
-    configFile.close();
-    // Интерпретируем эти данные, как документ в формате json
-    QJsonDocument document = QJsonDocument::fromJson(configData);
-    // Получаем ассоциативный массив из данных файла
-    parameters = (document.object()).toVariantMap();
+    retrieveParameters();
 }
 
 QString ConfigEditor::getString(const QString &key)
@@ -85,7 +77,7 @@ void ConfigEditor::setValue(const QString &key, const QVariant &value)
 }
 
 
-void ConfigEditor::updateConfigFile()
+void ConfigEditor::saveToFile()
 {
     // Подготавливаем документ для записи в файл
     QJsonDocument document = QJsonDocument::fromVariant(parameters);
@@ -94,3 +86,17 @@ void ConfigEditor::updateConfigFile()
     configFile.write(document.toJson(QJsonDocument::Indented));
     configFile.close();
 }
+
+void ConfigEditor::retrieveParameters()
+{
+    QFile configFile(pathToConfigFile);
+    configFile.open(QIODevice::ReadOnly);
+    // Считываем "сырые" данные из файла конфигурации
+    QByteArray configData = configFile.readAll();
+    configFile.close();
+    // Интерпретируем эти данные, как документ в формате json
+    QJsonDocument document = QJsonDocument::fromJson(configData);
+    // Получаем ассоциативный массив из данных файла
+    parameters = (document.object()).toVariantMap();
+}
+
