@@ -14,10 +14,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /*
      * Этот блок кода предназначен для обеспечения целостности конфигурационных файлов.
-    * При первом запуске программы создаются все необходимые файлы. Администратору программы
-    * остаётся лишь заполнить.
-    * Создаём директорию для конфигурационных файлов
-    */
+     * При первом запуске программы создаются все необходимые файлы. Администратору программы
+     * остаётся лишь заполнить.
+     * Создаём директорию для конфигурационных файлов
+     */
     BesConfigEditor::createConfigDirectory();
     BesConfigEditor::createEmptyDatabaseConnectionConfig(DATABASE_CONFIG_FILE_NAME);
     BesConfigEditor::createEmptyServerConfig(SERVER_CONFIG_FILE_NAME);

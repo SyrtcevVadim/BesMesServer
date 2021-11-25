@@ -23,10 +23,6 @@ ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : 
 
 
     connect(socket, SIGNAL(encrypted()), SLOT(showEncryptedState()));
-    // TODO Почему-то программа не видит этот сигнал
-//    connect(socket, SIGNAL(encryptedBytesWritten(qint64 written)),
-//            SLOT(showEncryptedBytes(qint64 written)));
-
     connect(socket, SIGNAL(disconnected()), SLOT(deleteLater()));
     connect(socket, SIGNAL(readyRead()), SLOT(processIncomingMessage()));
 }
@@ -36,10 +32,6 @@ void ClientConnection::showEncryptedState()
     qDebug() << "Запущено защищённое соединение";
 }
 
-void ClientConnection::showEncryptedBytes(qint64 written)
-{
-    qDebug() << "Отправлено по защищённому соединению "<<written<<" байт";
-}
 
 ClientConnection::~ClientConnection()
 {
@@ -57,7 +49,7 @@ void ClientConnection::close()
 
 void ClientConnection::sendResponse(QString response)
 {
-    *stream << response;
+    *stream << response << END_OF_MESSAGE;
     stream->flush();
 }
 
@@ -112,6 +104,10 @@ Command ClientConnection::getCommandType(const QString &commandName)
     {
         return Command::Verification;
     }
+    else if(commandName == SUPER_LOGIN_COMMAND)
+    {
+        return Command::SuperLogIn;
+    }
     return Command::Unspecified;
 }
 
@@ -125,7 +121,7 @@ void ClientConnection::processCommand(QStringList messageParts)
         case Command::LogIn:
         {
             // Команда аутентификации принимает два параметра
-            if(messageParts.length() == LOGIN_REQUIRED_ARGS+1)
+            if(messageParts.length()-1 == LOGIN_REQUIRED_ARGS)
             {
                 qDebug() << "Обрабатываем команду аутентификации";
                 emit logInCommandSent(messageParts[1], messageParts[2]);
@@ -142,7 +138,7 @@ void ClientConnection::processCommand(QStringList messageParts)
             /* Команда регистрации принимает 4 параметра
              * имя, фамилия, адрес электронной почты, пароль
              */
-            if(messageParts.length() == REGISTRATION_REQUIRED_ARGS+1)
+            if(messageParts.length()-1 == REGISTRATION_REQUIRED_ARGS)
             {
                 qDebug() << "Обрабатываем команду регистрации";
                 emit registrationCommandSent(messageParts[1], messageParts[2],
@@ -157,7 +153,7 @@ void ClientConnection::processCommand(QStringList messageParts)
         }
         case Command::Verification:
         {
-            if(messageParts.length() == VERIFICATION_REQUIRED_ARGS+1)
+            if(messageParts.length()-1 == VERIFICATION_REQUIRED_ARGS)
             {
                 qDebug() << "Обрабатываем команду с кодом верификации регистрации";
                 emit verificationCommandSent(messageParts[1]);
@@ -166,6 +162,14 @@ void ClientConnection::processCommand(QStringList messageParts)
             {
                 qDebug() << "В команде регистрации указано неверное количество аргументов";
                 occuredError=Error::Not_enought_args;
+            }
+        }
+        case Command::SuperLogIn:
+        {
+            if(messageParts.length()-1 == SUPER_LOGIN_REQUIRED_ARGS)
+            {
+                qDebug() << "Получена команда авторизации администратора";
+                emit superLogInCommandSent(messageParts[1], messageParts[2]);
             }
         }
         case Command::Unspecified:
@@ -179,8 +183,8 @@ void ClientConnection::processCommand(QStringList messageParts)
     {
         case Error::Not_enought_args:
         {
-            sendResponse(QString("- %1 неверное количество аргументов%2")
-                         .arg(NOT_ENOUGH_ARGS_ERROR, END_OF_MESSAGE));
+            sendResponse(QString("- %1 неверное количество аргументов")
+                         .arg(NOT_ENOUGH_ARGS_ERROR));
         }
     }
 }

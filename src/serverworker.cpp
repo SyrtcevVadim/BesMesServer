@@ -9,14 +9,15 @@
 unsigned int ServerWorker::createdObjectCounter = 0;
 QRandomGenerator ServerWorker::generator(QDateTime::currentSecsSinceEpoch());
 
-ServerWorker::ServerWorker(BesConfigEditor *databaseConnectionConfigEditor,
+ServerWorker::ServerWorker(BesConfigEditor *serverConfigEditor,
+                           BesConfigEditor *databaseConnectionConfigEditor,
                            BesConfigEditor *emailSenderConfigEditor,
                            QObject *parent):
     QThread(parent),
+    serverConfigEditor(serverConfigEditor),
     databaseConnectionConfigEditor(databaseConnectionConfigEditor),
     emailSenderConfigEditor(emailSenderConfigEditor)
 {
-
     id = createdObjectCounter++;
     initCounters();
     // Создаём соединение с базой данных
@@ -61,14 +62,18 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     // Обрабатывает команду регистрации
     connect(incomingConnection, SIGNAL(registrationCommandSent(QString,QString,QString,QString)),
             SLOT(processRegistrationCommand(QString,QString,QString,QString)));
-
+    // Обрабатывает команду верификации регистрации
     connect(incomingConnection, SIGNAL(verificationCommandSent(QString)),
             SLOT(processVerificationCommand(QString)));
+    // Обрабатываем команду авторизации администратора
+    connect(incomingConnection, SIGNAL(superLogInCommandSent(QString,QString)),
+            SLOT(processSuperLogInCommand(QString,QString)));
+
     // При остановке рабочего потока должны быть разорваны все пользовательские соединения
     connect(this, SIGNAL(finished()),
             incomingConnection, SLOT(close()));
 
-    incomingConnection->sendResponse(QString("+ %1\r\n").arg(GREETING_MESSAGE));
+    incomingConnection->sendResponse(QString("+ %1").arg(GREETING_MESSAGE));
 }
 
 void ServerWorker::decreaseHandlingConnectionsCounter()
@@ -88,15 +93,13 @@ void ServerWorker::processLogInCommand(QString email, QString password)
         emit logMessage(QString("Пользователь %1 успешно прошёл аутентификацию").arg(email));
         // Запоминаем в флаге статуса, что пользователь прошел процесс аутентификации
         client->setStatusFlag(LOGGED_IN_SUCCESSFULLY);
-        client->sendResponse(QString("+ Вы успешно вошли в систему%1")
-                             .arg(END_OF_MESSAGE));
+        client->sendResponse(QString("+ Вы успешно вошли в систему"));
     }
     else
     {
         emit logMessage(QString("Пользователь %1 не прошёл аутентификацию").arg(email));
-        client->sendResponse(QString("- %1 Не существует аккаунта с таким логином и паролем%2")
-                             .arg(WRONG_USERNAME_OR_PASSWORD_ERROR,
-                                  END_OF_MESSAGE));
+        client->sendResponse(QString("- %1 Не существует аккаунта с таким логином и паролем")
+                             .arg(WRONG_USERNAME_OR_PASSWORD_ERROR));
     }
 }
 
@@ -120,8 +123,7 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
         QString verificationCode = generateVerificationCode();
         emit logMessage(QString("Пользователь должен отправить код подтверждения регистрации: %1")
                         .arg(verificationCode));
-        client->sendResponse(QString("+ Вам на почту отправлен код подтверждения регистрации%1")
-                             .arg(END_OF_MESSAGE));
+        client->sendResponse(QString("+ Вам на почту отправлен код подтверждения регистрации"));
         EmailSender *emailSender = new EmailSender(email, emailSenderConfigEditor);
         emailSender->sendVerificationCode(firstName, verificationCode);
 
@@ -136,8 +138,8 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
     {
         emit logMessage(QString("Пользователь %1 %2 пытается зарегистрировать аккаунт на занятую почту %3")
                         .arg(firstName, lastName, email));
-        client->sendResponse(QString("- %1 На данную почту уже зарегистрирован аккаунт%2")
-                             .arg(EMAIL_OCCUPIED_ERROR, END_OF_MESSAGE));
+        client->sendResponse(QString("- %1 На данную почту уже зарегистрирован аккаунт")
+                             .arg(EMAIL_OCCUPIED_ERROR));
     }
 
 }
@@ -158,8 +160,7 @@ void ServerWorker::processVerificationCommand(QString code)
         {
             emit logMessage(QString("Зарегистрирован новый аккаунт на почту %1").
                             arg(clientData.email));
-            client->sendResponse(QString("+ Вы успешно зарегистрировали новый аккаунт%1")
-                                 .arg(END_OF_MESSAGE));
+            client->sendResponse(QString("+ Вы успешно зарегистрировали новый аккаунт"));
         }
         else
         {
@@ -168,13 +169,37 @@ void ServerWorker::processVerificationCommand(QString code)
                             .arg(clientData.firstName,
                                  clientData.lastName,
                                  clientData.email));
-            client->sendResponse(QString("- ?! Не удалось зарегистрировать новый аккаунт%1")
-                                 .arg(END_OF_MESSAGE));
+            client->sendResponse(QString("- ?! Не удалось зарегистрировать новый аккаунт"));
         }
         client->sendResponse(QString("+ Код верификации был принят! Пользователь зарегистрирован"));
     }
+    // Очищаем предыдущие данны о пользователе
     client->user.clear();
 }
+
+void ServerWorker::processSuperLogInCommand(QString login, QString password)
+{
+    ClientConnection *client = (ClientConnection*)sender();
+    // Сравниваем данные суперпользователя из файла конфигурации с данными, предоставленными пользователем
+    if(serverConfigEditor->getString("superUserLogin") == login &&
+            serverConfigEditor->getString("superUserLogin") == password)
+    {
+        // Авторизация прошла успешно
+        qDebug() << "Администратор авторизовался!";
+        client->sendResponse(QString("+ Вы авторизовались в системе как администратор!"));
+    }
+    else
+    {
+        emit logMessage(QString("Попытка авторизации. Предоставлены данные:"
+                                "логин: \"%1\" пароль: \"%2\"")
+                        .arg(login, password));
+        // В целях "безопасности" отсылаем такой ответо
+        client->sendResponse("- Не существует такой команды");
+        // Устанавливаем флаг того, что данный пользователь является администратором
+        client->setStatusFlag(IS_ADMINISTRATOR);
+    }
+}
+
 
 void ServerWorker::run()
 {

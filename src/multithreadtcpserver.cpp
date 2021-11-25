@@ -117,7 +117,8 @@ void MultithreadTcpServer::initWorkers()
     // Создаём потоки обработки входящих соединений
     for(int i{0}; i < workerThreadsNumber; i++)
     {
-        ServerWorker *newWorker = new ServerWorker(databaseConnectionConfigEditor,
+        ServerWorker *newWorker = new ServerWorker(serverConfigEditor,
+                                                   databaseConnectionConfigEditor,
                                                    emailSenderConfigEditor,this);
         /* Когда работа сервера останавливается, рабочим потокам отправляется сигнал
          * Мы отправляем именно сигнал, а не слот, поскольку рабочий поток не хранит объекты подключений в коллекции
