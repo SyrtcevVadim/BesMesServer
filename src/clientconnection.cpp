@@ -171,6 +171,10 @@ void ClientConnection::processCommand(QStringList messageParts)
                 qDebug() << "Получена команда авторизации администратора";
                 emit superLogInCommandSent(messageParts[1], messageParts[2]);
             }
+            else
+            {
+                occuredError=Error::Not_enought_args;
+            }
         }
         case Command::Unspecified:
         {
@@ -202,7 +206,6 @@ void ClientConnection::processIncomingMessage()
 
     // Разбиваем входящую строку на фрагменты: команда и аргументы
     QStringList messageParts = parseMessage(clientMessage);
-    qDebug() << messageParts;
 
     // Пустые команды не обрабатываем
     if(messageParts.length() > 1)

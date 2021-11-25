@@ -55,6 +55,8 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     connect(incomingConnection, SIGNAL(closed()), SIGNAL(clientConnectionClosed()));
     // После разрыва пользовательского соединения уменьшаем счётчик
     connect(incomingConnection, SIGNAL(closed()), SLOT(decreaseHandlingConnectionsCounter()));
+    // После разрыва соединения с клиентским приложением, нужно удалить объект
+    connect(incomingConnection, SIGNAL(closed()), incomingConnection, SLOT(deleteLater()));
 
     // Обрабатывает команду аутентификации
     connect(incomingConnection, SIGNAL(logInCommandSent(QString,QString)),
