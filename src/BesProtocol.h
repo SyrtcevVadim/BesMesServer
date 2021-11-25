@@ -10,7 +10,7 @@
 #define GREETING_MESSAGE "Привет! Вы успешно подключились к серверу Bes! Пройдите аутентификацию!"
 
 // Общие ошибки
-#define NOT_ENOUGH_ARGS_ERROR "1"
+#define NOT_ENOUGH_ARGS_ERROR 1
 
 /* ------------------------------------------------------------
 // СПИСОК КОМАНД ОБЩЕНИЯ КЛИЕНТСКОГО ПРИЛОЖЕНИЯ С СЕРВЕРНЫМ И
@@ -24,7 +24,7 @@
 #define LOGIN_REQUIRED_ARGS 2
 // Возможные ошибки:
 // Не существует пользователя
-#define WRONG_USERNAME_OR_PASSWORD_ERROR "2"
+#define WRONG_USERNAME_OR_PASSWORD_ERROR 2
 
 // Команда регистрации нового пользователя
 #define REGISTRATION_COMMAND "РЕГИСТРАЦИЯ"
@@ -32,7 +32,7 @@
 #define REGISTRATION_REQUIRED_ARGS 4
 // Возможные ошибки:
 // Пользователь с таким адресом электронной почты уже существует
-#define EMAIL_OCCUPIED_ERROR "3"
+#define EMAIL_OCCUPIED_ERROR 3
 
 // Команда для отправки кода верификации регистрации
 #define VERIFICATION_COMMAND "КОДРЕГ"
@@ -42,7 +42,7 @@
 #define VERIFICATION_CODE_LENGTH 6
 // Возможные ошибки:
 // Получен неправильный код верификации регистрации
-#define ERROR_VERIFICATION_CODE_ERROR "3"
+#define ERROR_VERIFICATION_CODE_ERROR 3
 
 /* ------------------------------------------------------------
 // СПИСОК КОМАНД ОБЩЕНИЯ ОКНА ПРОСМОТРА СОСТОЯНИЯ СЕРВЕРА С
