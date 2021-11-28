@@ -4,17 +4,17 @@
 
 LogSystem::LogSystem(const QString &logFileName, QObject *parent) : QThread(parent)
 {
-    latestLogFile = new QFile(logFileName);
+    logFile = new QFile(logFileName);
     // В начале каждой сессии файл логов перезаписывается
-    if(!latestLogFile->open(QIODevice::Truncate | QIODevice::WriteOnly))
+    if(!logFile->open(QIODevice::Truncate | QIODevice::WriteOnly))
     {
         qDebug() << "!!!Файл логов не открыт";
     }
-    logStream = new QTextStream(latestLogFile);
+    logStream = new QTextStream(logFile);
 }
 LogSystem::~LogSystem()
 {
-    latestLogFile->close();
+    logFile->close();
 }
 
 void LogSystem::run()
@@ -22,18 +22,37 @@ void LogSystem::run()
     exec();
 }
 
-void LogSystem::logToFile(QString message)
+void LogSystem::logToFile(MessageType type, QString message)
 {
     QDateTime now = QDateTime::currentDateTime();
-    QString outMessage = QString("%1:%2\r\n").arg(now.toString(), message);
+    // Выбираем соответствующий маркер сообщения
+    QString messageMarker="";
+    switch(type)
+    {
+        case MessageType::Error:
+        {
+            messageMarker = ERROR_MESSAGE_MARKER;
+            break;
+        }
+        case MessageType::Debug:
+        {
+            messageMarker = DEBUG_MESSAGE_MARKER;
+            break;
+        }
+        case MessageType::System:
+        {
+            messageMarker = SYSTEM_MESSAGE_MARKER;
+            break;
+        }
+    }
+
+    QString outMessage = QString("%1 %2 %3\n").arg(now.toString("hh:mm:ss"),messageMarker, message);
     *logStream << outMessage;
     logStream->flush();
-    qDebug() << outMessage;
     emit messageLogged(outMessage);
-
 }
 
 void LogSystem::close()
 {
-    latestLogFile->close();
+    logFile->close();
 }

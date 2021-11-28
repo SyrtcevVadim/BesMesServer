@@ -29,7 +29,6 @@ signals:
     /// Сигнал, высылаемый после изменения пользователем параметров конфигурации
     /// в секции настроек
     void configParametersChanged();
-    void logMessage(QString message);
 private slots:
     /// Устанавливает значение счётчика активных клиентских подключений
     void setActiveConnectionsCounter(unsigned long long counter);
@@ -48,8 +47,6 @@ private slots:
     /// Обновляет в UI метку-счётчик, отвечающую за хранения времени работы
     /// приложения в данной сессии
     void updateServerWorkingTimeCounter(QString time);
-    /// Отображает запись в журнале сообщений
-    void logToJournal(QString message);
 private:
     /// Связывает элементы графического интерфейса окна с соответствующим слотами
     void configureViews();

@@ -11,6 +11,7 @@ CONFIG += c++17
 
 SOURCES += \
     src/besconfigeditor.cpp \
+    src/beslogsystem.cpp \
     src/clientconnection.cpp \
     src/configeditor.cpp \
     src/databaseconnection.cpp \
@@ -27,6 +28,7 @@ SOURCES += \
 HEADERS += \
     src/besProtocol.h \
     src/besconfigeditor.h \
+    src/beslogsystem.h \
     src/clientconnection.h \
     src/configeditor.h \
     src/databaseconnection.h \

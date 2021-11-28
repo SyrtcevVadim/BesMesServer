@@ -5,32 +5,46 @@
 #include <QFile>
 #include <QTextStream>
 
-#define LOG_FILE_NAME "latest.txt"
+#define STANDART_LOG_FILE_NAME "latest.txt"
 
-///
-/// Объект логгирующей системы крутится в отдельном потоке и регистрирует деятельность
-/// сервера в выходном файле
-/// TODO В случае возникновения чрезвычайной ситуации, создаётся отдельный файл,
-/// в который копируется содержимое последнего файла логов.
+#define ERROR_MESSAGE_MARKER "!"
+#define DEBUG_MESSAGE_MARKER "#"
+#define SYSTEM_MESSAGE_MARKER "^"
+
+/// Каждое сообщение в логгирующей системе имеет тип. Эти типы описываются данным
+/// перечислением:
+/// Error - ошибка, возникшая во время работы приложения
+/// Debug - отладочная информация для разработчика
+/// System - системная информация(например, информация о периодах работы приложения)
+enum class MessageType{Error, Debug, System};
+
+/// Объект логгирующей системы работает в отдельном потоке и регистрирует деятельность
+/// сервера в файл. Каждый день содержимое файла конфигурации архивируется и сохраняется в
+/// файловой системой с временной пометкой в названии
 class LogSystem : public QThread
 {
     Q_OBJECT
+
 public:
     LogSystem(const QString &logFileName, QObject *parent = nullptr);
     ~LogSystem();
 public slots:
-    /// Регистрирует сообщение message в файле
-    void logToFile(QString message);
     /// Закрывает файл регистрации сообщений
     void close();
 signals:
     /// Сигнал, высылаемый после регистрации сообщения
     void messageLogged(QString message);
+
+protected slots:
+    /// Регистрирует сообщение в файле.
+    /// type - тип регистрируемого сообщения
+    /// message - строка сообщения
+    void logToFile(MessageType type, QString message);
 protected:
     void run();
 private:
     /// Файл, в который будут записываться логи текущего сеанса
-    QFile *latestLogFile;
+    QFile *logFile;
     /// Текстовый поток, связанный с файлом логов
     QTextStream *logStream;
 };

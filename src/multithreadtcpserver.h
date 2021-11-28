@@ -8,7 +8,7 @@
 #include "timecounter.h"
 #include "serverworker.h"
 #include "serverstatisticscounter.h"
-#include "logsystem.h"
+#include "beslogsystem.h"
 #include "besconfigeditor.h"
 
 // Интервал обновления UI-счётчика времени работы приложения
@@ -40,8 +40,6 @@ signals:
     /// Сигнал, высылаемый после открытия или разрыва клиентского соединения
     /// activeConnectionsCounter - количество активных соединений
     void activeConnectionsCounterChanged(unsigned long long activeConnectionsCounter);
-    /// Сигнал о намерении зарегистрировать сообщение в журнале
-    void logMessage(QString message);
     /// Отправляется каждый раз, когда время работы сервера в текущей
     /// сессии обновляется
     void workingTimeUpdated(QString time);
@@ -65,10 +63,13 @@ private:
     /// сообщения
     void removeWorkers();
 
-    /// Связывает сигналы и слоты, необходимые для ведения статистического учёта объектом-счётчиком
+    /// Настраивает объект-счётчик
     void configureStatisticsCounter();
-    /// Связывает сигналы и слоты, необходимые для корректной работы системы регистрации сообщений
+    /// Настраивает систему регистрации сообщений
     void configureLogSystem();
+    /// Настраивает таймеры сервера:
+    /// Таймер счётчика времени работы сервера
+    void configureTimers();
 private:
     /// Хранит количество потоков, которые физически(и в теории) могут выполняться независимо
     /// на разных ядрах процессора, т.е. оптимальное количество потоков. Ровно столько серверных рабочих
@@ -84,19 +85,16 @@ private:
     /// Объект, подсчитывающий статистику сервера во время его работы
     ServerStatisticsCounter *statisticsCounter;
     /// Логгирующая система, записывающая все действия, выполняемые сервером,
-    /// в отдельный файл
-    LogSystem *logSystem;
+    /// в файл
+    BesLogSystem *logSystem;
     /// Обрабатывает настройки подключения к базе данных
     BesConfigEditor *databaseConnectionConfigEditor;
     /// Обрабатывает настройки сервера
     BesConfigEditor *serverConfigEditor;
     /// Обрабатывает настройки отправителя email-писем
     BesConfigEditor *emailSenderConfigEditor;
-
-
     /// IP-адрес устройства, на котором запущен сервер
     QHostAddress serverIPAddress;
-
     /// Таймер, оповещающий UI, что следует обновить время работы
     /// серверного приложения в текущей сессии (после запуска)
     QTimer currentSessionWorkingTimeTimer;
