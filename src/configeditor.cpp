@@ -64,7 +64,7 @@ QStringList ConfigEditor::getStringList(const QString &key)
 
 void ConfigEditor::createConfigDirectory(const QString &configDirName)
 {
-    QDir currentDirectory = QDir::currentPath();
+    QDir currentDirectory;
     currentDirectory.mkdir(configDirName);
 }
 

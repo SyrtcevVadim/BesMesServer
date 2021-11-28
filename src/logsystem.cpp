@@ -1,10 +1,11 @@
 #include "logsystem.h"
 #include <QDebug>
 #include <QDateTime>
+#include <QDir>
 
 LogSystem::LogSystem(const QString &logFileName, QObject *parent) : QThread(parent)
 {
-    logFile = new QFile(logFileName);
+    logFile = new QFile(QDir::currentPath()+"/"+STANDART_LOG_DIR_NAME+"/"+logFileName);
     // В начале каждой сессии файл логов перезаписывается
     if(!logFile->open(QIODevice::Truncate | QIODevice::WriteOnly))
     {
@@ -15,6 +16,12 @@ LogSystem::LogSystem(const QString &logFileName, QObject *parent) : QThread(pare
 LogSystem::~LogSystem()
 {
     logFile->close();
+}
+
+void LogSystem::createLogsDirectory()
+{
+    QDir currentDirectory;
+    currentDirectory.mkdir(STANDART_LOG_DIR_NAME);
 }
 
 void LogSystem::run()

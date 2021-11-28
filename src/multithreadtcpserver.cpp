@@ -57,6 +57,8 @@ void MultithreadTcpServer::configureStatisticsCounter()
 
 void MultithreadTcpServer::configureLogSystem()
 {
+    // Создаём директорию для логов
+    BesLogSystem::createLogsDirectory();
     logSystem = new BesLogSystem(STANDART_LOG_FILE_NAME, this);
     /*
      * Все сообщения, которые мы хотим журналировать, мы должны отправлять в

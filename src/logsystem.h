@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 
+#define STANDART_LOG_DIR_NAME "logs"
 #define STANDART_LOG_FILE_NAME "latest.txt"
 
 #define ERROR_MESSAGE_MARKER "!"
@@ -28,6 +29,8 @@ class LogSystem : public QThread
 public:
     LogSystem(const QString &logFileName, QObject *parent = nullptr);
     ~LogSystem();
+    /// Создаёт директорию для файлов логов
+    void static createLogsDirectory();
 public slots:
     /// Закрывает файл регистрации сообщений
     void close();
@@ -42,6 +45,8 @@ protected slots:
     void logToFile(MessageType type, QString message);
 protected:
     void run();
+
+
 private:
     /// Файл, в который будут записываться логи текущего сеанса
     QFile *logFile;

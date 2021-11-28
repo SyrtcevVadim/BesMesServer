@@ -3,6 +3,7 @@
 
 #include "logsystem.h"
 
+
 class BesLogSystem : public LogSystem
 {
     Q_OBJECT
