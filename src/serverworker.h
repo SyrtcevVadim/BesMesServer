@@ -14,10 +14,7 @@ class ServerWorker : public QThread
 {
     Q_OBJECT
 public:
-    ServerWorker(BesConfigEditor *serverConfigEditor,
-                 BesConfigEditor *databaseConnectionConfigEditor,
-                 BesConfigEditor *emailSenderConfigEditor,
-                 BesLogSystem *logSystem,
+    ServerWorker(BesLogSystem *logSystem,
                  QObject *parent = nullptr);
     ~ServerWorker();
 
@@ -80,6 +77,8 @@ private:
     void configureDatabaseConnection();
     /// Настраивает систему логгирования сообщений из рабочих потоков
     void configureLogSystem();
+    /// Настраивает менеджеры конфигурационных файлов
+    void configureConfigEditors();
 
     /// Счётчик созданных объектов
     static unsigned int createdObjectCounter;
@@ -92,10 +91,7 @@ private:
 
     /// Обрабатывает параметры сервера
     BesConfigEditor *serverConfigEditor;
-    /// Обрабатывает параметры подключения к базе данных
-    BesConfigEditor *databaseConnectionConfigEditor;
-    /// Обрабатывает параметры отправителя email-писем
-    BesConfigEditor *emailSenderConfigEditor;
+
     /// Система журналирования сообщений
     BesLogSystem *logSystem;
     /// Генератор псевдослучайных чисел. Используется для генерации

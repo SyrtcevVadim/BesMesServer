@@ -9,18 +9,13 @@
 unsigned int ServerWorker::createdObjectCounter = 0;
 QRandomGenerator ServerWorker::generator(QDateTime::currentSecsSinceEpoch());
 
-ServerWorker::ServerWorker(BesConfigEditor *serverConfigEditor,
-                           BesConfigEditor *databaseConnectionConfigEditor,
-                           BesConfigEditor *emailSenderConfigEditor,
-                           BesLogSystem *logSystem,
+ServerWorker::ServerWorker(BesLogSystem *logSystem,
                            QObject *parent):
     QThread(parent),
-    serverConfigEditor(serverConfigEditor),
-    databaseConnectionConfigEditor(databaseConnectionConfigEditor),
-    emailSenderConfigEditor(emailSenderConfigEditor),
     logSystem(logSystem)
 {
     id = createdObjectCounter++;
+    configureConfigEditors();
     configureLogSystem();
     initCounters();
 }
@@ -28,6 +23,7 @@ ServerWorker::ServerWorker(BesConfigEditor *serverConfigEditor,
 ServerWorker::~ServerWorker()
 {
     delete databaseConnection;
+    delete serverConfigEditor;
 }
 
 void ServerWorker::quit()
@@ -37,12 +33,16 @@ void ServerWorker::quit()
     QThread::quit();
 }
 
+void ServerWorker::configureConfigEditors()
+{
+    serverConfigEditor = new BesConfigEditor(SERVER_CONFIG_FILE_NAME);
+}
+
 void ServerWorker::configureDatabaseConnection()
 {
     databaseConnection = new DatabaseConnection(QString("connection%1")
                                            .arg(id));
 }
-
 
 void ServerWorker::configureLogSystem()
 {
