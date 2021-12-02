@@ -33,6 +33,8 @@ MultithreadTcpServer::~MultithreadTcpServer()
     delete emailSenderConfigEditor;
 }
 
+
+
 void MultithreadTcpServer::updateWorkingTimeCounter()
 {
     currentSessionWorkingTime.addSecond();

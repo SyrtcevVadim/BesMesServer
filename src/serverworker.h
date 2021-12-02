@@ -20,12 +20,17 @@ public:
                  BesLogSystem *logSystem,
                  QObject *parent = nullptr);
     ~ServerWorker();
+
+
+
     /// Добавляет в данный серверный поток обработки новое клиентское
     /// соединение
     void addClientConnection(qintptr socketDescriptor);
     /// Возвращает количество клиентских подключений, обрабатываем текущим рабочим потоком
     unsigned long long getHandlingConnectionsCounter();
 
+public slots:
+    void quit();
 signals:
     /// Сигнал, высылаемый, когда рабочему потоку удалось установить соединение
     /// с базой данных
@@ -72,7 +77,7 @@ private:
     /// Генерирует код верификации регистрации
     QString generateVerificationCode();
     /// Настраивает подключение к базе данных в рабочем потоке
-    void configureDBConnection();
+    void configureDatabaseConnection();
     /// Настраивает систему логгирования сообщений из рабочих потоков
     void configureLogSystem();
 
@@ -83,7 +88,7 @@ private:
     /// Счётчик соединений, обрабатываемых данным рабочим потоком
     unsigned long long handlingConnectionsCounter;
     /// Объект подключения к базе данных
-    DatabaseConnection *dbConnection;
+    DatabaseConnection *databaseConnection;
 
     /// Обрабатывает параметры сервера
     BesConfigEditor *serverConfigEditor;

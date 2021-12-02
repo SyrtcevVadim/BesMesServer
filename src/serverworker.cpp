@@ -23,24 +23,24 @@ ServerWorker::ServerWorker(BesConfigEditor *serverConfigEditor,
     id = createdObjectCounter++;
     configureLogSystem();
     initCounters();
-    // Создаём соединение с базой данных
-    dbConnection = new DatabaseConnection(QString("%1%2")
-                                           .arg(databaseConnectionConfigEditor->getString("userName"), QString().setNum(id)));
 }
 
 ServerWorker::~ServerWorker()
 {
-    delete dbConnection;
+    delete databaseConnection;
 }
 
-void ServerWorker::configureDBConnection()
+void ServerWorker::quit()
 {
-    dbConnection->setDatabaseAddress(databaseConnectionConfigEditor->getString("address"),
-                                     databaseConnectionConfigEditor->getInt("port"));
-    dbConnection->setUser(databaseConnectionConfigEditor->getString("userName"),
-                          databaseConnectionConfigEditor->getString("password"));
+    // При остановке рабочего потока нужно удалить соединение с базой данных
+    delete databaseConnection;
+    QThread::quit();
+}
 
-    dbConnection->setDatabaseName(databaseConnectionConfigEditor->getString("databaseName"));
+void ServerWorker::configureDatabaseConnection()
+{
+    databaseConnection = new DatabaseConnection(QString("connection%1")
+                                           .arg(id));
 }
 
 
@@ -116,7 +116,7 @@ void ServerWorker::processLogInCommand(QString email, QString password)
     //emit logMessage(QString("Пользователь %1 хочет войти в систему").arg(email));
     ClientConnection *client = (ClientConnection*)sender();
     // Проверяем, есть ли такой пользователь в БД
-    if(dbConnection->userExists(email, password))
+    if(databaseConnection->userExists(email, password))
     {
         //emit logMessage(QString("Пользователь %1 успешно прошёл аутентификацию").arg(email));
         emit clientLoggedIn(email);
@@ -147,7 +147,7 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
     //emit logMessage(QString("Обрабатываем команду регистрации для пользвоателя %1 %2").arg(firstName, lastName));
     ClientConnection *client = (ClientConnection*)sender();
     // Регистрируем пользователя, если нет пользователей с такой почтой
-    if(!dbConnection->userExists(email))
+    if(!databaseConnection->userExists(email))
     {
         // Генерируем код верификации для пользователя
         QString verificationCode = generateVerificationCode();
@@ -189,7 +189,7 @@ void ServerWorker::processVerificationCommand(QString code)
     {
         client->sendResponse(QString("+ Код верификации был принят! Пользователь зарегистрирован"));
         User clientData = client->user;
-        if(dbConnection->addNewUser(clientData.firstName,
+        if(databaseConnection->addNewUser(clientData.firstName,
                                     clientData.lastName,
                                     clientData.email,
                                     clientData.password))
@@ -246,10 +246,9 @@ void ServerWorker::processSuperLogInCommand(QString login, QString password)
 void ServerWorker::run()
 {
     qDebug() << QString("Поток %1 запущен").arg(id);
-
-    configureDBConnection();
-    dbConnection->open();
-    if(dbConnection->isActive())
+    configureDatabaseConnection();
+    databaseConnection->open();
+    if(databaseConnection->isActive())
     {
         emit databaseConnectionEstablished(id);
 //        emit logMessage(QString("Рабочий поток %1 установил соединение с БД").arg(id));
