@@ -5,7 +5,8 @@
 
 LogSystem::LogSystem(const QString &logFileName, QObject *parent) : QThread(parent)
 {
-    logFile = new QFile(QDir::currentPath()+"/"+STANDART_LOG_DIR_NAME+"/"+logFileName);
+    this->logFileName=logFileName;
+    logFile = new QFile(STANDART_LOG_DIR_NAME+"/"+logFileName);
     // В начале каждой сессии файл логов перезаписывается
     if(!logFile->open(QIODevice::Truncate | QIODevice::WriteOnly))
     {

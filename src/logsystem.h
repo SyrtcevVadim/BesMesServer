@@ -5,8 +5,8 @@
 #include <QFile>
 #include <QTextStream>
 
-#define STANDART_LOG_DIR_NAME "logs"
-#define STANDART_LOG_FILE_NAME "latest.txt"
+#define STANDART_LOG_DIR_NAME QString("logs")
+#define STANDART_LOG_FILE_NAME QString("latest.txt")
 
 #define ERROR_MESSAGE_MARKER "!"
 #define DEBUG_MESSAGE_MARKER "#"
@@ -46,8 +46,9 @@ protected slots:
 protected:
     void run();
 
-
-private:
+protected:
+    /// Название текущего журнала сообщений
+    QString logFileName;
     /// Файл, в который будут записываться логи текущего сеанса
     QFile *logFile;
     /// Текстовый поток, связанный с файлом логов

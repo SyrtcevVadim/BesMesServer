@@ -70,14 +70,19 @@ bool DatabaseConnection::userExists(const QString &email, const QString &passwor
 bool DatabaseConnection::addNewUser(const QString &firstName, const QString &lastName, const QString &email, const QString &password)
 {
     QSqlQuery query(besMesDatabase);
-    query.prepare("INSERT INTO :user_table (first_name, last_name, email, password, registration_date)"
-                    "VALUES (:first_name, :last_name, :email, :password, :registration_date)");
-    query.bindValue(0, firstName);
-    query.bindValue(1, lastName);
-    query.bindValue(2, email);
-    query.bindValue(3, password);
-    query.bindValue(4, QDate::currentDate());
-    return query.exec();
+    //TODO СДЕЛАТЬ ПОДДЕРЖКУ КИРИЛЛИЦЫ
+    QString queryString = QString("INSERT INTO %1 (first_name, last_name, email, password, registration_date) "
+                    "VALUES ('%2', '%3', '%4', '%5', CURDATE())")
+            .arg(USER_TABLE,
+                 firstName,
+                 lastName,
+                 email,
+                 password);
+
+    qDebug() << queryString;
+    bool result =query.exec(QObject::trUtf8(queryString.toStdString().c_str()));
+    qDebug() << query.lastError();
+    return result;
 }
 
 bool DatabaseConnection::isActive()

@@ -163,6 +163,7 @@ void ClientConnection::processCommand(QStringList messageParts)
                 qDebug() << "В команде регистрации указано неверное количество аргументов";
                 occuredError=Error::Not_enought_args;
             }
+            break;
         }
         case Command::SuperLogIn:
         {
@@ -175,6 +176,7 @@ void ClientConnection::processCommand(QStringList messageParts)
             {
                 occuredError=Error::Not_enought_args;
             }
+            break;
         }
         case Command::Unspecified:
         {

@@ -1,8 +1,50 @@
+#include <QFile>
+#include <QTextStream>
+#include <QDir>
+#include <QDateTime>
+
 #include "beslogsystem.h"
 
 BesLogSystem::BesLogSystem(const QString &logFileName, QObject *parent):
     LogSystem(logFileName, parent)
-{}
+{
+    configureTimers();
+    connect(savePreviousLogFileTimer, SIGNAL(timeout()), SLOT(checkEndOfDay()));
+
+}
+
+BesLogSystem::~BesLogSystem()
+{
+    savePreviousLogFileTimer->stop();
+    delete savePreviousLogFileTimer;
+}
+
+void BesLogSystem::configureTimers()
+{
+    savePreviousLogFileTimer = new QTimer();
+    savePreviousLogFileTimer->setInterval(CHECK_END_OF_DAY_INTERVAL);
+    savePreviousLogFileTimer->start();
+}
+
+void BesLogSystem::checkEndOfDay()
+{
+    // Сравниваем именно строки, чтобы не учитывать миллисекунды в текущем времени
+    if(QTime::currentTime().toString("hh:mm:ss")==END_OF_DAY_TIME.toString("hh:mm:ss"))
+    {
+        savePreviousLogFile();
+    }
+}
+
+void BesLogSystem::savePreviousLogFile()
+{
+    // Закрываем текущий журнал сообщений
+    logFile->close();
+    // Переименовываем текущий журнал сообщений в файл с временной пометкой
+    logFile->rename(STANDART_LOG_DIR_NAME+"/"+QDateTime::currentDateTime().toString("dd-MM-yyyy")+".txt");
+
+    logFile->setFileName(STANDART_LOG_DIR_NAME+"/"+STANDART_LOG_FILE_NAME);
+    logFile->open(QIODevice::Truncate | QIODevice::WriteOnly);
+}
 
 void BesLogSystem::logServerStartedMessage()
 {
@@ -25,7 +67,6 @@ void BesLogSystem::logClientConnectionClosedMessage()
     // TODO добавить идентификатор пользовательского соединения
     logToFile(MessageType::Debug, "разорвано клиентское соединение");
 }
-
 
 
 void BesLogSystem::logDatabaseConnectionFailedMessage(int id)

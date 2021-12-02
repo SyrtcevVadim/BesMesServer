@@ -1,14 +1,22 @@
 #ifndef BESLOGSYSTEM_H
 #define BESLOGSYSTEM_H
-
+// Автор: Сырцев Вадим Игоревич
 #include "logsystem.h"
+#include <QTime>
+#include <QTimer>
 
+// Интервал, через который нужно проверять, закончился ли день или нет
+#define CHECK_END_OF_DAY_INTERVAL 1000
+// Устанавливаем время, в которое нужно сохранять журнал сообщений за
+// предыдущий день. По умолчанию это 23.59.59
+#define END_OF_DAY_TIME QTime(23,59,59)
 
 class BesLogSystem : public LogSystem
 {
     Q_OBJECT
 public:
     BesLogSystem(const QString &logFileName, QObject *parent = nullptr);
+    ~BesLogSystem();
 public slots:
     //----- Ошибки
     /// Регистрирует сообщение об ошибке подключения к базе данных потока с идентификатором id
@@ -39,6 +47,18 @@ public slots:
     void logClientSentWrongVerificationCode(QString email, QString code);
     /// Регистрирует сообщение об использовании для регистрации занятой почты email
     void logClientUsedOccupiedEmailForRegistration(QString email);
+private slots:
+    /// Проверяет, закончился ли день. День "заканчивается" в 23.59.
+    void checkEndOfDay();
+private:
+    /// Настраивает таймеры
+    void configureTimers();
+    /// Сохраняет журнал сообщений за предыдущий день в отдельном файле с временной пометкой в названии
+    void savePreviousLogFile();
+    /// Таймер, предназначенный для отслеживания момента, когда надо сохранить журнал сообщений в отдельный файл с временной пометкой
+    /// Обычно этот файл должен сохраняться каждые 23.59
+    QTimer *savePreviousLogFileTimer;
+
 };
 
 #endif // BESLOGSYSTEM_H

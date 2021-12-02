@@ -166,6 +166,7 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
         clientData.lastName = lastName;
         clientData.email = email;
         clientData.password = password;
+        client->verificationCode=verificationCode;
     }
     else
     {
@@ -186,6 +187,7 @@ void ServerWorker::processVerificationCommand(QString code)
     // Проверяем правильность кода
     if(client->checkVerificationCode(code))
     {
+        client->sendResponse(QString("+ Код верификации был принят! Пользователь зарегистрирован"));
         User clientData = client->user;
         if(dbConnection->addNewUser(clientData.firstName,
                                     clientData.lastName,
@@ -206,11 +208,12 @@ void ServerWorker::processVerificationCommand(QString code)
 //                                 clientData.email));
             client->sendResponse(QString("- ?! Не удалось зарегистрировать новый аккаунт"));
         }
-        client->sendResponse(QString("+ Код верификации был принят! Пользователь зарегистрирован"));
+
     }
     else
     {
         emit clientSentWrongVerificationCode(client->user.email, code);
+        // TODO отправить сообщение пользователю
     }
     // Очищаем предыдущие данны о пользователе
     client->user.clear();
