@@ -113,12 +113,14 @@ void ServerWorker::decreaseHandlingConnectionsCounter()
 
 void ServerWorker::processLogInCommand(QString email, QString password)
 {
-    //emit logMessage(QString("Пользователь %1 хочет войти в систему").arg(email));
+    qDebug() << QString("Пользователь %1 пытается пройти аутентификацию с паролем %2")
+                .arg(email, password);
+
     ClientConnection *client = (ClientConnection*)sender();
     // Проверяем, есть ли такой пользователь в БД
     if(databaseConnection->userExists(email, password))
     {
-        //emit logMessage(QString("Пользователь %1 успешно прошёл аутентификацию").arg(email));
+        qDebug() << QString("Пользователь %1 прошёл аутентификацию").arg(email);
         emit clientLoggedIn(email);
         // Запоминаем в флаге статуса, что пользователь прошел процесс аутентификации
         client->setStatusFlag(LOGGED_IN_SUCCESSFULLY);
@@ -126,7 +128,7 @@ void ServerWorker::processLogInCommand(QString email, QString password)
     }
     else
     {
-        //emit logMessage(QString("Пользователь %1 не прошёл аутентификацию").arg(email));
+        qDebug() << QString("Пользователь %1 не прошёл аутентификацию").arg(email);
         emit clientFailedAuthentication (email);
         client->sendResponse(QString("- %1 Не существует аккаунта с таким логином и паролем")
                              .arg(WRONG_USERNAME_OR_PASSWORD_ERROR));
@@ -144,17 +146,17 @@ QString ServerWorker::generateVerificationCode()
 void ServerWorker::processRegistrationCommand(QString firstName, QString lastName,
                                               QString email, QString password)
 {
-    //emit logMessage(QString("Обрабатываем команду регистрации для пользвоателя %1 %2").arg(firstName, lastName));
+    qDebug() << QString("Пользователь \"%1 %2\" с почтой \"%3\" и паролем \"%4\" пытается зарегистрироваться")
+                .arg(firstName, lastName, email, password);
     ClientConnection *client = (ClientConnection*)sender();
     // Регистрируем пользователя, если нет пользователей с такой почтой
     if(!databaseConnection->userExists(email))
     {
         // Генерируем код верификации для пользователя
         QString verificationCode = generateVerificationCode();
-        //emit logMessage(QString("Пользователь должен отправить код подтверждения регистрации: %1")
-        //              .arg(verificationCode));
 
         client->sendResponse(QString("+ Вам на почту отправлен код подтверждения регистрации"));
+        qDebug()<<"Пользователю на почту отправлен код верификации "<<verificationCode;
         EmailSender *emailSender = new EmailSender(email);
         emailSender->sendVerificationCode(firstName, verificationCode);
 
@@ -170,9 +172,9 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
     }
     else
     {
+        qDebug() << "При регистрации пользователь указал используемую почту "<< email;
         emit clientUsedOccupiedEmailForRegistration(email);
-        //emit logMessage(QString("Пользователь %1 %2 пытается зарегистрировать аккаунт на занятую почту %3")
-        //                .arg(firstName, lastName, email));
+
         client->sendResponse(QString("- %1 На данную почту уже зарегистрирован аккаунт")
                              .arg(EMAIL_OCCUPIED_ERROR));
     }
@@ -181,39 +183,38 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
 
 void ServerWorker::processVerificationCommand(QString code)
 {
-//    emit logMessage(QString("Обрабатываем команду верификации с кодом %1")
-//                    .arg(code));
+    qDebug() << "Обрабатываем команду верификации регистрации с кодом "<<code;
     ClientConnection *client = (ClientConnection*)sender();
     // Проверяем правильность кода
     if(client->checkVerificationCode(code))
     {
-        client->sendResponse(QString("+ Код верификации был принят! Пользователь зарегистрирован"));
+
+        client->sendResponse(QString("+ Код верификации был принят."));
         User clientData = client->user;
+        qDebug() << "Пользователь "<<clientData.email <<" прислал верный код! Верификация прошла успешно";
         if(databaseConnection->addNewUser(clientData.firstName,
                                     clientData.lastName,
                                     clientData.email,
                                     clientData.password))
         {
-//            emit logMessage(QString("Зарегистрирован новый аккаунт на почту %1").
-//                            arg(clientData.email));
             emit clientWasRegistered(clientData.email);
+            qDebug() << "зарегистрирован новый аккаунт пользотеля: "<<clientData.email;
             client->sendResponse(QString("+ Вы успешно зарегистрировали новый аккаунт"));
         }
         else
         {
-//            emit logMessage(QString("Пользователь %1 %2 пытался зарегистрировать аккаунт на почту %3."
-//                                    " произошла внутренняя ошибка!")
-//                            .arg(clientData.firstName,
-//                                 clientData.lastName,
-//                                 clientData.email));
-            client->sendResponse(QString("- ?! Не удалось зарегистрировать новый аккаунт"));
+            qDebug() << "По каким-то внутренним причинам не удалось зарегистрировать новый аккаунт";
+            client->sendResponse(QString("- %1 Не удалось зарегистрировать новый аккаунт из-за ошибки, возникшей на сервере")
+                                 .arg(REGISTRATION_INNER_ERROR));
         }
 
     }
     else
     {
+        qDebug() <<"Пользователь "<<client->user.email <<" прислал неверный код верификации: "<<code;
         emit clientSentWrongVerificationCode(client->user.email, code);
-        // TODO отправить сообщение пользователю
+        client->sendResponse(QString("- %1 Отправлен неверный код верификации")
+                             .arg(WRONG_VERIFICATION_CODE_ERROR));
     }
     // Очищаем предыдущие данны о пользователе
     client->user.clear();
