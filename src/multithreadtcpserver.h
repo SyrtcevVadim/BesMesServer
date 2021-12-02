@@ -23,9 +23,6 @@ class MultithreadTcpServer : public QTcpServer
     Q_OBJECT
 public:
     MultithreadTcpServer(QHostAddress serverIPAddress,
-                         BesConfigEditor *serverConfigEditor,
-                         BesConfigEditor *databaseConnectionConfigEditor,
-                         BesConfigEditor *emailSenderConfigEditor,
                          QObject *parent = nullptr);
     ~MultithreadTcpServer();
 signals:
@@ -70,6 +67,8 @@ private:
     /// Настраивает таймеры сервера:
     /// Таймер счётчика времени работы сервера
     void configureTimers();
+    /// Настраивает менеджеры конфигурационных файлов
+    void configureConfigEditors();
 private:
     /// Хранит количество потоков, которые физически(и в теории) могут выполняться независимо
     /// на разных ядрах процессора, т.е. оптимальное количество потоков. Ровно столько серверных рабочих
@@ -84,15 +83,14 @@ private:
     QVector<ServerWorker*> serverWorkers;
     /// Объект, подсчитывающий статистику сервера во время его работы
     ServerStatisticsCounter *statisticsCounter;
+
     /// Логгирующая система, записывающая все действия, выполняемые сервером,
     /// в файл
     BesLogSystem *logSystem;
-    /// Обрабатывает настройки подключения к базе данных
-    BesConfigEditor *databaseConnectionConfigEditor;
+
     /// Обрабатывает настройки сервера
     BesConfigEditor *serverConfigEditor;
-    /// Обрабатывает настройки отправителя email-писем
-    BesConfigEditor *emailSenderConfigEditor;
+
     /// IP-адрес устройства, на котором запущен сервер
     QHostAddress serverIPAddress;
     /// Таймер, оповещающий UI, что следует обновить время работы

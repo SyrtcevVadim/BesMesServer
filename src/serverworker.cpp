@@ -245,18 +245,18 @@ void ServerWorker::processSuperLogInCommand(QString login, QString password)
 
 void ServerWorker::run()
 {
+    // Обновляем параметры сервера из конфигурационного файла
+    serverConfigEditor->retrieveParameters();
     qDebug() << QString("Поток %1 запущен").arg(id);
     configureDatabaseConnection();
     databaseConnection->open();
     if(databaseConnection->isActive())
     {
         emit databaseConnectionEstablished(id);
-//        emit logMessage(QString("Рабочий поток %1 установил соединение с БД").arg(id));
     }
     else
     {
         emit databaseConnectionFailed(id);
-//        emit logMessage(QString("Рабочий поток %1 не смог установить соединение с БД").arg(id));
     }
     exec();
 }

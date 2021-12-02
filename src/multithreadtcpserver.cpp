@@ -5,17 +5,14 @@
 
 int MultithreadTcpServer::workerThreadsNumber = std::thread::hardware_concurrency();
 
-MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
-                                           BesConfigEditor *serverConfigEditor,
-                                           BesConfigEditor *databaseConnectionConfigEditor,
-                                           BesConfigEditor *emailSenderConfigEditor,
+MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,                                
                                            QObject *parent):
     QTcpServer(parent),
-    databaseConnectionConfigEditor(databaseConnectionConfigEditor),
-    serverConfigEditor(serverConfigEditor),
-    emailSenderConfigEditor(emailSenderConfigEditor),
     serverIPAddress(serverIPAddress)
 {
+    // Получаем указатели на менеджеры конфигурационных файлов
+    configureConfigEditors();
+
     configureStatisticsCounter();
     configureLogSystem();
     configureTimers();
@@ -28,12 +25,15 @@ MultithreadTcpServer::~MultithreadTcpServer()
     removeWorkers();
     delete statisticsCounter;
     delete logSystem;
-    delete databaseConnectionConfigEditor;
+
     delete serverConfigEditor;
-    delete emailSenderConfigEditor;
 }
 
 
+void MultithreadTcpServer::configureConfigEditors()
+{
+    serverConfigEditor = new BesConfigEditor(SERVER_CONFIG_FILE_NAME);
+}
 
 void MultithreadTcpServer::updateWorkingTimeCounter()
 {
@@ -94,9 +94,7 @@ void MultithreadTcpServer::start()
     {
         worker->start(QThread::Priority::TimeCriticalPriority);
         // Считываем параметры из файлов конфигурации, т.к. они могли измениться
-        databaseConnectionConfigEditor->retrieveParameters();
         serverConfigEditor->retrieveParameters();
-        emailSenderConfigEditor->retrieveParameters();
     }
     // Запускаем счётчик времени работы
     currentSessionWorkingTimeTimer.start();

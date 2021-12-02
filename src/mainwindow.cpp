@@ -74,10 +74,8 @@ void MainWindow::showServerStateAsPassive()
 void MainWindow::configureServer()
 {
     // Создаём многопоточный сервер
-    server = new MultithreadTcpServer(QHostAddress::Any,
-                                      serverConfigEditor,
-                                      databaseConnectionConfigEditor,
-                                      emailSenderConfigEditor);
+    server = new MultithreadTcpServer(QHostAddress::Any);
+
     // Как только сервер запустился, это будет отображено в UI
     connect(server, SIGNAL(started()), SLOT(showServerStateAsActive()));
     connect(server, SIGNAL(stopped()), SLOT(showServerStateAsPassive()));
