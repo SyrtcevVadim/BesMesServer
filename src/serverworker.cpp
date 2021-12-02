@@ -155,7 +155,7 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
         //              .arg(verificationCode));
 
         client->sendResponse(QString("+ Вам на почту отправлен код подтверждения регистрации"));
-        EmailSender *emailSender = new EmailSender(email, emailSenderConfigEditor);
+        EmailSender *emailSender = new EmailSender(email);
         emailSender->sendVerificationCode(firstName, verificationCode);
 
         emit verificationCodeWasSent(email);

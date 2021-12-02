@@ -4,12 +4,11 @@
 QRandomGenerator EmailSender::generator(QDateTime::currentSecsSinceEpoch());
 
 EmailSender::EmailSender(const QString &recipientEmail,
-                         BesConfigEditor *emailSenderConfigEditor,
                          QObject *parent)
     : QThread(parent),
-      emailSenderConfigEditor(emailSenderConfigEditor),
       recipientEmail(recipientEmail)
 {
+    configureConfigEditors();
     socket = new QSslSocket();
     stream = new QTextStream(socket);
 
@@ -40,6 +39,12 @@ EmailSender::~EmailSender()
 {
     delete socket;
     delete stream;
+    delete emailSenderConfigEditor;
+}
+
+void EmailSender::configureConfigEditors()
+{
+    emailSenderConfigEditor = new BesConfigEditor(EMAIL_SENDER_CONFIG_FILE_NAME);
 }
 
 void EmailSender::connectToSmtpServer()

@@ -30,7 +30,6 @@ class EmailSender : public QThread
     Q_OBJECT
 public:
     EmailSender(const QString &recipientEmail,
-                BesConfigEditor *emailSenderConfigEditor,
                 QObject *parent = nullptr);
     ~EmailSender();
     /// Сообщает объекту, что нужно отправить на почту получателя сообщение с кодом
@@ -48,6 +47,9 @@ private:
     void connectToSmtpServer();
     /// Формирует из файла конфигурации текст письма
     QString getMessage();
+    /// Настраивает менеджеры конфигурационных файлов
+    void configureConfigEditors();
+
     enum class EmailType {EmailWithVerificationCode};
 
     /// Имя пользователя
@@ -66,6 +68,7 @@ private:
     QString senderEmail;
     /// Пароль от почты отправителя
     QString senderPassword;
+
     /// Адрес электронной почты получателя
     QString recipientEmail;
 
