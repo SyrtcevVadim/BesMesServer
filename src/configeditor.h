@@ -6,7 +6,7 @@
 #include<QMap>
 #include<QVariant>
 
-#define STANDART_CONFIG_DIR QString("configs")
+#define STANDART_CONFIG_DIR_NAME QString("configs")
 
 class ConfigEditor
 {
@@ -37,8 +37,10 @@ public:
 
 
     /// Создаёт директорию для конфигурационных файлов. В качетстве аргумента можно указать
-    /// имя создаваемой директории. По умолчанию оно определено макросом STANDART_CONFIG_DIR
-    static void createConfigDirectory(const QString &configDirName=STANDART_CONFIG_DIR);
+    /// имя создаваемой директории. Имя директории указывается с помощью функции setConfigDirectoryName
+    static void createConfigDirectory();
+    /// Устанавливает имя директории с файлами конфигурации, в которой следует искать файлы конфигурации
+    static void setConfigDirectoryName(const QString &path);
 protected:
     /// Путь к конфигурационному файлу, с которым связан этот объект
     QString pathToConfigFile;
@@ -46,7 +48,7 @@ protected:
     QMap<QString, QVariant> parameters;
 
     /// Путь к директории с файлами конфигурации. По умолчанию
-    /// папка с конфигурациями определяется макросом STANDART_CONFIG_DIR
+    /// папка с конфигурациями определяется макросом STANDART_CONFIG_DIR_NAME
     static QString pathToConfigDirectory;
 
 };

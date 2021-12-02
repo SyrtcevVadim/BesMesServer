@@ -12,17 +12,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    /*
-     * Этот блок кода предназначен для обеспечения целостности конфигурационных файлов.
-     * При первом запуске программы создаются все необходимые файлы. Администратору программы
-     * остаётся лишь заполнить.
-     * Создаём директорию для конфигурационных файлов
-     */
-    BesConfigEditor::createConfigDirectory();
-    BesConfigEditor::createEmptyDatabaseConnectionConfig(DATABASE_CONFIG_FILE_NAME);
-    BesConfigEditor::createEmptyServerConfig(SERVER_CONFIG_FILE_NAME);
-    BesConfigEditor::createEmptyEmailSenderConfig(EMAIL_SENDER_CONFIG_FILE_NAME);
-
     databaseConnectionConfigEditor = new BesConfigEditor(DATABASE_CONFIG_FILE_NAME);
     serverConfigEditor = new BesConfigEditor(SERVER_CONFIG_FILE_NAME);
     emailSenderConfigEditor = new BesConfigEditor(EMAIL_SENDER_CONFIG_FILE_NAME);
@@ -32,7 +21,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Отображаем в UI параметры конфигурации, записанные в файле
     showConfigParameters();
-
 }
 
 MainWindow::~MainWindow()

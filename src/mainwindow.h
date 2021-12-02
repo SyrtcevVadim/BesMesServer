@@ -68,8 +68,6 @@ private:
     BesConfigEditor *serverConfigEditor;
     /// Обрабатывает параметры отправителя email-писем
     BesConfigEditor *emailSenderConfigEditor;
-
-
 };
 
 #endif // MAINWINDOW_H

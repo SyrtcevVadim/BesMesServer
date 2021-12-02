@@ -246,6 +246,7 @@ void ServerWorker::processSuperLogInCommand(QString login, QString password)
 void ServerWorker::run()
 {
     qDebug() << QString("Поток %1 запущен").arg(id);
+
     configureDBConnection();
     dbConnection->open();
     if(dbConnection->isActive())

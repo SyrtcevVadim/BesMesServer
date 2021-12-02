@@ -6,7 +6,7 @@
 
 
 
-QString ConfigEditor::pathToConfigDirectory{QDir::currentPath()+"/"+STANDART_CONFIG_DIR};
+QString ConfigEditor::pathToConfigDirectory;
 
 ConfigEditor::ConfigEditor(const QString &configFileName)
 {
@@ -62,11 +62,7 @@ QStringList ConfigEditor::getStringList(const QString &key)
     return QStringList();
 }
 
-void ConfigEditor::createConfigDirectory(const QString &configDirName)
-{
-    QDir currentDirectory;
-    currentDirectory.mkdir(configDirName);
-}
+
 
 void ConfigEditor::setValue(const QString &key, const QVariant &value)
 {
@@ -100,3 +96,13 @@ void ConfigEditor::retrieveParameters()
     parameters = (document.object()).toVariantMap();
 }
 
+void ConfigEditor::createConfigDirectory()
+{
+    QDir currentDirectory;
+    currentDirectory.mkdir(pathToConfigDirectory);
+}
+
+void ConfigEditor::setConfigDirectoryName(const QString &path)
+{
+    pathToConfigDirectory=path;
+}
