@@ -26,9 +26,9 @@ SOURCES += \
     src/user.cpp
 
 HEADERS += \
-    src/besProtocol.h \
     src/besconfigeditor.h \
     src/beslogsystem.h \
+    src/besprotocol.h \
     src/clientconnection.h \
     src/configeditor.h \
     src/databaseconnection.h \
