@@ -5,13 +5,12 @@
 #include <QFile>
 #include <QTextStream>
 
+// Названия файлов с логами
+#define SYSTEM_LOG_FILE_NAME QString("system.txt")
+#define DEBUG_LOG_FILE_NAME QString("debug.txt")
+#define ERROR_LOG_FILE_NAME QString("error.txt")
 
 #define STANDART_LOG_DIR_NAME QString("logs")
-#define STANDART_LOG_FILE_NAME QString("latest.txt")
-
-#define ERROR_MESSAGE_MARKER "!"
-#define DEBUG_MESSAGE_MARKER "#"
-#define SYSTEM_MESSAGE_MARKER "^"
 
 /// Каждое сообщение в логгирующей системе имеет тип. Эти типы описываются данным
 /// перечислением:
@@ -28,13 +27,14 @@ class LogSystem : public QThread
     Q_OBJECT
 
 public:
-    LogSystem(const QString &logFileName, QObject *parent = nullptr);
+    LogSystem(QObject *parent = nullptr);
     ~LogSystem();
 
     /// Создаёт директорию для файлов логов. TODO перенести в ProjectStructureDefender
     void static createLogsDirectory();
+
 public slots:
-    /// Закрывает файл регистрации сообщений
+    /// Закрывает журнал сообщений. После этого сообщения не будут записываться в файлы
     void close();
 
 signals:
@@ -50,13 +50,20 @@ protected slots:
 protected:
     void run();
 
-    /// Название текущего журнала сообщений
-    QString logFileName;
-    /// Файл, в который будут записываться логи текущего сеанса
-    QFile *logFile;
-    /// Текстовый поток, связанный с файлом логов
-    QTextStream *logStream;
+    /// Лог системных сообщений
+    QFile *systemLog;
+    /// Текстовый поток, связанный с файлов системных сообщений
+    QTextStream *systemStream;
 
+    /// Лог отладочных сообщений
+    QFile *debugLog;
+    /// Текстовый поток, связанный с файлом отладочных сообщений
+    QTextStream *debugStream;
+
+    /// Лог сообщений об ошибках
+    QFile *errorLog;
+    /// Текстовый поток, связанный с файлом сообщений об ошибках
+    QTextStream *errorStream;
 };
 
 #endif // LOGSYSTEM_H

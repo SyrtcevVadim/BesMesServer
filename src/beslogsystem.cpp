@@ -2,18 +2,17 @@
 #include <QTextStream>
 #include <QDir>
 #include <QDateTime>
-
+#include <QDebug>
 #include "beslogsystem.h"
 
 BesLogSystem *BesLogSystem::_instance{nullptr};
 mutex BesLogSystem::_mutex;
 
-BesLogSystem::BesLogSystem(const QString &logFileName, QObject *parent):
-    LogSystem(logFileName, parent)
+BesLogSystem::BesLogSystem(QObject *parent):
+    LogSystem(parent)
 {
+    // Настраиваем таймер для сохранения логов за предыдущий день
     configureTimers();
-    connect(savePreviousLogFileTimer, SIGNAL(timeout()), SLOT(checkEndOfDay()));
-
 }
 
 BesLogSystem::~BesLogSystem()
@@ -28,7 +27,7 @@ BesLogSystem* BesLogSystem::getInstance()
     lock_guard<mutex> lock(_mutex);
     if(_instance == nullptr)
     {
-        _instance = new BesLogSystem(STANDART_LOG_FILE_NAME);
+        _instance = new BesLogSystem();
     }
     return _instance;
 }
@@ -39,6 +38,7 @@ void BesLogSystem::configureTimers()
     savePreviousLogFileTimer = new QTimer();
     savePreviousLogFileTimer->setInterval(CHECK_END_OF_DAY_INTERVAL);
     savePreviousLogFileTimer->start();
+    connect(savePreviousLogFileTimer, SIGNAL(timeout()), SLOT(checkEndOfDay()));
 }
 
 void BesLogSystem::checkEndOfDay()
@@ -46,19 +46,33 @@ void BesLogSystem::checkEndOfDay()
     // Сравниваем именно строки, чтобы не учитывать миллисекунды в текущем времени
     if(QTime::currentTime().toString("hh:mm:ss")==END_OF_DAY_TIME.toString("hh:mm:ss"))
     {
-        savePreviousLogFile();
+        savePreviousLogFiles();
     }
 }
 
-void BesLogSystem::savePreviousLogFile()
+void BesLogSystem::savePreviousLogFiles()
 {
-    // Закрываем текущий журнал сообщений
-    logFile->close();
-    // Переименовываем текущий журнал сообщений в файл с временной пометкой
-    logFile->rename(STANDART_LOG_DIR_NAME+"/"+QDateTime::currentDateTime().toString("dd-MM-yyyy")+".txt");
+    qDebug() << "Сохраняем старые журналы сообщений";
+    // Закрываем текущие журналы сообщений
+    close();
+    QString timeStamp = QDateTime::currentDateTime().toString("dd-MM-yyyy");
+    // Создаём папку для журналов сообщений предыдущего дня
+    QDir previousDayLogsDir;
+    previousDayLogsDir.cd(STANDART_LOG_DIR_NAME);
+    previousDayLogsDir.mkdir(timeStamp);
 
-    logFile->setFileName(STANDART_LOG_DIR_NAME+"/"+STANDART_LOG_FILE_NAME);
-    logFile->open(QIODevice::Truncate | QIODevice::WriteOnly);
+    // Перемещаем файлы в папку журналы сообщений за прошедший день
+
+    qDebug() << systemLog->copy(QString("%1/%2/%3")
+                    .arg(STANDART_LOG_DIR_NAME, timeStamp, QString("system.txt")));
+    debugLog->copy(QString("%1/%2/%3")
+                   .arg(STANDART_LOG_DIR_NAME, timeStamp, QString("debug.txt")));
+    errorLog->copy(QString("%1/%2/%3")
+                   .arg(STANDART_LOG_DIR_NAME, timeStamp, QString("error.txt")));
+    // Перезаписываем журналы сообщений
+    systemLog->open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text);
+    debugLog->open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text);
+    errorLog->open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text);
 }
 
 void BesLogSystem::logServerStartedMessage()

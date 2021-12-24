@@ -57,7 +57,7 @@ public slots:
     /// Регистрирует сообщение об использовании для регистрации занятой почты email
     void logClientUsedOccupiedEmailForRegistration(QString email);
 private slots:
-    /// Проверяет, закончился ли день. День "заканчивается" в 23.59.
+    /// Проверяет, закончился ли "день". Время окончания дня определяется макросом END_OF_DAY_TIME
     void checkEndOfDay();
 
 private:
@@ -65,13 +65,13 @@ private:
     static mutex _mutex;
 
 protected:
-    BesLogSystem(const QString &logFileName, QObject *parent = nullptr);
+    BesLogSystem(QObject *parent = nullptr);
     ~BesLogSystem();
 
     /// Настраивает таймеры
     void configureTimers();
-    /// Сохраняет журнал сообщений за предыдущий день в отдельном файле с временной пометкой в названии
-    void savePreviousLogFile();
+    /// Сохраняет журналы сообщений за предыдущий день в файлы с временной пометкой. TODO
+    void savePreviousLogFiles();
     /// Таймер, предназначенный для отслеживания момента, когда надо сохранить журнал сообщений в отдельный файл с временной пометкой
     /// Обычно этот файл должен сохраняться каждый раз во время, описываемое макросом END_OF_DAY_TIME
     QTimer *savePreviousLogFileTimer;

@@ -3,20 +3,40 @@
 #include <QDateTime>
 #include <QDir>
 
-LogSystem::LogSystem(const QString &logFileName, QObject *parent) : QThread(parent)
+LogSystem::LogSystem(QObject *parent) : QThread(parent)
 {
-    this->logFileName=logFileName;
-    logFile = new QFile(STANDART_LOG_DIR_NAME+"/"+logFileName);
-    // В начале каждой сессии файл логов перезаписывается
-    if(!logFile->open(QIODevice::Truncate | QIODevice::WriteOnly))
+
+    systemLog = new QFile(QString("%1/%2")
+                          .arg(STANDART_LOG_DIR_NAME, SYSTEM_LOG_FILE_NAME));
+    systemStream = new QTextStream(systemLog);
+
+    debugLog = new QFile(QString("%1/%2")
+                         .arg(STANDART_LOG_DIR_NAME, DEBUG_LOG_FILE_NAME));
+    debugStream = new QTextStream(debugLog);
+
+    errorLog = new QFile(QString("%1/%2")
+                         .arg(STANDART_LOG_DIR_NAME, ERROR_LOG_FILE_NAME));
+    errorStream = new QTextStream(errorLog);
+
+
+    // Создаём файлы
+    if(!systemLog->open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
     {
-        qDebug() << "!!!Файл логов не открыт";
+        qDebug() << "Не удалось открыть файл системных логов!";
     }
-    logStream = new QTextStream(logFile);
+    if(!debugLog->open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+    {
+        qDebug() << "Не удалось открыть файл логов отладочных сообщений";
+    }
+    if(!errorLog->open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+    {
+        qDebug() << "Не удалось открыть файл сообщений об ошибках";
+    }
 }
+
 LogSystem::~LogSystem()
 {
-    logFile->close();
+    close();
 }
 
 void LogSystem::createLogsDirectory()
@@ -33,34 +53,37 @@ void LogSystem::run()
 void LogSystem::logToFile(MessageType type, QString message)
 {
     QDateTime now = QDateTime::currentDateTime();
-    // Выбираем соответствующий маркер сообщения
-    QString messageMarker="";
+    // В зависимости от типа сообщение попадает в свой файл: с системными сообщениями, с отладочными сообщения,
+    // с сообщениями об ошибках
+    QString outMessage = QString("%1 %2\n").arg(now.toString("hh:mm:ss"),message);
     switch(type)
     {
-        case MessageType::Error:
+        case MessageType::System:
         {
-            messageMarker = ERROR_MESSAGE_MARKER;
+            *systemStream << outMessage;
+            systemStream->flush();
             break;
         }
         case MessageType::Debug:
         {
-            messageMarker = DEBUG_MESSAGE_MARKER;
+            *debugStream << outMessage;
+            debugStream->flush();
             break;
         }
-        case MessageType::System:
+        case MessageType::Error:
         {
-            messageMarker = SYSTEM_MESSAGE_MARKER;
+            *errorStream << outMessage;
+            errorStream->flush();
             break;
         }
     }
-
-    QString outMessage = QString("%1 %2 %3\n").arg(now.toString("hh:mm:ss"),messageMarker, message);
-    *logStream << outMessage;
-    logStream->flush();
     emit messageLogged(outMessage);
 }
 
 void LogSystem::close()
 {
-    logFile->close();
+    // Закрываем все файлы логов
+    systemLog->close();
+    debugLog->close();
+    errorLog->close();
 }
