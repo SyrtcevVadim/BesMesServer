@@ -4,6 +4,10 @@
 #include "logsystem.h"
 #include <QTime>
 #include <QTimer>
+#include <mutex>
+
+using std::mutex;
+using std::lock_guard;
 
 // Интервал, через который нужно проверять, закончился ли день или нет
 #define CHECK_END_OF_DAY_INTERVAL 1000
@@ -11,12 +15,17 @@
 // предыдущий день. По умолчанию это 23.59.59
 #define END_OF_DAY_TIME QTime(23,59,59)
 
+/// ВАЖНО: этот класс реализует паттерн проектирования "Одиночка"
 class BesLogSystem : public LogSystem
 {
     Q_OBJECT
 public:
-    BesLogSystem(const QString &logFileName, QObject *parent = nullptr);
-    ~BesLogSystem();
+    // Одиночку нельзя клонировать
+    BesLogSystem(BesLogSystem &) = delete;
+    void operator=(const BesLogSystem &) = delete;
+    /// Даёт доступ к объекту логгирующей системы
+    static BesLogSystem *getInstance();
+
 public slots:
     //----- Ошибки
     /// Регистрирует сообщение об ошибке подключения к базе данных потока с идентификатором id
@@ -50,13 +59,21 @@ public slots:
 private slots:
     /// Проверяет, закончился ли день. День "заканчивается" в 23.59.
     void checkEndOfDay();
+
 private:
+    static BesLogSystem *_instance;
+    static mutex _mutex;
+
+protected:
+    BesLogSystem(const QString &logFileName, QObject *parent = nullptr);
+    ~BesLogSystem();
+
     /// Настраивает таймеры
     void configureTimers();
     /// Сохраняет журнал сообщений за предыдущий день в отдельном файле с временной пометкой в названии
     void savePreviousLogFile();
     /// Таймер, предназначенный для отслеживания момента, когда надо сохранить журнал сообщений в отдельный файл с временной пометкой
-    /// Обычно этот файл должен сохраняться каждые 23.59
+    /// Обычно этот файл должен сохраняться каждый раз во время, описываемое макросом END_OF_DAY_TIME
     QTimer *savePreviousLogFileTimer;
 
 };

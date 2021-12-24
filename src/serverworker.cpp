@@ -1,5 +1,6 @@
 #include <QDebug>
 #include "besProtocol.h"
+#include "beslogsystem.h"
 #include "serverworker.h"
 #include "clientconnection.h"
 #include "emailsender.h"
@@ -9,10 +10,8 @@
 unsigned int ServerWorker::createdObjectCounter = 0;
 QRandomGenerator ServerWorker::generator(QDateTime::currentSecsSinceEpoch());
 
-ServerWorker::ServerWorker(BesLogSystem *logSystem,
-                           QObject *parent):
-    QThread(parent),
-    logSystem(logSystem)
+ServerWorker::ServerWorker(QObject *parent):
+    QThread(parent)
 {
     id = createdObjectCounter++;
     configureConfigEditors();
@@ -46,6 +45,7 @@ void ServerWorker::configureDatabaseConnection()
 
 void ServerWorker::configureLogSystem()
 {
+    BesLogSystem *logSystem = BesLogSystem::getInstance();
     // Сохраняем в журнале сообщений следующие события
     connect(this, SIGNAL(databaseConnectionEstablished(int)),
             logSystem, SLOT(logDatabaseConnectionEstablishedMessage(int)));

@@ -5,6 +5,9 @@
 
 #include "beslogsystem.h"
 
+BesLogSystem *BesLogSystem::_instance{nullptr};
+mutex BesLogSystem::_mutex;
+
 BesLogSystem::BesLogSystem(const QString &logFileName, QObject *parent):
     LogSystem(logFileName, parent)
 {
@@ -18,6 +21,18 @@ BesLogSystem::~BesLogSystem()
     savePreviousLogFileTimer->stop();
     delete savePreviousLogFileTimer;
 }
+
+BesLogSystem* BesLogSystem::getInstance()
+{
+    // Когда какой-либо поток пытается получить объект логгирующей системы, остальные потоки не смогут сделать этого
+    lock_guard<mutex> lock(_mutex);
+    if(_instance == nullptr)
+    {
+        _instance = new BesLogSystem(STANDART_LOG_FILE_NAME);
+    }
+    return _instance;
+}
+
 
 void BesLogSystem::configureTimers()
 {

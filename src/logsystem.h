@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 
+
 #define STANDART_LOG_DIR_NAME QString("logs")
 #define STANDART_LOG_FILE_NAME QString("latest.txt")
 
@@ -29,11 +30,13 @@ class LogSystem : public QThread
 public:
     LogSystem(const QString &logFileName, QObject *parent = nullptr);
     ~LogSystem();
-    /// Создаёт директорию для файлов логов
+
+    /// Создаёт директорию для файлов логов. TODO перенести в ProjectStructureDefender
     void static createLogsDirectory();
 public slots:
     /// Закрывает файл регистрации сообщений
     void close();
+
 signals:
     /// Сигнал, высылаемый после регистрации сообщения
     void messageLogged(QString message);
@@ -43,16 +46,17 @@ protected slots:
     /// type - тип регистрируемого сообщения
     /// message - строка сообщения
     void logToFile(MessageType type, QString message);
+
 protected:
     void run();
 
-protected:
     /// Название текущего журнала сообщений
     QString logFileName;
     /// Файл, в который будут записываться логи текущего сеанса
     QFile *logFile;
     /// Текстовый поток, связанный с файлом логов
     QTextStream *logStream;
+
 };
 
 #endif // LOGSYSTEM_H

@@ -11,7 +11,7 @@
 #include "beslogsystem.h"
 #include "besconfigeditor.h"
 
-// Интервал обновления UI-счётчика времени работы приложения
+// Интервал обновления счётчика времени работы приложения
 #define WORKING_TIME_COUNTER_UPDATE_TIME 1000
 
 /**
@@ -83,14 +83,8 @@ private:
     QVector<ServerWorker*> serverWorkers;
     /// Объект, подсчитывающий статистику сервера во время его работы
     ServerStatisticsCounter *statisticsCounter;
-
-    /// Логгирующая система, записывающая все действия, выполняемые сервером,
-    /// в файл
-    BesLogSystem *logSystem;
-
     /// Обрабатывает настройки сервера
     BesConfigEditor *serverConfigEditor;
-
     /// IP-адрес устройства, на котором запущен сервер
     QHostAddress serverIPAddress;
     /// Таймер, оповещающий UI, что следует обновить время работы

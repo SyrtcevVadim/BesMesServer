@@ -24,8 +24,6 @@ MultithreadTcpServer::~MultithreadTcpServer()
 {
     removeWorkers();
     delete statisticsCounter;
-    delete logSystem;
-
     delete serverConfigEditor;
 }
 
@@ -59,9 +57,7 @@ void MultithreadTcpServer::configureStatisticsCounter()
 
 void MultithreadTcpServer::configureLogSystem()
 {
-    // Создаём директорию для логов
-    BesLogSystem::createLogsDirectory();
-    logSystem = new BesLogSystem(STANDART_LOG_FILE_NAME, this);
+    BesLogSystem *logSystem = BesLogSystem::getInstance();
     /*
      * Все сообщения, которые мы хотим журналировать, мы должны отправлять в
      * виде сигналов. Эти сигналы будут обрабатываться логгирующей системой
@@ -136,8 +132,7 @@ void MultithreadTcpServer::initWorkers()
     // Создаём потоки обработки входящих соединений
     for(int i{0}; i < workerThreadsNumber; i++)
     {
-        ServerWorker *newWorker = new ServerWorker(logSystem,
-                                                   this);
+        ServerWorker *newWorker = new ServerWorker(this);
         /* Когда работа сервера останавливается, рабочим потокам отправляется сигнал
          * Мы отправляем именно сигнал, а не слот, поскольку рабочий поток не хранит объекты подключений в коллекции
          * Объекты подключения, получив данный сигнал, разрывают своё соединение с сервером. Таким образом, нагрузка на рабочий поток

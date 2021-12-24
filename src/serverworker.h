@@ -4,7 +4,6 @@
 #include<QRandomGenerator>
 #include "databaseconnection.h"
 #include "besconfigeditor.h"
-#include "beslogsystem.h"
 #include <QThread>
 
 /**
@@ -14,11 +13,8 @@ class ServerWorker : public QThread
 {
     Q_OBJECT
 public:
-    ServerWorker(BesLogSystem *logSystem,
-                 QObject *parent = nullptr);
+    ServerWorker(QObject *parent = nullptr);
     ~ServerWorker();
-
-
 
     /// Добавляет в данный серверный поток обработки новое клиентское
     /// соединение
@@ -88,12 +84,8 @@ private:
     unsigned long long handlingConnectionsCounter;
     /// Объект подключения к базе данных
     DatabaseConnection *databaseConnection;
-
     /// Обрабатывает параметры сервера
     BesConfigEditor *serverConfigEditor;
-
-    /// Система журналирования сообщений
-    BesLogSystem *logSystem;
     /// Генератор псевдослучайных чисел. Используется для генерации
     /// кодов верификации
     static QRandomGenerator generator;
