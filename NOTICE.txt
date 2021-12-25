@@ -1,2 +1,0 @@
-Copyright 2021 Сырцев Вадим Игоревич, Воропаев Владимир Геннадьевич, Жужликова Екатерина Алексеевна
-Licensed under the Apache License, Version 2.0
