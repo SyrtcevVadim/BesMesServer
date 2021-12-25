@@ -20,6 +20,7 @@ SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
     src/multithreadtcpserver.cpp \
+    src/projectstructuredefender.cpp \
     src/serverstatisticscounter.cpp \
     src/serverworker.cpp \
     src/timecounter.cpp \
@@ -36,6 +37,7 @@ HEADERS += \
     src/logsystem.h \
     src/mainwindow.h \
     src/multithreadtcpserver.h \
+    src/projectstructuredefender.h \
     src/serverstatisticscounter.h \
     src/serverworker.h \
     src/timecounter.h \
