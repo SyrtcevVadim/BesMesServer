@@ -10,7 +10,7 @@
 #define DEBUG_LOG_FILE_NAME QString("debug.txt")
 #define ERROR_LOG_FILE_NAME QString("error.txt")
 
-#define STANDART_LOG_DIR_NAME QString("logs")
+#define LOG_DIR_NAME QString("logs")
 
 /// Каждое сообщение в логгирующей системе имеет тип. Эти типы описываются данным
 /// перечислением:
@@ -29,9 +29,6 @@ class LogSystem : public QThread
 public:
     LogSystem(QObject *parent = nullptr);
     ~LogSystem();
-
-    /// Создаёт директорию для файлов логов. TODO перенести в ProjectStructureDefender
-    void static createLogsDirectory();
 
 public slots:
     /// Закрывает журнал сообщений. После этого сообщения не будут записываться в файлы

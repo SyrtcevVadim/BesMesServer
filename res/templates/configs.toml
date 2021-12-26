@@ -12,6 +12,7 @@ login = ""
 password = ""
 
 [database]
+name = ""
 address = "127.0.0.1"
 # По умолчанию MySql Server прослушивает именно этот порт
 port = 3306

@@ -7,7 +7,6 @@
 DatabaseConnection::DatabaseConnection(const QString &connectionName)
 {
     this->connectionName=connectionName;
-    configureConfigEditors();
     configureDatabaseConnection();
 }
 
@@ -17,25 +16,21 @@ DatabaseConnection::~DatabaseConnection()
     besMesDatabase.close();
     besMesDatabase=QSqlDatabase();
     QSqlDatabase::removeDatabase(connectionName);
-    delete databaseConnectionConfigEditor;
-}
-
-void DatabaseConnection::configureConfigEditors()
-{
-    databaseConnectionConfigEditor=new BesConfigEditor(DATABASE_CONFIG_FILE_NAME);
 }
 
 void DatabaseConnection::configureDatabaseConnection()
 {
+    // Получаем доступ к параметрам конфигурации
+    BesConfigReader *configs = BesConfigReader::getInstance();
     besMesDatabase = QSqlDatabase::addDatabase(USING_PLUGIN_NAME, connectionName);
     // Указываем ip-адрес устройства, на котором развёрнута база данных и порт, прослушиваемый базой данных
-    besMesDatabase.setHostName(databaseConnectionConfigEditor->getString("address"));
-    besMesDatabase.setPort(databaseConnectionConfigEditor->getInt("port"));
+    besMesDatabase.setHostName(configs->getString("database","address"));
+    besMesDatabase.setPort(configs->getInt("database", "port"));
     // Указываем имя базы данных, к которой хотим подключиться
-    besMesDatabase.setDatabaseName(databaseConnectionConfigEditor->getString("databaseName"));
+    besMesDatabase.setDatabaseName(configs->getString("database", "name"));
     // Указываем имя аккаунта, который мы будем использовать для подключения к базе данных
-    besMesDatabase.setUserName(databaseConnectionConfigEditor->getString("userName"));
-    besMesDatabase.setPassword(databaseConnectionConfigEditor->getString("password"));
+    besMesDatabase.setUserName(configs->getString("database_connection", "user_name"));
+    besMesDatabase.setPassword(configs->getString("database_connection", "password"));
 }
 
 void DatabaseConnection::open()

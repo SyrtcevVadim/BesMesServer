@@ -10,9 +10,6 @@ MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
     QTcpServer(parent),
     serverIPAddress(serverIPAddress)
 {
-    // Получаем указатели на менеджеры конфигурационных файлов
-    configureConfigEditors();
-
     configureStatisticsCounter();
     configureLogSystem();
     configureTimers();
@@ -24,13 +21,6 @@ MultithreadTcpServer::~MultithreadTcpServer()
 {
     removeWorkers();
     delete statisticsCounter;
-    delete serverConfigEditor;
-}
-
-
-void MultithreadTcpServer::configureConfigEditors()
-{
-    serverConfigEditor = new BesConfigEditor(SERVER_CONFIG_FILE_NAME);
 }
 
 void MultithreadTcpServer::updateWorkingTimeCounter()
@@ -83,14 +73,15 @@ void MultithreadTcpServer::configureTimers()
 
 void MultithreadTcpServer::start()
 {
+    // Получаем доступ к настройкам конфигурации
+    BesConfigReader *configs = BesConfigReader::getInstance();
+
     // Начинаем слушать входящие соединения
-    listen(serverIPAddress, serverConfigEditor->getInt("port"));
+    listen(serverIPAddress, configs->getInt("server","client_connection_port"));
     // Запускает рабочие потоки
     for(ServerWorker *worker:serverWorkers)
     {
         worker->start(QThread::Priority::TimeCriticalPriority);
-        // Считываем параметры из файлов конфигурации, т.к. они могли измениться
-        serverConfigEditor->retrieveParameters();
     }
     // Запускаем счётчик времени работы
     currentSessionWorkingTimeTimer.start();
@@ -106,6 +97,9 @@ void MultithreadTcpServer::stop()
     currentSessionWorkingTimeTimer.stop();
     // Отправляем сигнал о том, что нужно остановить рабочие потоки (отключаем все соединения от них)
     emit stopped();
+    // Сейчас наиболее безопасно обновить параметры конфигурации, т.к. никакая из частей системы
+    // не будет обращаться к данным конфигурации(до перезапуска)
+    BesConfigReader::getInstance()->readConfigs();
 }
 
 void MultithreadTcpServer::removeWorkers()

@@ -7,15 +7,15 @@ LogSystem::LogSystem(QObject *parent) : QThread(parent)
 {
 
     systemLog = new QFile(QString("%1/%2")
-                          .arg(STANDART_LOG_DIR_NAME, SYSTEM_LOG_FILE_NAME));
+                          .arg(LOG_DIR_NAME, SYSTEM_LOG_FILE_NAME));
     systemStream = new QTextStream(systemLog);
 
     debugLog = new QFile(QString("%1/%2")
-                         .arg(STANDART_LOG_DIR_NAME, DEBUG_LOG_FILE_NAME));
+                         .arg(LOG_DIR_NAME, DEBUG_LOG_FILE_NAME));
     debugStream = new QTextStream(debugLog);
 
     errorLog = new QFile(QString("%1/%2")
-                         .arg(STANDART_LOG_DIR_NAME, ERROR_LOG_FILE_NAME));
+                         .arg(LOG_DIR_NAME, ERROR_LOG_FILE_NAME));
     errorStream = new QTextStream(errorLog);
 
 
@@ -37,12 +37,6 @@ LogSystem::LogSystem(QObject *parent) : QThread(parent)
 LogSystem::~LogSystem()
 {
     close();
-}
-
-void LogSystem::createLogsDirectory()
-{
-    QDir currentDirectory;
-    currentDirectory.mkdir(STANDART_LOG_DIR_NAME);
 }
 
 void LogSystem::run()

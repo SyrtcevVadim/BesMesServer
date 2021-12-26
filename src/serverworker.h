@@ -3,7 +3,7 @@
 // Автор: Сырцев Вадим Игоревич
 #include<QRandomGenerator>
 #include "databaseconnection.h"
-#include "besconfigeditor.h"
+#include "besconfigreader.h"
 #include <QThread>
 
 /**
@@ -71,10 +71,8 @@ private:
     QString generateVerificationCode();
     /// Настраивает подключение к базе данных в рабочем потоке
     void configureDatabaseConnection();
-    /// Настраивает систему логгирования сообщений из рабочих потоков
+    /// Настраивает систему логгирования сообщений для регистрации событий рабочих потоков
     void configureLogSystem();
-    /// Настраивает менеджеры конфигурационных файлов
-    void configureConfigEditors();
 
     /// Счётчик созданных объектов
     static unsigned int createdObjectCounter;
@@ -84,8 +82,6 @@ private:
     unsigned long long handlingConnectionsCounter;
     /// Объект подключения к базе данных
     DatabaseConnection *databaseConnection;
-    /// Обрабатывает параметры сервера
-    BesConfigEditor *serverConfigEditor;
     /// Генератор псевдослучайных чисел. Используется для генерации
     /// кодов верификации
     static QRandomGenerator generator;

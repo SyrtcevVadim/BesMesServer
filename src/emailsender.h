@@ -4,10 +4,8 @@
 #include <QThread>
 #include <QSslSocket>
 #include <QTextStream>
-
 #include <QRandomGenerator>
-
-#include"besconfigeditor.h"
+#include"besconfigreader.h"
 
 enum class  SmtpAnswerCode{READY=220,
                            SUCCESS=250,
@@ -47,8 +45,6 @@ private:
     void connectToSmtpServer();
     /// Формирует из файла конфигурации текст письма
     QString getMessage();
-    /// Настраивает менеджеры конфигурационных файлов
-    void configureConfigEditors();
 
     enum class EmailType {EmailWithVerificationCode};
 
@@ -56,27 +52,18 @@ private:
     QString userName;
     /// Код верификации регистрации, который нужно отправить в письме
     QString verificationCode;
-
     /// Тип письма, которое будет отправлено в текуще сессии
     EmailType currentEmailType;
-
-    /// Обрабатывает параметры отправителя email
-    BesConfigEditor *emailSenderConfigEditor;
-
-
     /// Почта, с которой будет отправлено сообщение
     QString senderEmail;
     /// Пароль от почты отправителя
     QString senderPassword;
-
     /// Адрес электронной почты получателя
     QString recipientEmail;
-
     /// Сокет, по которому отправитель соединяется с smtp-сервером
     QSslSocket *socket;
     /// Текстовый поток, связанный с сокетом
     QTextStream *stream;
-
     /// Текущая ступень общения с smtp-сервером
     CommunicationStates currentState;
     /// Генератор псевдослучайных чисел. Используется для выбора почты,

@@ -1,5 +1,5 @@
 #include <QDebug>
-#include "besProtocol.h"
+#include "besprotocol.h"
 #include "beslogsystem.h"
 #include "serverworker.h"
 #include "clientconnection.h"
@@ -14,7 +14,6 @@ ServerWorker::ServerWorker(QObject *parent):
     QThread(parent)
 {
     id = createdObjectCounter++;
-    configureConfigEditors();
     configureLogSystem();
     initCounters();
 }
@@ -22,7 +21,6 @@ ServerWorker::ServerWorker(QObject *parent):
 ServerWorker::~ServerWorker()
 {
     delete databaseConnection;
-    delete serverConfigEditor;
 }
 
 void ServerWorker::quit()
@@ -30,11 +28,6 @@ void ServerWorker::quit()
     // При остановке рабочего потока нужно удалить соединение с базой данных
     delete databaseConnection;
     QThread::quit();
-}
-
-void ServerWorker::configureConfigEditors()
-{
-    serverConfigEditor = new BesConfigEditor(SERVER_CONFIG_FILE_NAME);
 }
 
 void ServerWorker::configureDatabaseConnection()
@@ -223,9 +216,11 @@ void ServerWorker::processVerificationCommand(QString code)
 void ServerWorker::processSuperLogInCommand(QString login, QString password)
 {
     ClientConnection *client = (ClientConnection*)sender();
+    // Получаем доступ к параметрам конфигурации
+    BesConfigReader *configs = BesConfigReader::getInstance();
     // Сравниваем данные суперпользователя из файла конфигурации с данными, предоставленными пользователем
-    if(serverConfigEditor->getString("superUserLogin") == login &&
-            serverConfigEditor->getString("superUserLogin") == password)
+    if(configs->getString("super_user", "login") == login &&
+            configs->getString("super_user", "password") == password)
     {
         // Авторизация прошла успешно
         qDebug() << "Администратор авторизовался!";
@@ -246,8 +241,6 @@ void ServerWorker::processSuperLogInCommand(QString login, QString password)
 
 void ServerWorker::run()
 {
-    // Обновляем параметры сервера из конфигурационного файла
-    serverConfigEditor->retrieveParameters();
     qDebug() << QString("Поток %1 запущен").arg(id);
     configureDatabaseConnection();
     databaseConnection->open();

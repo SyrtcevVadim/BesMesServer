@@ -10,10 +10,9 @@ CONFIG += c++17
 
 
 SOURCES += \
-    src/besconfigeditor.cpp \
+    src/besconfigreader.cpp \
     src/beslogsystem.cpp \
     src/clientconnection.cpp \
-    src/configeditor.cpp \
     src/databaseconnection.cpp \
     src/emailsender.cpp \
     src/logsystem.cpp \
@@ -28,11 +27,10 @@ SOURCES += \
 
 HEADERS += \
     libs/include/toml.hpp \
-    src/besconfigeditor.h \
+    src/besconfigreader.h \
     src/beslogsystem.h \
     src/besprotocol.h \
     src/clientconnection.h \
-    src/configeditor.h \
     src/databaseconnection.h \
     src/emailsender.h \
     src/logsystem.h \

@@ -8,27 +8,12 @@ EmailSender::EmailSender(const QString &recipientEmail,
     : QThread(parent),
       recipientEmail(recipientEmail)
 {
-    configureConfigEditors();
     socket = new QSslSocket();
     stream = new QTextStream(socket);
 
-    // Выбираем почту для отправки сообщений
-    QMap<QString, QString> senders = emailSenderConfigEditor->getMap("senderEmails");
-    qDebug() << senders;
-    // Индекс почты отправителя в ассоциативном массиве
-    int chosenSenderIndex = generator.bounded(0,senders.keys().length());
-    int counter{0};
-    //TODO ПЕРЕДЕЛАТЬ, ИТЕРАТОРЫ НЕ РАБОТАЮТ БЕЗ БРЯКИ
-    for(const QString &sender: senders.keys())
-    {
-        if(counter == chosenSenderIndex)
-        {
-            senderEmail = sender;
-            senderPassword = senders[senderEmail];
-            qDebug() << "Устанавливаем почту "<<senderEmail <<" " << senderPassword;
-            break;
-        }
-    }
+    BesConfigReader *configs = BesConfigReader::getInstance();
+    senderEmail = configs->getString("email_sender_account","email");
+    senderPassword = configs->getString("email_sender_account", "password");
 
     qDebug() << "Для отправки выбрана почта "<<senderEmail;
 
@@ -39,22 +24,19 @@ EmailSender::~EmailSender()
 {
     delete socket;
     delete stream;
-    delete emailSenderConfigEditor;
-}
-
-void EmailSender::configureConfigEditors()
-{
-    emailSenderConfigEditor = new BesConfigEditor(EMAIL_SENDER_CONFIG_FILE_NAME);
 }
 
 void EmailSender::connectToSmtpServer()
 {
-    socket->connectToHostEncrypted(emailSenderConfigEditor->getString("smtpServerAddress"),
-                                   emailSenderConfigEditor->getInt("smtpServerPort"));
+    // Получаем доступ к параметрам конфигурации
+    BesConfigReader *configs = BesConfigReader::getInstance();
+    socket->connectToHostEncrypted(configs->getString("esmtp_server","address"),
+                                   configs->getInt("esmtp_server","port"));
     if(!socket->waitForConnected(2000))
     {
-        qDebug() << "Ошибка! Не получается подключиться к "<<emailSenderConfigEditor->getString("smtpServerAddress")<<": "<<
-                    emailSenderConfigEditor->getInt("smtpServerPort");
+        // TODO добавить сообщение для BesLogSystem
+        qDebug() << "Ошибка! Не получается подключиться к "<<configs->getString("esmtp_server", "addresss")<<": "<<
+                    configs->getInt("esmtp_server", "port");
     }
     currentState=CommunicationStates::INITIALIZATION;
 }
@@ -82,21 +64,14 @@ QString EmailSender::getMessage()
     QString result{};
     result += "To: "+recipientEmail+"\r\n";
     result += "From: "+senderEmail +"\r\n";
+    BesConfigReader *configs = BesConfigReader::getInstance();
     switch(currentEmailType)
     {
         case EmailType::EmailWithVerificationCode:
         {
-            result += "Subject: "+emailSenderConfigEditor->getString("verificationEmailTitle")+"\r\n";
-
-            // Формируем тело сообщения
-            QString body{};
-            for(const QString &line:emailSenderConfigEditor->getStringList("verificationEmailBody"))
-            {
-                body+=line;
-            }
-            // В теле письма отправки кода верификации содержится имя пользователя и код верификации
-            body = body.arg(userName, verificationCode);
-            result += body+"\r\n.\r\n";
+            result += "Subject: "+configs->getString("registration_notification","title")+"\r\n";
+            QString body{configs->getString("registration_notification", "body").arg(userName, verificationCode)};
+            result += body +"\r\n.\r\n";
             break;
         }
     }

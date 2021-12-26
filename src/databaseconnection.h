@@ -2,7 +2,7 @@
 #define DATABASECONNECTION_H
 
 #include <QSqlDatabase>
-#include "besconfigeditor.h"
+#include "besconfigreader.h"
 
 #define USING_PLUGIN_NAME "QMYSQL"
 #define USER_TABLE_NAME "user"
@@ -26,12 +26,9 @@ public:
     /// Добавляет нового пользователя в базу данных
     bool addNewUser(const QString &firstName, const QString &lastName,
                     const QString &email, const QString &password);
-
     /// Проверяет, является ли подключение к базе данных активным
     bool isActive();
 private:
-    /// Настраивает менеджеры конфигурационных файлов
-    void configureConfigEditors();
     /// Настраивает подключение к базе данных
     /// connectionName - имя подключения к базе данных. Должно быть уникальным
     void configureDatabaseConnection();
@@ -39,8 +36,6 @@ private:
     QString connectionName;
     /// Подключение к базе данных проекта BesMes
     QSqlDatabase besMesDatabase;
-    /// Менеджер конфигурационного файла, хранящего настройки для подключения к базе данных
-    BesConfigEditor *databaseConnectionConfigEditor;
 };
 
 #endif // DATABASECONNECTION_H

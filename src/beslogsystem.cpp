@@ -58,17 +58,17 @@ void BesLogSystem::savePreviousLogFiles()
     QString timeStamp = QDateTime::currentDateTime().toString("dd-MM-yyyy");
     // Создаём папку для журналов сообщений предыдущего дня
     QDir previousDayLogsDir;
-    previousDayLogsDir.cd(STANDART_LOG_DIR_NAME);
+    previousDayLogsDir.cd(LOG_DIR_NAME);
     previousDayLogsDir.mkdir(timeStamp);
 
     // Перемещаем файлы в папку журналы сообщений за прошедший день
 
     qDebug() << systemLog->copy(QString("%1/%2/%3")
-                    .arg(STANDART_LOG_DIR_NAME, timeStamp, QString("system.txt")));
+                    .arg(LOG_DIR_NAME, timeStamp, QString("system.txt")));
     debugLog->copy(QString("%1/%2/%3")
-                   .arg(STANDART_LOG_DIR_NAME, timeStamp, QString("debug.txt")));
+                   .arg(LOG_DIR_NAME, timeStamp, QString("debug.txt")));
     errorLog->copy(QString("%1/%2/%3")
-                   .arg(STANDART_LOG_DIR_NAME, timeStamp, QString("error.txt")));
+                   .arg(LOG_DIR_NAME, timeStamp, QString("error.txt")));
     // Перезаписываем журналы сообщений
     systemLog->open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text);
     debugLog->open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text);

@@ -9,7 +9,7 @@
 #include "serverworker.h"
 #include "serverstatisticscounter.h"
 #include "beslogsystem.h"
-#include "besconfigeditor.h"
+#include "besconfigreader.h"
 
 // Интервал обновления счётчика времени работы приложения
 #define WORKING_TIME_COUNTER_UPDATE_TIME 1000
@@ -67,8 +67,6 @@ private:
     /// Настраивает таймеры сервера:
     /// Таймер счётчика времени работы сервера
     void configureTimers();
-    /// Настраивает менеджеры конфигурационных файлов
-    void configureConfigEditors();
 private:
     /// Хранит количество потоков, которые физически(и в теории) могут выполняться независимо
     /// на разных ядрах процессора, т.е. оптимальное количество потоков. Ровно столько серверных рабочих
@@ -83,8 +81,6 @@ private:
     QVector<ServerWorker*> serverWorkers;
     /// Объект, подсчитывающий статистику сервера во время его работы
     ServerStatisticsCounter *statisticsCounter;
-    /// Обрабатывает настройки сервера
-    BesConfigEditor *serverConfigEditor;
     /// IP-адрес устройства, на котором запущен сервер
     QHostAddress serverIPAddress;
     /// Таймер, оповещающий UI, что следует обновить время работы
