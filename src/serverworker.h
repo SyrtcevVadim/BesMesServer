@@ -3,7 +3,7 @@
 // Автор: Сырцев Вадим Игоревич
 #include<QRandomGenerator>
 #include "databaseconnection.h"
-#include "besconfigeditor.h"
+#include "besconfigreader.h"
 #include <QThread>
 
 /**
@@ -13,23 +13,44 @@ class ServerWorker : public QThread
 {
     Q_OBJECT
 public:
-    ServerWorker(BesConfigEditor *serverConfigEditor,
-                 BesConfigEditor *databaseConnectionConfigEditor,
-                 BesConfigEditor *emailSenderConfigEditor,
-                 QObject *parent = nullptr);
+    ServerWorker(QObject *parent = nullptr);
     ~ServerWorker();
+
     /// Добавляет в данный серверный поток обработки новое клиентское
     /// соединение
     void addClientConnection(qintptr socketDescriptor);
     /// Возвращает количество клиентских подключений, обрабатываем текущим рабочим потоком
     unsigned long long getHandlingConnectionsCounter();
 
+public slots:
+    void quit();
 signals:
+    /// Сигнал, высылаемый, когда рабочему потоку удалось установить соединение
+    /// с базой данных
+    void databaseConnectionEstablished(int workerId);
+    /// Сигнал, высылаемый, когда рабочий поток не смог установить соединение с
+    /// базой данных
+    void databaseConnectionFailed(int workerId);
+
     /// Сигнал, высылаемый, когда клиентское соединение, обрабатываемое
     /// в данном потоке, разрывается
     void clientConnectionClosed();
-    /// Сигнал о намерении сделать запись в журнале (логе)
-    void logMessage(QString message);
+
+    /// Сигнал, высылаемый при успешном прохождении пользователем аутентификации
+    void clientLoggedIn(QString email);
+    /// Сигнал, высылаемый при неудачной попытке прохождения аутентификации
+    void clientFailedAuthentication(QString email);
+    /// Сигнал, высылаемый после отправки пользователю кода верификации
+    void verificationCodeWasSent(QString email);
+    /// Сигнал, высылаемый после успешной регистрации пользователя
+    void clientWasRegistered(QString email);
+    /// Сигнал, высылаемый, когда пользователь отправляет неверный код верификации
+    void clientSentWrongVerificationCode(QString email,QString code);
+    /// Сигнал, высылаемый, когда пользователь для регистрации указал
+    /// занятую почту
+    void clientUsedOccupiedEmailForRegistration(QString email);
+
+
 protected:
     void run();
 private slots:
@@ -48,9 +69,11 @@ private:
     inline void initCounters();
     /// Генерирует код верификации регистрации
     QString generateVerificationCode();
-
     /// Настраивает подключение к базе данных в рабочем потоке
-    void configureDBConnection();
+    void configureDatabaseConnection();
+    /// Настраивает систему логгирования сообщений для регистрации событий рабочих потоков
+    void configureLogSystem();
+
     /// Счётчик созданных объектов
     static unsigned int createdObjectCounter;
     /// Номер потока, работающего в рамках серверного приложения
@@ -58,13 +81,7 @@ private:
     /// Счётчик соединений, обрабатываемых данным рабочим потоком
     unsigned long long handlingConnectionsCounter;
     /// Объект подключения к базе данных
-    DatabaseConnection *dbConnection;
-    /// Обрабатывает параметры подключения к базе данных
-    BesConfigEditor *databaseConnectionConfigEditor;
-    /// Обрабатывает параметры сервера
-    BesConfigEditor *serverConfigEditor;
-    /// Обрабатывает параметры отправителя email-писем
-    BesConfigEditor *emailSenderConfigEditor;
+    DatabaseConnection *databaseConnection;
     /// Генератор псевдослучайных чисел. Используется для генерации
     /// кодов верификации
     static QRandomGenerator generator;

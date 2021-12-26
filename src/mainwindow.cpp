@@ -2,7 +2,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "multithreadtcpserver.h"
-#include "besconfigeditor.h"
+#include "besconfigreader.h"
 
 
 
@@ -12,44 +12,17 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    /*
-     * Этот блок кода предназначен для обеспечения целостности конфигурационных файлов.
-     * При первом запуске программы создаются все необходимые файлы. Администратору программы
-     * остаётся лишь заполнить.
-     * Создаём директорию для конфигурационных файлов
-     */
-    BesConfigEditor::createConfigDirectory();
-    BesConfigEditor::createEmptyDatabaseConnectionConfig(DATABASE_CONFIG_FILE_NAME);
-    BesConfigEditor::createEmptyServerConfig(SERVER_CONFIG_FILE_NAME);
-    BesConfigEditor::createEmptyEmailSenderConfig(EMAIL_SENDER_CONFIG_FILE_NAME);
-
-    databaseConnectionConfigEditor = new BesConfigEditor(DATABASE_CONFIG_FILE_NAME);
-    serverConfigEditor = new BesConfigEditor(SERVER_CONFIG_FILE_NAME);
-    emailSenderConfigEditor = new BesConfigEditor(EMAIL_SENDER_CONFIG_FILE_NAME);
-
     configureServer();
     configureViews();
 
     // Отображаем в UI параметры конфигурации, записанные в файле
     showConfigParameters();
-
-    connect(this, SIGNAL(logMessage(QString)), SLOT(logToJournal(QString)));
-
-
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
     delete server;
-    delete databaseConnectionConfigEditor;
-    delete serverConfigEditor;
-    delete emailSenderConfigEditor;
-}
-
-void MainWindow::logToJournal(QString message)
-{
-    ui->logJournal->append(QTime::currentTime().toString("hh:mm:ss")+":"+message);
 }
 
 
@@ -71,8 +44,6 @@ void MainWindow::configureViews()
     connect(server, SIGNAL(activeConnectionsCounterChanged(unsigned long long)),
             SLOT(setActiveConnectionsCounter(unsigned long long)));
 
-
-    connect(ui->saveConfigParametersBtn, SIGNAL(clicked()), SLOT(saveConfigParameters()));
 }
 
 void MainWindow::setActiveConnectionsCounter(unsigned long long counter)
@@ -94,15 +65,11 @@ void MainWindow::showServerStateAsPassive()
 void MainWindow::configureServer()
 {
     // Создаём многопоточный сервер
-    server = new MultithreadTcpServer(QHostAddress::Any,
-                                      serverConfigEditor,
-                                      databaseConnectionConfigEditor,
-                                      emailSenderConfigEditor);
+    server = new MultithreadTcpServer(QHostAddress::Any);
+
     // Как только сервер запустился, это будет отображено в UI
     connect(server, SIGNAL(started()), SLOT(showServerStateAsActive()));
     connect(server, SIGNAL(stopped()), SLOT(showServerStateAsPassive()));
-    // Прокидываем сообщение о регистрации сообщения в журнале
-    connect(server, SIGNAL(logMessage(QString)),SIGNAL(logMessage(QString)));
 
     connect(server, SIGNAL(workingTimeUpdated(QString)),
             SLOT(updateServerWorkingTimeCounter(QString)));
@@ -110,42 +77,12 @@ void MainWindow::configureServer()
 
 void MainWindow::showConfigParameters()
 {
-    ui->databaseAddressEdit->setText(databaseConnectionConfigEditor->getString("address"));
-    ui->databasePortEdit->setText(databaseConnectionConfigEditor->getString("port"));
-    ui->databaseUserNameEdit->setText(databaseConnectionConfigEditor->getString("userName"));
+    BesConfigReader *configs = BesConfigReader::getInstance();
+    ui->databaseAddressEdit->setText(configs->getString("database", "address"));
+    ui->databasePortEdit->setText(QString().setNum(configs->getInt("database", "port")));
+    ui->databaseUserNameEdit->setText(configs->getString("database_connection", "user_name"));
     // Пароль не отображаем в целях безопасности :)
 }
-
-void MainWindow::saveConfigParameters()
-{
-    qDebug() << "Сохраняем данные в конфигурационный файл";
-    // Нельзя допустить сохранения пустых значений параметров
-    QString databaseAddress = ui->databaseAddressEdit->text();
-    QString databasePort = ui->databasePortEdit->text();
-    QString userName = ui->databaseUserNameEdit->text();
-    QString password = ui->databaseUserPasswordEdit->text();
-    // TODO Если какое-либо поле пустое, нужно заблокировать кнопку сохранения результатов!
-    if(databaseAddress.isEmpty() || databasePort.isEmpty() ||
-        userName.isEmpty())
-    {
-        QMessageBox::critical(this, tr("Ошибка изменения параметров конфигурации"),
-                              tr("Нельзя оставлять поле ввода параметра пустым(кроме пароля)"), QMessageBox::Ok);
-    }
-    else
-    {
-        databaseConnectionConfigEditor->setValue("address", databaseAddress);
-        databaseConnectionConfigEditor->setValue("port", databasePort);
-        databaseConnectionConfigEditor->setValue("userName", userName);
-        if(!password.isEmpty())
-        {
-            databaseConnectionConfigEditor->setValue("password", password);
-        }
-        // Сохраняем данные в файл конфигурации
-        databaseConnectionConfigEditor->saveToFile();
-        emit configParametersChanged();
-    }
-}
-
 
 void MainWindow::toggleStartStopBtns()
 {

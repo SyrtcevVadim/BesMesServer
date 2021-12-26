@@ -5,31 +5,22 @@
 
 int MultithreadTcpServer::workerThreadsNumber = std::thread::hardware_concurrency();
 
-MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
-                                           BesConfigEditor *serverConfigEditor,
-                                           BesConfigEditor *databaseConnectionConfigEditor,
-                                           BesConfigEditor *emailSenderConfigEditor,
+MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,                                
                                            QObject *parent):
     QTcpServer(parent),
-    databaseConnectionConfigEditor(databaseConnectionConfigEditor),
-    serverConfigEditor(serverConfigEditor),
-    emailSenderConfigEditor(emailSenderConfigEditor),
     serverIPAddress(serverIPAddress)
 {
-    initWorkers();
     configureStatisticsCounter();
     configureLogSystem();
-
-    currentSessionWorkingTimeTimer.setInterval(WORKING_TIME_COUNTER_UPDATE_TIME);
-    connect(&currentSessionWorkingTimeTimer, SIGNAL(timeout()),
-            SLOT(updateWorkingTimeCounter()));
+    configureTimers();
+    // Создаём потоки после выделения всех ресурсов
+    initWorkers();
 }
 
 MultithreadTcpServer::~MultithreadTcpServer()
 {
     removeWorkers();
     delete statisticsCounter;
-    delete logSystem;
 }
 
 void MultithreadTcpServer::updateWorkingTimeCounter()
@@ -56,30 +47,46 @@ void MultithreadTcpServer::configureStatisticsCounter()
 
 void MultithreadTcpServer::configureLogSystem()
 {
-    logSystem = new LogSystem("latest.txt", this);
-    connect(this, SIGNAL(logMessage(QString)),
-            logSystem, SLOT(logToFile(QString)));
+    BesLogSystem *logSystem = BesLogSystem::getInstance();
+    /*
+     * Все сообщения, которые мы хотим журналировать, мы должны отправлять в
+     * виде сигналов. Эти сигналы будут обрабатываться логгирующей системой
+     */
+
+    connect(this, SIGNAL(started()),
+            logSystem, SLOT(logServerStartedMessage()));
+    connect(this, SIGNAL(stopped()),
+            logSystem, SLOT(logServerStoppedMessage()));
+
+    connect(this, SIGNAL(clientConnectionOpenned()),
+            logSystem, SLOT(logClientConnectionCreatedMessage()));
+    connect(this, SIGNAL(clientConnectionClosed()),
+            logSystem, SLOT(logClientConnectionClosedMessage()));
+}
+
+void MultithreadTcpServer::configureTimers()
+{
+    currentSessionWorkingTimeTimer.setInterval(WORKING_TIME_COUNTER_UPDATE_TIME);
+    connect(&currentSessionWorkingTimeTimer, SIGNAL(timeout()),
+            SLOT(updateWorkingTimeCounter()));
 }
 
 void MultithreadTcpServer::start()
 {
+    // Получаем доступ к настройкам конфигурации
+    BesConfigReader *configs = BesConfigReader::getInstance();
+
     // Начинаем слушать входящие соединения
-    listen(serverIPAddress, serverConfigEditor->getInt("port"));
+    listen(serverIPAddress, configs->getInt("server","client_connection_port"));
     // Запускает рабочие потоки
     for(ServerWorker *worker:serverWorkers)
     {
         worker->start(QThread::Priority::TimeCriticalPriority);
-        // Считываем параметры из файлов конфигурации, т.к. они могли измениться
-        databaseConnectionConfigEditor->retrieveParameters();
-        serverConfigEditor->retrieveParameters();
-        emailSenderConfigEditor->retrieveParameters();
     }
     // Запускаем счётчик времени работы
     currentSessionWorkingTimeTimer.start();
     // Сообщаем, что сервер начал свою работу
     emit started();
-    emit logMessage("Сервер включён");
-
 }
 
 void MultithreadTcpServer::stop()
@@ -90,7 +97,9 @@ void MultithreadTcpServer::stop()
     currentSessionWorkingTimeTimer.stop();
     // Отправляем сигнал о том, что нужно остановить рабочие потоки (отключаем все соединения от них)
     emit stopped();
-    emit logMessage("Сервер отключён");
+    // Сейчас наиболее безопасно обновить параметры конфигурации, т.к. никакая из частей системы
+    // не будет обращаться к данным конфигурации(до перезапуска)
+    BesConfigReader::getInstance()->readConfigs();
 }
 
 void MultithreadTcpServer::removeWorkers()
@@ -117,16 +126,13 @@ void MultithreadTcpServer::initWorkers()
     // Создаём потоки обработки входящих соединений
     for(int i{0}; i < workerThreadsNumber; i++)
     {
-        ServerWorker *newWorker = new ServerWorker(serverConfigEditor,
-                                                   databaseConnectionConfigEditor,
-                                                   emailSenderConfigEditor,this);
+        ServerWorker *newWorker = new ServerWorker(this);
         /* Когда работа сервера останавливается, рабочим потокам отправляется сигнал
          * Мы отправляем именно сигнал, а не слот, поскольку рабочий поток не хранит объекты подключений в коллекции
          * Объекты подключения, получив данный сигнал, разрывают своё соединение с сервером. Таким образом, нагрузка на рабочий поток
          * останавливается. Сервер после этого можно считать простаивающим
          */
         connect(this, SIGNAL(stopped()), newWorker, SLOT(quit()));
-        connect(newWorker, SIGNAL(logMessage(QString)), SIGNAL(logMessage(QString)));
         // Пробрасываем сигнал о разрыве клиентского соединения "во вне"
         connect(newWorker, SIGNAL(clientConnectionClosed()), SIGNAL(clientConnectionClosed()));
         // Пробрасываем сигнал о регистрации сообщения в журнале сообщений

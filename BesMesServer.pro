@@ -10,30 +10,33 @@ CONFIG += c++17
 
 
 SOURCES += \
-    src/besconfigeditor.cpp \
+    src/besconfigreader.cpp \
+    src/beslogsystem.cpp \
     src/clientconnection.cpp \
-    src/configeditor.cpp \
     src/databaseconnection.cpp \
     src/emailsender.cpp \
     src/logsystem.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/multithreadtcpserver.cpp \
+    src/projectstructuredefender.cpp \
     src/serverstatisticscounter.cpp \
     src/serverworker.cpp \
     src/timecounter.cpp \
     src/user.cpp
 
 HEADERS += \
-    src/besProtocol.h \
-    src/besconfigeditor.h \
+    libs/include/toml.hpp \
+    src/besconfigreader.h \
+    src/beslogsystem.h \
+    src/besprotocol.h \
     src/clientconnection.h \
-    src/configeditor.h \
     src/databaseconnection.h \
     src/emailsender.h \
     src/logsystem.h \
     src/mainwindow.h \
     src/multithreadtcpserver.h \
+    src/projectstructuredefender.h \
     src/serverstatisticscounter.h \
     src/serverworker.h \
     src/timecounter.h \
@@ -46,4 +49,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 FORMS += \
     src/mainwindow.ui
+
+RESOURCES += \
+    res/res.qrc
+
+DISTFILES +=
 

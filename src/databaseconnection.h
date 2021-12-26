@@ -1,24 +1,23 @@
 #ifndef DATABASECONNECTION_H
 #define DATABASECONNECTION_H
 
-#include<QSqlDatabase>
-#include"user.h"
+#include <QSqlDatabase>
+#include "besconfigreader.h"
 
-#define USING_PLUGIN "QMYSQL"
-#define USER_TABLE "user"
+#define USING_PLUGIN_NAME "QMYSQL"
+#define USER_TABLE_NAME "user"
 
 class DatabaseConnection
 {
 public:
     DatabaseConnection(const QString &connectionName);
-    /// Устанавливает имя используемой базы данных
-    void setDatabaseName(const QString &databaseName);
-    /// Устанавливает данные об адресе и порте устройства, на котором находится база данных
-    void setDatabaseAddress(const QString &databaseAddress, const int port);
-    /// Устанавливает данные об используемом аккаунте в базе данных
-    void setUser(const QString &userName, const QString &password);
+    ~DatabaseConnection();
     /// Открывате физическое подключение с базой данных
     void open();
+    /// Закрывает соединение с базой данных, освобождая все ресурсы
+    void close();
+
+
     /// Проверяет, существует ли пользователь с таким адресом электронной почты
     bool userExists(const QString &email);
     /// Проверяет, существует ли пользователь с таким адресом электронной почты
@@ -27,11 +26,14 @@ public:
     /// Добавляет нового пользователя в базу данных
     bool addNewUser(const QString &firstName, const QString &lastName,
                     const QString &email, const QString &password);
-    /// Закрывает соединение с базой данных, освобождая все ресурсы
-    void close();
     /// Проверяет, является ли подключение к базе данных активным
     bool isActive();
 private:
+    /// Настраивает подключение к базе данных
+    /// connectionName - имя подключения к базе данных. Должно быть уникальным
+    void configureDatabaseConnection();
+    /// Имя подключения к базе данных
+    QString connectionName;
     /// Подключение к базе данных проекта BesMes
     QSqlDatabase besMesDatabase;
 };

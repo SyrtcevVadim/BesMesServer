@@ -199,13 +199,6 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
-      <widget class="QPushButton" name="saveConfigParametersBtn">
-       <property name="text">
-        <string>Сохранить</string>
-       </property>
-      </widget>
-     </item>
      <item row="5" column="1">
       <widget class="QLineEdit" name="databaseUserPasswordEdit">
        <property name="toolTip">
@@ -254,29 +247,6 @@
       </widget>
      </item>
     </layout>
-   </widget>
-   <widget class="QTextEdit" name="logJournal">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>280</y>
-      <width>331</width>
-      <height>271</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_10">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>260</y>
-      <width>141</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Журнал событий:</string>
-    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

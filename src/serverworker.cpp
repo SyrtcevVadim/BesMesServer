@@ -1,5 +1,6 @@
 #include <QDebug>
-#include "besProtocol.h"
+#include "besprotocol.h"
+#include "beslogsystem.h"
 #include "serverworker.h"
 #include "clientconnection.h"
 #include "emailsender.h"
@@ -9,37 +10,55 @@
 unsigned int ServerWorker::createdObjectCounter = 0;
 QRandomGenerator ServerWorker::generator(QDateTime::currentSecsSinceEpoch());
 
-ServerWorker::ServerWorker(BesConfigEditor *serverConfigEditor,
-                           BesConfigEditor *databaseConnectionConfigEditor,
-                           BesConfigEditor *emailSenderConfigEditor,
-                           QObject *parent):
-    QThread(parent),
-    serverConfigEditor(serverConfigEditor),
-    databaseConnectionConfigEditor(databaseConnectionConfigEditor),
-    emailSenderConfigEditor(emailSenderConfigEditor)
+ServerWorker::ServerWorker(QObject *parent):
+    QThread(parent)
 {
     id = createdObjectCounter++;
+    configureLogSystem();
     initCounters();
-    // Создаём соединение с базой данных
-    dbConnection = new DatabaseConnection(QString("%1%2")
-                                           .arg(databaseConnectionConfigEditor->getString("userName"), QString().setNum(id)));
 }
 
 ServerWorker::~ServerWorker()
 {
-    delete dbConnection;
+    delete databaseConnection;
 }
 
-void ServerWorker::configureDBConnection()
+void ServerWorker::quit()
 {
-    dbConnection->setDatabaseAddress(databaseConnectionConfigEditor->getString("address"),
-                                     databaseConnectionConfigEditor->getInt("port"));
-    dbConnection->setUser(databaseConnectionConfigEditor->getString("userName"),
-                          databaseConnectionConfigEditor->getString("password"));
-
-    dbConnection->setDatabaseName(databaseConnectionConfigEditor->getString("databaseName"));
+    // При остановке рабочего потока нужно удалить соединение с базой данных
+    delete databaseConnection;
+    QThread::quit();
 }
 
+void ServerWorker::configureDatabaseConnection()
+{
+    databaseConnection = new DatabaseConnection(QString("connection%1")
+                                           .arg(id));
+}
+
+void ServerWorker::configureLogSystem()
+{
+    BesLogSystem *logSystem = BesLogSystem::getInstance();
+    // Сохраняем в журнале сообщений следующие события
+    connect(this, SIGNAL(databaseConnectionEstablished(int)),
+            logSystem, SLOT(logDatabaseConnectionEstablishedMessage(int)));
+    connect(this, SIGNAL(databaseConnectionFailed(int)),
+            logSystem, SLOT(logDatabaseConnectionFailedMessage(int)));
+
+    connect(this, SIGNAL(clientLoggedIn(QString)),
+            logSystem, SLOT(logClientLoggedInMessage(QString)));
+
+    connect(this, SIGNAL(clientFailedAuthentication(QString)),
+            logSystem, SLOT(logClientFailedAuthentication(QString)));
+    connect(this, SIGNAL(verificationCodeWasSent(QString)),
+            logSystem, SLOT(logVerificationCodeWasSent(QString)));
+    connect(this, SIGNAL(clientWasRegistered(QString)),
+            logSystem, SLOT(logClientWasRegistered(QString)));
+    connect(this, SIGNAL(clientSentWrongVerificationCode(QString,QString)),
+            logSystem, SLOT(logClientSentWrongVerificationCode(QString,QString)));
+    connect(this, SIGNAL(clientUsedOccupiedEmailForRegistration(QString)),
+            logSystem, SLOT(logClientUsedOccupiedEmailForRegistration(QString)));
+}
 
 unsigned long long ServerWorker::getHandlingConnectionsCounter()
 {
@@ -87,19 +106,23 @@ void ServerWorker::decreaseHandlingConnectionsCounter()
 
 void ServerWorker::processLogInCommand(QString email, QString password)
 {
-    emit logMessage(QString("Пользователь %1 хочет войти в систему").arg(email));
+    qDebug() << QString("Пользователь %1 пытается пройти аутентификацию с паролем %2")
+                .arg(email, password);
+
     ClientConnection *client = (ClientConnection*)sender();
     // Проверяем, есть ли такой пользователь в БД
-    if(dbConnection->userExists(email, password))
+    if(databaseConnection->userExists(email, password))
     {
-        emit logMessage(QString("Пользователь %1 успешно прошёл аутентификацию").arg(email));
+        qDebug() << QString("Пользователь %1 прошёл аутентификацию").arg(email);
+        emit clientLoggedIn(email);
         // Запоминаем в флаге статуса, что пользователь прошел процесс аутентификации
         client->setStatusFlag(LOGGED_IN_SUCCESSFULLY);
         client->sendResponse(QString("+ Вы успешно вошли в систему"));
     }
     else
     {
-        emit logMessage(QString("Пользователь %1 не прошёл аутентификацию").arg(email));
+        qDebug() << QString("Пользователь %1 не прошёл аутентификацию").arg(email);
+        emit clientFailedAuthentication (email);
         client->sendResponse(QString("- %1 Не существует аккаунта с таким логином и паролем")
                              .arg(WRONG_USERNAME_OR_PASSWORD_ERROR));
     }
@@ -116,18 +139,21 @@ QString ServerWorker::generateVerificationCode()
 void ServerWorker::processRegistrationCommand(QString firstName, QString lastName,
                                               QString email, QString password)
 {
-    emit logMessage(QString("Обрабатываем команду регистрации для пользвоателя %1 %2").arg(firstName, lastName));
+    qDebug() << QString("Пользователь \"%1 %2\" с почтой \"%3\" и паролем \"%4\" пытается зарегистрироваться")
+                .arg(firstName, lastName, email, password);
     ClientConnection *client = (ClientConnection*)sender();
     // Регистрируем пользователя, если нет пользователей с такой почтой
-    if(!dbConnection->userExists(email))
+    if(!databaseConnection->userExists(email))
     {
         // Генерируем код верификации для пользователя
         QString verificationCode = generateVerificationCode();
-        emit logMessage(QString("Пользователь должен отправить код подтверждения регистрации: %1")
-                        .arg(verificationCode));
+
         client->sendResponse(QString("+ Вам на почту отправлен код подтверждения регистрации"));
-        EmailSender *emailSender = new EmailSender(email, emailSenderConfigEditor);
+        qDebug()<<"Пользователю на почту отправлен код верификации "<<verificationCode;
+        EmailSender *emailSender = new EmailSender(email);
         emailSender->sendVerificationCode(firstName, verificationCode);
+
+        emit verificationCodeWasSent(email);
 
         // Сохраняем пользовательские данные
         User &clientData = client->user;
@@ -135,11 +161,13 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
         clientData.lastName = lastName;
         clientData.email = email;
         clientData.password = password;
+        client->verificationCode=verificationCode;
     }
     else
     {
-        emit logMessage(QString("Пользователь %1 %2 пытается зарегистрировать аккаунт на занятую почту %3")
-                        .arg(firstName, lastName, email));
+        qDebug() << "При регистрации пользователь указал используемую почту "<< email;
+        emit clientUsedOccupiedEmailForRegistration(email);
+
         client->sendResponse(QString("- %1 На данную почту уже зарегистрирован аккаунт")
                              .arg(EMAIL_OCCUPIED_ERROR));
     }
@@ -148,32 +176,38 @@ void ServerWorker::processRegistrationCommand(QString firstName, QString lastNam
 
 void ServerWorker::processVerificationCommand(QString code)
 {
-    emit logMessage(QString("Обрабатываем команду верификации с кодом %1")
-                    .arg(code));
+    qDebug() << "Обрабатываем команду верификации регистрации с кодом "<<code;
     ClientConnection *client = (ClientConnection*)sender();
     // Проверяем правильность кода
     if(client->checkVerificationCode(code))
     {
+
+        client->sendResponse(QString("+ Код верификации был принят."));
         User clientData = client->user;
-        if(dbConnection->addNewUser(clientData.firstName,
+        qDebug() << "Пользователь "<<clientData.email <<" прислал верный код! Верификация прошла успешно";
+        if(databaseConnection->addNewUser(clientData.firstName,
                                     clientData.lastName,
                                     clientData.email,
                                     clientData.password))
         {
-            emit logMessage(QString("Зарегистрирован новый аккаунт на почту %1").
-                            arg(clientData.email));
+            emit clientWasRegistered(clientData.email);
+            qDebug() << "зарегистрирован новый аккаунт пользотеля: "<<clientData.email;
             client->sendResponse(QString("+ Вы успешно зарегистрировали новый аккаунт"));
         }
         else
         {
-            emit logMessage(QString("Пользователь %1 %2 пытался зарегистрировать аккаунт на почту %3."
-                                    " произошла внутренняя ошибка!")
-                            .arg(clientData.firstName,
-                                 clientData.lastName,
-                                 clientData.email));
-            client->sendResponse(QString("- ?! Не удалось зарегистрировать новый аккаунт"));
+            qDebug() << "По каким-то внутренним причинам не удалось зарегистрировать новый аккаунт";
+            client->sendResponse(QString("- %1 Не удалось зарегистрировать новый аккаунт из-за ошибки, возникшей на сервере")
+                                 .arg(REGISTRATION_INNER_ERROR));
         }
-        client->sendResponse(QString("+ Код верификации был принят! Пользователь зарегистрирован"));
+
+    }
+    else
+    {
+        qDebug() <<"Пользователь "<<client->user.email <<" прислал неверный код верификации: "<<code;
+        emit clientSentWrongVerificationCode(client->user.email, code);
+        client->sendResponse(QString("- %1 Отправлен неверный код верификации")
+                             .arg(WRONG_VERIFICATION_CODE_ERROR));
     }
     // Очищаем предыдущие данны о пользователе
     client->user.clear();
@@ -182,9 +216,11 @@ void ServerWorker::processVerificationCommand(QString code)
 void ServerWorker::processSuperLogInCommand(QString login, QString password)
 {
     ClientConnection *client = (ClientConnection*)sender();
+    // Получаем доступ к параметрам конфигурации
+    BesConfigReader *configs = BesConfigReader::getInstance();
     // Сравниваем данные суперпользователя из файла конфигурации с данными, предоставленными пользователем
-    if(serverConfigEditor->getString("superUserLogin") == login &&
-            serverConfigEditor->getString("superUserLogin") == password)
+    if(configs->getString("super_user", "login") == login &&
+            configs->getString("super_user", "password") == password)
     {
         // Авторизация прошла успешно
         qDebug() << "Администратор авторизовался!";
@@ -192,9 +228,9 @@ void ServerWorker::processSuperLogInCommand(QString login, QString password)
     }
     else
     {
-        emit logMessage(QString("Попытка авторизации. Предоставлены данные:"
-                                "логин: \"%1\" пароль: \"%2\"")
-                        .arg(login, password));
+//        emit logMessage(QString("Попытка авторизации. Предоставлены данные:"
+//                                "логин: \"%1\" пароль: \"%2\"")
+//                        .arg(login, password));
         // В целях "безопасности" отсылаем такой ответо
         client->sendResponse("- Не существует такой команды");
         // Устанавливаем флаг того, что данный пользователь является администратором
@@ -206,15 +242,15 @@ void ServerWorker::processSuperLogInCommand(QString login, QString password)
 void ServerWorker::run()
 {
     qDebug() << QString("Поток %1 запущен").arg(id);
-    configureDBConnection();
-    dbConnection->open();
-    if(dbConnection->isActive())
+    configureDatabaseConnection();
+    databaseConnection->open();
+    if(databaseConnection->isActive())
     {
-        emit logMessage(QString("Рабочий поток %1 установил соединение с БД").arg(id));
+        emit databaseConnectionEstablished(id);
     }
     else
     {
-        emit logMessage(QString("Рабочий поток %1 не смог установить соединение с БД").arg(id));
+        emit databaseConnectionFailed(id);
     }
     exec();
 }
