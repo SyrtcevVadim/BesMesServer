@@ -27,6 +27,7 @@ SOURCES += \
     src/user.cpp
 
 HEADERS += \
+    libs/include/toml.hpp \
     src/besconfigeditor.h \
     src/beslogsystem.h \
     src/besprotocol.h \
@@ -50,4 +51,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 FORMS += \
     src/mainwindow.ui
+
+RESOURCES += \
+    res/res.qrc
+
+DISTFILES +=
 
