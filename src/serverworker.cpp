@@ -1,5 +1,4 @@
 #include <QDebug>
-#include "besprotocol.h"
 #include "beslogsystem.h"
 #include "serverworker.h"
 #include "clientconnection.h"
@@ -93,8 +92,6 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     // При остановке рабочего потока должны быть разорваны все пользовательские соединения
     connect(this, SIGNAL(finished()),
             incomingConnection, SLOT(close()));
-
-    incomingConnection->sendResponse(QString("+ %1").arg(GREETING_MESSAGE));
 }
 
 void ServerWorker::decreaseHandlingConnectionsCounter()

@@ -75,6 +75,14 @@ void BesLogSystem::savePreviousLogFiles()
     errorLog->open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text);
 }
 
+void BesLogSystem::logConfigFileReadingFailed(QString errorMessage)
+{
+    QString message{"В файле параметров конфигурации была допущена ошибка. "
+                    "Проверьте синтаксис! Полученное сообщение от системы: "+errorMessage};
+    logToFile(MessageType::Error, message);
+}
+
+
 void BesLogSystem::logServerStartedMessage()
 {
     logToFile(MessageType::System, "сервер включён");

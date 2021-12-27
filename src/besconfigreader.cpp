@@ -1,18 +1,17 @@
 #include "besconfigreader.h"
 #include<QDebug>
+#include "beslogsystem.h"
 #include<string_view>
 
 BesConfigReader* BesConfigReader::_instance{nullptr};
 mutex BesConfigReader::_mutex;
 
-BesConfigReader::BesConfigReader()
+BesConfigReader::BesConfigReader(): QObject(nullptr)
 {
     readConfigs();
 }
 
-
 BesConfigReader::~BesConfigReader(){}
-
 
 BesConfigReader* BesConfigReader::getInstance()
 {
@@ -43,5 +42,19 @@ void BesConfigReader::readConfigs()
     std::string_view configFileName{QString("%1/%2")
                                    .arg(CONFIG_DIR_NAME, CONFIG_FILE_NAME).toStdString()};
     // Считываем конфигурационный файл в таблицу
-    configs = toml::parse_file(configFileName);
+    try
+    {
+        configs = toml::parse_file(configFileName);
+    }
+    catch(toml::parse_error error)
+    {
+        emit readingConfigFileFailed(error.what());
+    }
+}
+
+void BesConfigReader::configureLogSystem()
+{
+    BesLogSystem *logSystem = BesLogSystem::getInstance();
+    connect(this, SIGNAL(readingConfigFileFailed(QString)),
+            logSystem, SLOT(logConfigFileReadingFailed(QString)));
 }

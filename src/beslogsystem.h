@@ -30,6 +30,8 @@ public slots:
     //----- Ошибки
     /// Регистрирует сообщение об ошибке подключения к базе данных потока с идентификатором id
     void logDatabaseConnectionFailedMessage(int id);
+    /// Регистрирует сообщение об ошибке чтения файла конфигурации
+    void logConfigFileReadingFailed(QString error_message);
     //----- Системные сообщения
     /// Регистрирует сообщение о включении сервера
     void logServerStartedMessage();
