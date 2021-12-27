@@ -5,7 +5,6 @@
 
 LogSystem::LogSystem(QObject *parent) : QThread(parent)
 {
-
     systemLog = new QFile(QString("%1/%2")
                           .arg(LOG_DIR_NAME, SYSTEM_LOG_FILE_NAME));
     systemStream = new QTextStream(systemLog);
@@ -71,6 +70,7 @@ void LogSystem::logToFile(MessageType type, QString message)
             break;
         }
     }
+    qDebug() << outMessage;
     emit messageLogged(outMessage);
 }
 

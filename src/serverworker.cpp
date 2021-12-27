@@ -41,8 +41,6 @@ void ServerWorker::configureLogSystem()
     // Сохраняем в журнале сообщений следующие события
     connect(this, SIGNAL(databaseConnectionEstablished(int)),
             logSystem, SLOT(logDatabaseConnectionEstablishedMessage(int)));
-    connect(this, SIGNAL(databaseConnectionFailed(int)),
-            logSystem, SLOT(logDatabaseConnectionFailedMessage(int)));
 
     connect(this, SIGNAL(clientLoggedIn(QString)),
             logSystem, SLOT(logClientLoggedInMessage(QString)));
@@ -241,14 +239,6 @@ void ServerWorker::run()
     qDebug() << QString("Поток %1 запущен").arg(id);
     configureDatabaseConnection();
     databaseConnection->open();
-    if(databaseConnection->isActive())
-    {
-        emit databaseConnectionEstablished(id);
-    }
-    else
-    {
-        emit databaseConnectionFailed(id);
-    }
     exec();
 }
 

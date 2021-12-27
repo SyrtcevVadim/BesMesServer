@@ -1,4 +1,5 @@
 #include "databaseconnection.h"
+#include "beslogsystem.h"
 #include <QDebug>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -37,11 +38,8 @@ void DatabaseConnection::open()
 {
     if(!besMesDatabase.open())
     {
-        qDebug() << "Ошибка "<< besMesDatabase.lastError().text();
-    }
-    else
-    {
-        qDebug() << "Успешно установили подключение к базе данных";
+        BesLogSystem::getInstance()->logUnableEstablishDatabaseConnection(connectionName,
+                                                                          besMesDatabase.lastError().text());
     }
 }
 

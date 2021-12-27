@@ -32,7 +32,6 @@ BesLogSystem* BesLogSystem::getInstance()
     return _instance;
 }
 
-
 void BesLogSystem::configureTimers()
 {
     savePreviousLogFileTimer = new QTimer();
@@ -75,13 +74,38 @@ void BesLogSystem::savePreviousLogFiles()
     errorLog->open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text);
 }
 
-void BesLogSystem::logConfigFileReadingFailed(QString errorMessage)
+void BesLogSystem::logUnableToOpenCertificateMessage(QString providedPath)
+{
+    QString message{QString("Не получилось прочесть файл-сертификат, расположенный по пути \"%1\"."
+"Убедитесь, что по указанному пути находится сертификат ssl и проверьте корректность данных в configs.toml, "
+"таблица [security], поле path_to_certificate")
+                   .arg(providedPath)};
+    logToFile(MessageType::Error, message);
+}
+
+void BesLogSystem::logUnableToOpenPrivateKeyMessage(QString providedPath)
+{
+    QString message{QString("Не получилось прочесть файл, содержащий закрытый ключ ssl, расположенный по пути "
+"\"%1\". Убедитесь, что по указанному пути находится файл с закрытым ключём и проверьте корректность данных в configs.toml, "
+"таблица [security], поле path_to_private_key")
+                   .arg(providedPath)};
+    logToFile(MessageType::Error, message);
+}
+
+void BesLogSystem::logUnableEstablishDatabaseConnection(QString connectionName, QString errorMessage)
+{
+    QString message{QString("Не удалось установить подключение \"%1\" к базе данных. "
+"Получено сообщение: \"%2\"")
+                   .arg(connectionName, errorMessage)};
+    logToFile(MessageType::Error, message);
+}
+
+void BesLogSystem::logConfigFileReadingFailedMessage(QString errorMessage)
 {
     QString message{"В файле параметров конфигурации была допущена ошибка. "
                     "Проверьте синтаксис! Полученное сообщение от системы: "+errorMessage};
     logToFile(MessageType::Error, message);
 }
-
 
 void BesLogSystem::logServerStartedMessage()
 {
@@ -103,13 +127,6 @@ void BesLogSystem::logClientConnectionClosedMessage()
 {
     // TODO добавить идентификатор пользовательского соединения
     logToFile(MessageType::Debug, "разорвано клиентское соединение");
-}
-
-
-void BesLogSystem::logDatabaseConnectionFailedMessage(int id)
-{
-    logToFile(MessageType::Error, QString("поток %1 не смог установить соединение с базой данных")
-              .arg(id));
 }
 
 void BesLogSystem::logDatabaseConnectionEstablishedMessage(int id)

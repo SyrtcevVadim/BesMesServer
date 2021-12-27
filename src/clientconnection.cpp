@@ -3,6 +3,7 @@
 #include<QSslCertificate>
 #include "clientconnection.h"
 #include "besconfigreader.h"
+#include "beslogsystem.h"
 
 QSslConfiguration ClientConnection::sslConfiguration;
 
@@ -11,19 +12,25 @@ void ClientConnection::initSslConfiguration()
     sslConfiguration.setProtocol(QSsl::TlsV1_3OrLater);
     BesConfigReader *configs = BesConfigReader::getInstance();
 
-    // TODO добавить проверку на наличие сертификата и закрытого ключа по указанному пути
-    // Устанавливает закрытый ключ
-    QFile *privateKeyFile = new QFile(configs->getString("security","path_to_private_key"));
+    QString pathToPrivateKey{configs->getString("security","path_to_private_key")};
+    QFile *privateKeyFile = new QFile(pathToPrivateKey);
     // Нужно открыть файл, чтобы QSslKey смог прочесть его содержимое
-    privateKeyFile->open(QIODevice::ReadOnly);
+    if(!privateKeyFile->open(QIODevice::ReadOnly))
+    {
+        BesLogSystem::getInstance()->logUnableToOpenPrivateKeyMessage(pathToPrivateKey);
+    }
     QSslKey privateKey(privateKeyFile, QSsl::Rsa,
                        QSsl::Pem, QSsl::PrivateKey,
                        configs->getString("security", "pass_phrase").toUtf8());
     privateKeyFile->close();
     sslConfiguration.setPrivateKey(privateKey);
     // Устанавливает сертификат
-    QFile *certificateFile = new QFile(configs->getString("security", "path_to_certificate"));
-    certificateFile->open(QIODevice::ReadOnly);
+    QString pathToCertificate{configs->getString("security", "path_to_certificate")};
+    QFile *certificateFile = new QFile(pathToCertificate);
+    if(!certificateFile->open(QIODevice::ReadOnly))
+    {
+        BesLogSystem::getInstance()->logUnableToOpenCertificateMessage(pathToCertificate);
+    }
     QSslCertificate certificate(certificateFile, QSsl::Pem);
     sslConfiguration.setLocalCertificate(certificate);
     certificateFile->close();
