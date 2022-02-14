@@ -104,10 +104,6 @@ Command ClientConnection::getCommandType(const QString &commandName)
     {
         return Command::Verification;
     }
-    else if(commandName == SUPER_LOGIN_COMMAND)
-    {
-        return Command::SuperLogIn;
-    }
     return Command::Unspecified;
 }
 
@@ -161,19 +157,6 @@ void ClientConnection::processCommand(QStringList messageParts)
             else
             {
                 qDebug() << "В команде регистрации указано неверное количество аргументов";
-                occuredError=Error::Not_enought_args;
-            }
-            break;
-        }
-        case Command::SuperLogIn:
-        {
-            if(messageParts.length()-1 == SUPER_LOGIN_REQUIRED_ARGS)
-            {
-                qDebug() << "Получена команда авторизации администратора";
-                emit superLogInCommandSent(messageParts[1], messageParts[2]);
-            }
-            else
-            {
                 occuredError=Error::Not_enought_args;
             }
             break;

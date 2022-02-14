@@ -14,7 +14,6 @@
 #define IS_ADMINISTRATOR (1<<1)
 
 enum class Command{LogIn,
-                   SuperLogIn,
                    Registration,
                    Verification,
                    Unspecified};
@@ -57,10 +56,6 @@ signals:
     /// Отправляется, когда пользователь отправляет на сервер код верификации регистрации
     /// code - код верификации, который был передан вместе с командой
     void verificationCommandSent(QString code);
-
-    /// Отправляется, когда администратор отправляет запрос на авторизацию
-    /// login - логин суперпользователя, password - пароль от аккаунта суперпользователя
-    void superLogInCommandSent(QString login, QString password);
 
     /// Отправляется после разрыва клиентского соединения с сервером
     void closed();

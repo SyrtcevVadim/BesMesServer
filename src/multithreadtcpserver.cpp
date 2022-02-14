@@ -1,9 +1,9 @@
-#include<thread>
+#include<QThread>
 #include<QTcpSocket>
 #include "multithreadtcpserver.h"
 
 
-int MultithreadTcpServer::workerThreadsNumber = std::thread::hardware_concurrency();
+int MultithreadTcpServer::workerThreadsNumber = QThread::idealThreadCount();
 
 MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,                                
                                            QObject *parent):
@@ -112,13 +112,13 @@ void MultithreadTcpServer::removeWorkers()
 
 void MultithreadTcpServer::initWorkers()
 {
-    /* Значение possibleThreadNumber может оказаться равным нулю.
-     * Это может произойти, если это значение изначально неопределено или не поддаётся расчёту.
+    /*
+     * Статический метод QThread::idealThreadCount() выдает наилучшее количество потоков для системы.
      *
-     * Функция std::thread::hardware_concurrency() даёт лишь рекомендацию
-     * об оптимальном количестве потоков. Тем не менее мы будем ей следовать
+     * Однако, если определить его невозможно, он выдаст единицу.
+     * В таком случае мы будем запускать 4 потока.
      */
-    if(workerThreadsNumber == 0)
+    if(workerThreadsNumber == 1)
     {
         workerThreadsNumber = DEFAULT_THREAD_NUMBER;
     }

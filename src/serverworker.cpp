@@ -213,32 +213,6 @@ void ServerWorker::processVerificationCommand(QString code)
     client->user.clear();
 }
 
-void ServerWorker::processSuperLogInCommand(QString login, QString password)
-{
-    ClientConnection *client = (ClientConnection*)sender();
-    // Получаем доступ к параметрам конфигурации
-    BesConfigReader *configs = BesConfigReader::getInstance();
-    // Сравниваем данные суперпользователя из файла конфигурации с данными, предоставленными пользователем
-    if(configs->getString("super_user", "login") == login &&
-            configs->getString("super_user", "password") == password)
-    {
-        // Авторизация прошла успешно
-        qDebug() << "Администратор авторизовался!";
-        client->sendResponse(QString("+ Вы авторизовались в системе как администратор!"));
-    }
-    else
-    {
-//        emit logMessage(QString("Попытка авторизации. Предоставлены данные:"
-//                                "логин: \"%1\" пароль: \"%2\"")
-//                        .arg(login, password));
-        // В целях "безопасности" отсылаем такой ответо
-        client->sendResponse("- Не существует такой команды");
-        // Устанавливаем флаг того, что данный пользователь является администратором
-        client->setStatusFlag(IS_ADMINISTRATOR);
-    }
-}
-
-
 void ServerWorker::run()
 {
     qDebug() << QString("Поток %1 запущен").arg(id);

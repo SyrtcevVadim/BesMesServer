@@ -28,8 +28,7 @@ signals:
     /// Сигнал, высылаемый, когда рабочему потоку удалось установить соединение
     /// с базой данных
     void databaseConnectionEstablished(int workerId);
-    /// Сигнал, высылаемый, когда рабочий поток не смог установить соединение с
-    /// базой данных
+    /// Сигнал, высылаемый, когда рабочий поток не смог установить соединение с базой данных
     void databaseConnectionFailed(int workerId);
 
     /// Сигнал, высылаемый, когда клиентское соединение, обрабатываемое
@@ -46,8 +45,7 @@ signals:
     void clientWasRegistered(QString email);
     /// Сигнал, высылаемый, когда пользователь отправляет неверный код верификации
     void clientSentWrongVerificationCode(QString email,QString code);
-    /// Сигнал, высылаемый, когда пользователь для регистрации указал
-    /// занятую почту
+    /// Сигнал, высылаемый, когда пользователь для регистрации указал занятую почту
     void clientUsedOccupiedEmailForRegistration(QString email);
 
 
@@ -61,8 +59,6 @@ private slots:
                                     QString email, QString password);
     /// Обрабатывает команду верификации регистрации
     void processVerificationCommand(QString code);
-    /// Обрабатывает команду авторизации администратора
-    void processSuperLogInCommand(QString login, QString password);
     /// Уменьшает счётчик клиентских соединений, обрабатываемых текущим потоком
     void decreaseHandlingConnectionsCounter();
 private:
