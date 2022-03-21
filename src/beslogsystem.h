@@ -28,8 +28,17 @@ public:
 
 public slots:
     //----- Ошибки
-    /// Регистрирует сообщение об ошибке подключения к базе данных потока с идентификатором id
-    void logDatabaseConnectionFailedMessage(int id);
+    /// Регистрирует сообщение об ошибке чтения файла конфигурации
+    void logConfigFileReadingFailedMessage(QString error_message);
+    /// Регистрирует сообщение об ошибке открытия ssl-сертификата по указанному пути.
+    /// Параметр providedPath содержит путь, по которому была произведена попытка чтения данных
+    void logUnableToOpenCertificateMessage(QString providedPath);
+    /// Регистрирует сообщение об ошибке открытия закрытого ключа по указанному пути.
+    /// Параметр providedPath содержит путь, по которому была произведена попытка чтения данных
+    void logUnableToOpenPrivateKeyMessage(QString providedPath);
+    /// Регистрирует сообщение об ошибке подключения к базе данных.
+    /// Параметр errorMessage содержит в себе описание внутренней ошибки
+    void logUnableEstablishDatabaseConnection(QString connectionName, QString errorMessage);
     //----- Системные сообщения
     /// Регистрирует сообщение о включении сервера
     void logServerStartedMessage();

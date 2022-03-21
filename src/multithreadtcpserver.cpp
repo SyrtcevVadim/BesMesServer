@@ -1,6 +1,7 @@
 #include<QThread>
 #include<QTcpSocket>
 #include "multithreadtcpserver.h"
+#include "clientconnection.h"
 
 
 int MultithreadTcpServer::workerThreadsNumber = QThread::idealThreadCount();
@@ -100,6 +101,7 @@ void MultithreadTcpServer::stop()
     // Сейчас наиболее безопасно обновить параметры конфигурации, т.к. никакая из частей системы
     // не будет обращаться к данным конфигурации(до перезапуска)
     BesConfigReader::getInstance()->readConfigs();
+    ClientConnection::initSslConfiguration();
 }
 
 void MultithreadTcpServer::removeWorkers()

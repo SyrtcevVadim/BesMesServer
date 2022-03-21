@@ -2,6 +2,7 @@
 #define BESCONFIGEDITOR_H
 // Автор: Сырцев Вадим Игоревич
 #include<QString>
+#include<QObject>
 #include "mutex"
 #include "libs/include/toml.hpp"
 
@@ -13,8 +14,9 @@ using std::lock_guard;
 
 /// Класс-обёртка для работы с файлами конфигурации
 /// ВАЖНО: реализует паттерн "Одиночка"
-class BesConfigReader
+class BesConfigReader: public QObject
 {
+    Q_OBJECT
 public:
     BesConfigReader(BesConfigReader &)=delete;
     void operator=(const BesConfigReader &)=delete;
@@ -30,12 +32,18 @@ public:
     void readConfigs();
     /// Возвращает указатель на объект
     static BesConfigReader* getInstance();
+signals:
+    /// Сигнал, высылаемый после возникновения ошибки при чтении конфигурационного файла
+    void readingConfigFileFailed(QString message);
 private:
     static BesConfigReader *_instance;
     static mutex _mutex;
 protected:
     BesConfigReader();
     ~BesConfigReader();
+    /// Настраивает систему логгирования сообщения для регистрации сообщений от
+    /// системы чтения параметров конфигурации
+    void configureLogSystem();
 
     /// В этой таблице будут хранится настройки из файла конфигурации
     toml::table configs;

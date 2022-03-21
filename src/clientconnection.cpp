@@ -1,9 +1,40 @@
 #include<QFile>
+#include<QSslKey>
+#include<QSslCertificate>
 #include "clientconnection.h"
+#include "besconfigreader.h"
+#include "beslogsystem.h"
 
-#define KEY_FILE_NAME "besmes.key"
-#define CERTIFICATE_FILE_NAME "besmes.crt"
-#define PASS_PHRASE "besmes"
+QSslConfiguration ClientConnection::sslConfiguration;
+
+void ClientConnection::initSslConfiguration()
+{
+    sslConfiguration.setProtocol(QSsl::TlsV1_3OrLater);
+    BesConfigReader *configs = BesConfigReader::getInstance();
+
+    QString pathToPrivateKey{configs->getString("security","path_to_private_key")};
+    QFile *privateKeyFile = new QFile(pathToPrivateKey);
+    // Нужно открыть файл, чтобы QSslKey смог прочесть его содержимое
+    if(!privateKeyFile->open(QIODevice::ReadOnly))
+    {
+        BesLogSystem::getInstance()->logUnableToOpenPrivateKeyMessage(pathToPrivateKey);
+    }
+    QSslKey privateKey(privateKeyFile, QSsl::Rsa,
+                       QSsl::Pem, QSsl::PrivateKey,
+                       configs->getString("security", "pass_phrase").toUtf8());
+    privateKeyFile->close();
+    sslConfiguration.setPrivateKey(privateKey);
+    // Устанавливает сертификат
+    QString pathToCertificate{configs->getString("security", "path_to_certificate")};
+    QFile *certificateFile = new QFile(pathToCertificate);
+    if(!certificateFile->open(QIODevice::ReadOnly))
+    {
+        BesLogSystem::getInstance()->logUnableToOpenCertificateMessage(pathToCertificate);
+    }
+    QSslCertificate certificate(certificateFile, QSsl::Pem);
+    sslConfiguration.setLocalCertificate(certificate);
+    certificateFile->close();
+}
 
 ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : QObject(parent)
 {
@@ -12,26 +43,21 @@ ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : 
     // Создаём сокет защищённого уровня
     socket = new QSslSocket();
     socket->setSocketDescriptor(socketDescriptor);
-    socket->setProtocol(QSsl::TlsV1_3OrLater);
-
-    // Устанавливаем открытый ключ и закрытый
-    socket->setLocalCertificate(CERTIFICATE_FILE_NAME);
-    socket->setPrivateKey(KEY_FILE_NAME, QSsl::Rsa, QSsl::Pem, PASS_PHRASE);
+    // Устанавливаем конфигурацию Ssl для серверного сокета
+    socket->setSslConfiguration(sslConfiguration);
     // Первыми инициализируем SSL-рукопожатие
     socket->startServerEncryption();
     stream = new QTextStream(socket);
 
-
-    connect(socket, SIGNAL(encrypted()), SLOT(showEncryptedState()));
+    connect(socket, SIGNAL(encrypted()), SLOT(sendGreetingMessage()));
     connect(socket, SIGNAL(disconnected()), SLOT(deleteLater()));
     connect(socket, SIGNAL(readyRead()), SLOT(processIncomingMessage()));
 }
 
-void ClientConnection::showEncryptedState()
+void ClientConnection::sendGreetingMessage()
 {
-    qDebug() << "Запущено защищённое соединение";
+    sendResponse(QString("+ %1").arg(GREETING_MESSAGE));
 }
-
 
 ClientConnection::~ClientConnection()
 {
@@ -204,12 +230,10 @@ void ClientConnection::setStatusFlag(unsigned long long flag)
     statusFlags |= flag;
 }
 
-
 void ClientConnection::setVerificationCode(const QString &code)
 {
     verificationCode = code;
 }
-
 
 bool ClientConnection::checkVerificationCode(const QString &code)
 {

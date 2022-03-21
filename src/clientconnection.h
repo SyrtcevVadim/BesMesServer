@@ -3,6 +3,7 @@
 // Автор: Сырцев Вадим Игоревич
 #include<QObject>
 #include<QSslSocket>
+#include<QSslConfiguration>
 #include<QTextStream>
 
 #include"besprotocol.h"
@@ -31,20 +32,25 @@ public:
     explicit ClientConnection(qintptr socketDescriptor,QObject *parent = nullptr);
     ~ClientConnection();
 public slots:
-    /// Отправляет клиенту сообщение. К сообщению автоматически добавляется символ
-    /// конца сообщения. Самому его добавлять не надо
+    /// Отправляет клиенту сообщение.
+    /// К сообщению автоматически добавляется символ конца сообщения.
     void sendResponse(QString response);
     /// Закрывает клиентское соединение
     void close();
     /// Устанавливает статусный флаг flag в единицу
     void setStatusFlag(unsigned long long flag);
-    void showEncryptedState();
+    /// Отправляет клиенту сообщение об успешном подключении к серверу
+    void sendGreetingMessage();
 
     /// Устанавливает код верификации, который данный пользователь должен отправить
     /// для успешного окончания регистрации
     void setVerificationCode(const QString &code);
     /// Проверяет, совпадает ли код регистрации
     bool checkVerificationCode(const QString &code);
+
+    /// Устанавливает параметры для корректной работы ssl-соединения. Следует вызвать эту функцию
+    /// в начале работы программы
+    static void initSslConfiguration();
 signals:
     /// Отправляется, когда пользователь отправил команду аутентификации и передал
     /// адрес электронной почты и пароль от аккаунта
@@ -77,20 +83,22 @@ private:
     /// Обрабатывает команду клиента в зависимости от ее типа.
     /// Вместе с командой передаются её аргументы
     void processCommand(QStringList messageParts);
+
     /// Сокет, через который клиентское приложение подключено к серверу
     QSslSocket *socket;
     /// Текстовый поток, связанный с этим сокетом
     QTextStream *stream;
-
     /// Код подтверждения регистрации, который должен отправить пользователь,
     /// чтобы успешно завершить регистрацию
     QString verificationCode;
-
     /// Хранит различные флаги состояния клиентского соединения.
     /// Например, здесь хранится инф. о том, были ли отправлены некоторые команды
     unsigned long long statusFlags;
     /// Структура, хранящая информацию о пользователе
     User user;
+    /// Хранит параметры, необходимые для работы ssl-сокетов
+    static QSslConfiguration sslConfiguration;
+
 
     /// Объекты класса ClientConnection "живут" в объектах класса ServerWorker. Так что будет разумным
     /// дать объектам этого класса доступ к внутренним переменным

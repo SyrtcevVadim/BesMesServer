@@ -15,13 +15,11 @@ class ServerWorker : public QThread
 public:
     ServerWorker(QObject *parent = nullptr);
     ~ServerWorker();
-
     /// Добавляет в данный серверный поток обработки новое клиентское
     /// соединение
     void addClientConnection(qintptr socketDescriptor);
     /// Возвращает количество клиентских подключений, обрабатываем текущим рабочим потоком
     unsigned long long getHandlingConnectionsCounter();
-
 public slots:
     void quit();
 signals:
@@ -30,11 +28,9 @@ signals:
     void databaseConnectionEstablished(int workerId);
     /// Сигнал, высылаемый, когда рабочий поток не смог установить соединение с базой данных
     void databaseConnectionFailed(int workerId);
-
     /// Сигнал, высылаемый, когда клиентское соединение, обрабатываемое
     /// в данном потоке, разрывается
     void clientConnectionClosed();
-
     /// Сигнал, высылаемый при успешном прохождении пользователем аутентификации
     void clientLoggedIn(QString email);
     /// Сигнал, высылаемый при неудачной попытке прохождения аутентификации
@@ -47,8 +43,6 @@ signals:
     void clientSentWrongVerificationCode(QString email,QString code);
     /// Сигнал, высылаемый, когда пользователь для регистрации указал занятую почту
     void clientUsedOccupiedEmailForRegistration(QString email);
-
-
 protected:
     void run();
 private slots:

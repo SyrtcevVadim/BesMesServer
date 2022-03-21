@@ -17,10 +17,12 @@ void ProjectStructureDefender::initDirectories()
      * Проект имеет (сырую. TODO) следующую древовидную струтуру:
      * -logs
      * -configs
+     * -certificate
      */
     QDir currentDir;
     currentDir.mkdir(LOG_DIR_NAME);
     currentDir.mkdir(CONFIG_DIR_NAME);
+    currentDir.mkdir("certificate");
 }
 
 void ProjectStructureDefender::initConfigFile()

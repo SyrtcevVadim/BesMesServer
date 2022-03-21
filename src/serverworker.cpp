@@ -1,5 +1,4 @@
 #include <QDebug>
-#include "besprotocol.h"
 #include "beslogsystem.h"
 #include "serverworker.h"
 #include "clientconnection.h"
@@ -42,8 +41,6 @@ void ServerWorker::configureLogSystem()
     // Сохраняем в журнале сообщений следующие события
     connect(this, SIGNAL(databaseConnectionEstablished(int)),
             logSystem, SLOT(logDatabaseConnectionEstablishedMessage(int)));
-    connect(this, SIGNAL(databaseConnectionFailed(int)),
-            logSystem, SLOT(logDatabaseConnectionFailedMessage(int)));
 
     connect(this, SIGNAL(clientLoggedIn(QString)),
             logSystem, SLOT(logClientLoggedInMessage(QString)));
@@ -93,8 +90,6 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     // При остановке рабочего потока должны быть разорваны все пользовательские соединения
     connect(this, SIGNAL(finished()),
             incomingConnection, SLOT(close()));
-
-    incomingConnection->sendResponse(QString("+ %1").arg(GREETING_MESSAGE));
 }
 
 void ServerWorker::decreaseHandlingConnectionsCounter()
@@ -218,14 +213,6 @@ void ServerWorker::run()
     qDebug() << QString("Поток %1 запущен").arg(id);
     configureDatabaseConnection();
     databaseConnection->open();
-    if(databaseConnection->isActive())
-    {
-        emit databaseConnectionEstablished(id);
-    }
-    else
-    {
-        emit databaseConnectionFailed(id);
-    }
     exec();
 }
 
