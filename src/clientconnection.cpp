@@ -34,6 +34,9 @@ void ClientConnection::initSslConfiguration()
     QSslCertificate certificate(certificateFile, QSsl::Pem);
     sslConfiguration.setLocalCertificate(certificate);
     certificateFile->close();
+
+    delete privateKeyFile;
+    delete certificateFile;
 }
 
 ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : QObject(parent)

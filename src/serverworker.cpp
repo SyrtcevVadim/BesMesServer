@@ -83,9 +83,6 @@ void ServerWorker::addClientConnection(qintptr socketDescriptor)
     // Обрабатывает команду верификации регистрации
     connect(incomingConnection, SIGNAL(verificationCommandSent(QString)),
             SLOT(processVerificationCommand(QString)));
-    // Обрабатываем команду авторизации администратора
-    connect(incomingConnection, SIGNAL(superLogInCommandSent(QString,QString)),
-            SLOT(processSuperLogInCommand(QString,QString)));
 
     // При остановке рабочего потока должны быть разорваны все пользовательские соединения
     connect(this, SIGNAL(finished()),
