@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>templates/configs.toml</file>
+    </qresource>
+</RCC>
