@@ -6,7 +6,7 @@
 
 int MultithreadTcpServer::workerThreadsNumber = QThread::idealThreadCount();
 
-MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,                                
+MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
                                            QObject *parent):
     QTcpServer(parent),
     serverIPAddress(serverIPAddress)

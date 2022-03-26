@@ -50,5 +50,4 @@
 // Не удалось зарегистрировать нового пользователя из-за возникшей ошибки на сервере
 #define REGISTRATION_INNER_ERROR 4
 
-
 #endif // BESPROTOCOL_H

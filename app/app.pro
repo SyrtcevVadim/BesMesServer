@@ -12,7 +12,8 @@ SOURCES += \
 
 HEADERS += \
         $$files(src/*.h*) \
-        $$files(libs/include/*.h*)
+        $$files(libs/include/*.h*) \
+        src/besprotocol.h
 
 RESOURCES += \
         $$files(res/*.qrc)
