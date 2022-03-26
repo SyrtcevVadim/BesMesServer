@@ -1,6 +1,11 @@
-TEMPLATE = SUBDIRS
+TEMPLATE = subdirs
+
+CONFIG += ordered
+
 SUBDIRS += \
-    BesMesServerApplication
+    app \
+
+
 
 
 
