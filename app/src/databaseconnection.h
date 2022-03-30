@@ -26,7 +26,7 @@ public:
     /// Добавляет нового пользователя в базу данных
     bool addNewUser(const QString &firstName, const QString &lastName,
                     const QString &email, const QString &password);
-    /// Проверяет, является ли подключение к базе данных активным
+    /// Проверяет, является ли подключение к базе даннzых активным
     bool isActive();
 private:
     /// Настраивает подключение к базе данных

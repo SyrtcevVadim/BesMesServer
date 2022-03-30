@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.15.0, 2022-03-26T20:13:17. -->
+<!-- Written by QtCreator 4.15.0, 2022-03-27T17:30:33. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -67,13 +67,7 @@
     <value type="bool" key="AutoTest.Framework.QtQuickTest">true</value>
     <value type="bool" key="AutoTest.Framework.QtTest">true</value>
    </valuemap>
-   <valuemap type="QVariantMap" key="AutoTest.CheckStates">
-    <value type="Qt::CheckState" key="1@D:/Projects/BesMes/BesMesServer/tests/TestClientServerInteraction/tst_testclientserverinteraction.cpp:TestClientServerInteraction">Checked</value>
-    <value type="Qt::CheckState" key="1@D:/Projects/BesMes/BesMesServer/tests/TestClientServerInteraction/tst_testclientserverinteraction.cpp:cleanup">Checked</value>
-    <value type="Qt::CheckState" key="1@D:/Projects/BesMes/BesMesServer/tests/TestClientServerInteraction/tst_testclientserverinteraction.cpp:cleanupTestCase">Checked</value>
-    <value type="Qt::CheckState" key="1@D:/Projects/BesMes/BesMesServer/tests/TestClientServerInteraction/tst_testclientserverinteraction.cpp:initTestCase">Unchecked</value>
-    <value type="Qt::CheckState" key="1@D:/Projects/BesMes/BesMesServer/tests/TestClientServerInteraction/tst_testclientserverinteraction.cpp:testReceivingGreetingMessage">Checked</value>
-   </valuemap>
+   <valuemap type="QVariantMap" key="AutoTest.CheckStates"/>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>
    <value type="bool" key="AutoTest.UseGlobal">true</value>
    <valuelist type="QVariantList" key="ClangCodeModel.CustomCommandLineKey">
@@ -312,6 +306,7 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">D:/Projects/BesMes/BesMesServer/app/../build/app</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>
