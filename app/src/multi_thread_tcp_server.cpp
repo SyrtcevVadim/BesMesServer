@@ -11,8 +11,6 @@ MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
     QTcpServer(parent),
     serverIPAddress(serverIPAddress)
 {
-    configureStatisticsCounter();
-    configureTimers();
     // Создаём потоки после выделения всех ресурсов
     initWorkers();
 }
@@ -20,36 +18,6 @@ MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
 MultithreadTcpServer::~MultithreadTcpServer()
 {
     removeWorkers();
-    delete statisticsCounter;
-}
-
-void MultithreadTcpServer::updateWorkingTimeCounter()
-{
-    currentSessionWorkingTime.addSecond();
-    emit workingTimeUpdated(currentSessionWorkingTime.toString());
-}
-
-void MultithreadTcpServer::configureStatisticsCounter()
-{
-    statisticsCounter = new ServerStatisticsCounter(this);
-    // Объект счётчик узнаёт об открытии нового клиентского соединения
-    connect(this, SIGNAL(clientConnectionOpenned()),
-            statisticsCounter, SLOT(increaseActiveConnectionsCounter()));
-    connect(this, SIGNAL(clientConnectionOpenned()),
-            statisticsCounter, SLOT(increaseTotalEstablishedConnectionsCounter()));
-    // Объект счётчик узнаёт о закрытии клиентского соединения
-    connect(this, SIGNAL(clientConnectionClosed()),
-            statisticsCounter, SLOT(decreaseActiveConnectionsCounter()));
-    // Пробрасываем сигнал об изменении количества активных соединений "во вне"
-    connect(statisticsCounter, SIGNAL(activeConnectionsCounterChanged(unsigned long long)),
-            SIGNAL(activeConnectionsCounterChanged(unsigned long long)));
-}
-
-void MultithreadTcpServer::configureTimers()
-{
-    currentSessionWorkingTimeTimer.setInterval(WORKING_TIME_COUNTER_UPDATE_TIME);
-    connect(&currentSessionWorkingTimeTimer, SIGNAL(timeout()),
-            SLOT(updateWorkingTimeCounter()));
 }
 
 void MultithreadTcpServer::start()
@@ -64,8 +32,6 @@ void MultithreadTcpServer::start()
     {
         worker->start(QThread::Priority::TimeCriticalPriority);
     }
-    // Запускаем счётчик времени работы
-    currentSessionWorkingTimeTimer.start();
     // Сообщаем, что сервер начал свою работу
     emit started();
 }
@@ -74,8 +40,6 @@ void MultithreadTcpServer::stop()
 {
     // Приостанавливаем прослушивание входящих соединений
     close();
-    // Останавливаем счётчик времени работы сервера
-    currentSessionWorkingTimeTimer.stop();
     // Отправляем сигнал о том, что нужно остановить рабочие потоки (отключаем все соединения от них)
     emit stopped();
     ClientConnection::initSslConfiguration();
@@ -143,6 +107,3 @@ void MultithreadTcpServer::incomingConnection(qintptr socketDescriptor)
     currentWorker->addClientConnection(socketDescriptor);
     emit clientConnectionOpenned();
 }
-
-
-

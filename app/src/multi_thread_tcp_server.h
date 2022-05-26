@@ -5,9 +5,7 @@
 #include <QVector>
 #include <QTimer>
 
-#include "time_counter.h"
 #include "server_worker.h"
-#include "server_statistics_counter.h"
 #include "config_reader.h"
 
 // Интервал обновления счётчика времени работы приложения
@@ -48,9 +46,6 @@ public slots:
 protected:
     /// Вызывается сервером каждый раз, когда имеется входящее соединение
     void incomingConnection(qintptr socketDescriptor);
-private slots:
-    /// Обновляет счётчик времени работы сервера в текущей сессии
-    void updateWorkingTimeCounter();
 private:
     /// Создаёт оптимальное количество рабочих потоков, по которым будет распределена
     /// нагрузка входящих соединений, основываясь на значении possibleThreadNumber
@@ -58,12 +53,6 @@ private:
     /// Освобождает ресурсы, выделенные для рабочих, обрабатывающих входящие
     /// сообщения
     void removeWorkers();
-
-    /// Настраивает объект-счётчик
-    void configureStatisticsCounter();
-    /// Настраивает таймеры сервера:
-    /// Таймер счётчика времени работы сервера
-    void configureTimers();
 private:
     /// Хранит количество потоков, которые физически(и в теории) могут выполняться независимо
     /// на разных ядрах процессора, т.е. оптимальное количество потоков. Ровно столько серверных рабочих
@@ -76,15 +65,8 @@ private:
     /// Список рабочих, обрабатывающих в отдельных потоках
     /// пользовательские соединения
     QVector<ServerWorker*> serverWorkers;
-    /// Объект, подсчитывающий статистику сервера во время его работы
-    ServerStatisticsCounter *statisticsCounter;
     /// IP-адрес устройства, на котором запущен сервер
     QHostAddress serverIPAddress;
-    /// Таймер, оповещающий UI, что следует обновить время работы
-    /// серверного приложения в текущей сессии (после запуска)
-    QTimer currentSessionWorkingTimeTimer;
-    /// Время работы приложения в текущей сессии
-    TimeCounter currentSessionWorkingTime;
 };
 
 #endif // MULTI_THREAD_TCP_SERVER_H
