@@ -1,7 +1,7 @@
 #include <QDir>
 #include <QFile>
 #include "config_reader.h"
-#include "projectstructuredefender.h"
+#include "project_structure_defender.h"
 #include "libs/include/toml.hpp"
 
 void ProjectStructureDefender::init()

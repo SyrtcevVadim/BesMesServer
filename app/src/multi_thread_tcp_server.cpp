@@ -1,7 +1,7 @@
 #include<QThread>
 #include<QTcpSocket>
-#include "multithreadtcpserver.h"
-#include "clientconnection.h"
+#include "multi_thread_tcp_server.h"
+#include "client_connection.h"
 
 
 int MultithreadTcpServer::workerThreadsNumber = QThread::idealThreadCount();

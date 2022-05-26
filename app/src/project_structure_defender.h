@@ -1,5 +1,5 @@
-#ifndef PROJECTSTRUCTUREDEFENDER_H
-#define PROJECTSTRUCTUREDEFENDER_H
+#ifndef PROJECT_STRUCTURE_DEFENDER_H
+#define PROJECT_STRUCTURE_DEFENDER_H
 
 #define CONFIG_FILE_NAME QString("configs.toml")
 
@@ -20,4 +20,4 @@ private:
     static void initConfigFile();
 };
 
-#endif // PROJECTSTRUCTUREDEFENDER_H
+#endif // PROJECT_STRUCTURE_DEFENDER_H

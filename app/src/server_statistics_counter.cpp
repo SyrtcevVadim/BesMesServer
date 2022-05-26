@@ -1,4 +1,4 @@
-#include "serverstatisticscounter.h"
+#include "server_statistics_counter.h"
 
 ServerStatisticsCounter::ServerStatisticsCounter(QObject *parent):
     QThread(parent)

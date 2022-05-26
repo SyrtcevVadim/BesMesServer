@@ -1,13 +1,13 @@
-#ifndef MULTITHREADTCPSERVER_H
-#define MULTITHREADTCPSERVER_H
+#ifndef MULTI_THREAD_TCP_SERVER_H
+#define MULTI_THREAD_TCP_SERVER_H
 // Автор: Сырцев Вадим Игоревич
 #include <QTcpServer>
 #include <QVector>
 #include <QTimer>
 
-#include "timecounter.h"
-#include "serverworker.h"
-#include "serverstatisticscounter.h"
+#include "time_counter.h"
+#include "server_worker.h"
+#include "server_statistics_counter.h"
 #include "config_reader.h"
 
 // Интервал обновления счётчика времени работы приложения
@@ -87,4 +87,4 @@ private:
     TimeCounter currentSessionWorkingTime;
 };
 
-#endif // MULTITHREADTCPSERVER_H
+#endif // MULTI_THREAD_TCP_SERVER_H

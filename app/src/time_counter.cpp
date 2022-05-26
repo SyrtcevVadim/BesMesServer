@@ -1,4 +1,4 @@
-#include "timecounter.h"
+#include "time_counter.h"
 #include <QDebug>
 
 TimeCounter::TimeCounter()

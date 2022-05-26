@@ -1,5 +1,5 @@
-#ifndef BESPROTOCOL_H
-#define BESPROTOCOL_H
+#ifndef BES_PROTOCOL_H
+#define BES_PROTOCOL_H
 /*
  * Автор: Сырцев Вадим Игоревич,
  * Воропаев Владимир Геннадьевич,
@@ -50,4 +50,4 @@
 // Не удалось зарегистрировать нового пользователя из-за возникшей ошибки на сервере
 #define REGISTRATION_INNER_ERROR 4
 
-#endif // BESPROTOCOL_H
+#endif // BES_PROTOCOL_H

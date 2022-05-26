@@ -1,5 +1,5 @@
-#ifndef SERVERSTATISTICSCOUNTER_H
-#define SERVERSTATISTICSCOUNTER_H
+#ifndef SERVER_STATISTICS_COUNTER_H
+#define SERVER_STATISTICS_COUNTER_H
 // Автор: Сырцев Вадим Игоревич
 #include <QThread>
 
@@ -38,4 +38,4 @@ private:
     unsigned long long totalEstablishedConnectionsCounter;
 };
 
-#endif // SERVERSTATISTICSCOUNTER_H
+#endif // SERVER_STATISTICS_COUNTER_H

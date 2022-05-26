@@ -1,8 +1,8 @@
-#ifndef SERVERWORKER_H
-#define SERVERWORKER_H
+#ifndef SERVER_WORKER_H
+#define SERVER_WORKER_H
 // Автор: Сырцев Вадим Игоревич
 #include<QRandomGenerator>
-#include "databaseconnection.h"
+#include "database_connection.h"
 #include "config_reader.h"
 #include <QThread>
 
@@ -74,4 +74,4 @@ private:
     static QRandomGenerator generator;
 };
 
-#endif // SERVERWORKER_H
+#endif // SERVER_WORKER_H

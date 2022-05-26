@@ -1,8 +1,8 @@
-#include "databaseconnection.h"
 #include <QDebug>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QDate>
+#include "database_connection.h"
 
 DatabaseConnection::DatabaseConnection(const QString &connectionName)
 {

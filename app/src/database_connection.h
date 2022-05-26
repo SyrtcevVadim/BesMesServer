@@ -1,5 +1,5 @@
-#ifndef DATABASECONNECTION_H
-#define DATABASECONNECTION_H
+#ifndef DATABASE_CONNECTION_H
+#define DATABASE_CONNECTION_H
 
 #include <QSqlDatabase>
 #include "config_reader.h"
@@ -38,4 +38,4 @@ private:
     QSqlDatabase besMesDatabase;
 };
 
-#endif // DATABASECONNECTION_H
+#endif // DATABASE_CONNECTION_H

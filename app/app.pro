@@ -13,8 +13,6 @@ SOURCES += \
 HEADERS += \
         $$files(src/*.h*) \
         $$files(libs/include/*.h*) \
-        src/besprotocol.h \
-        src/singleton_base.h
 
 RESOURCES += \
         $$files(res/*.qrc)

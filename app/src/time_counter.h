@@ -1,5 +1,5 @@
-#ifndef TIMECOUNTER_H
-#define TIMECOUNTER_H
+#ifndef TIME_COUNTER_H
+#define TIME_COUNTER_H
 #include<QString>
 
 #define SECONDS_TO_DAYS_FACTOR 86400
@@ -20,4 +20,4 @@ public:
     void addSecond();
 };
 
-#endif // TIMECOUNTER_H
+#endif // TIME_COUNTER_H

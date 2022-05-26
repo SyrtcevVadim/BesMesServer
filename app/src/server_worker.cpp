@@ -1,6 +1,6 @@
 #include <QDebug>
-#include "serverworker.h"
-#include "clientconnection.h"
+#include "server_worker.h"
+#include "client_connection.h"
 
 // Изначально нет созданных объектов серверных рабочих
 unsigned int ServerWorker::createdObjectCounter = 0;

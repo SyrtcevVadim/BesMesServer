@@ -1,12 +1,12 @@
-#ifndef CLIENTCONNECTION_H
-#define CLIENTCONNECTION_H
+#ifndef CLIENT_CONNECTION_H
+#define CLIENT_CONNECTION_H
 // Автор: Сырцев Вадим Игоревич
 #include<QObject>
 #include<QSslSocket>
 #include<QSslConfiguration>
 #include<QTextStream>
 
-#include"besprotocol.h"
+#include"bes_protocol.h"
 #include"user.h"
 
 
@@ -105,4 +105,4 @@ private:
     friend class ServerWorker;
 };
 
-#endif // CLIENTCONNECTION_H
+#endif // CLIENT_CONNECTION_H
