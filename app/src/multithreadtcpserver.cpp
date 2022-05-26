@@ -75,7 +75,7 @@ void MultithreadTcpServer::configureTimers()
 void MultithreadTcpServer::start()
 {
     // Получаем доступ к настройкам конфигурации
-    BesConfigReader *configs = BesConfigReader::getInstance();
+    ConfigReader *configs = ConfigReader::getInstance();
 
     // Начинаем слушать входящие соединения
     listen(serverIPAddress, configs->getInt("server","client_connection_port"));
@@ -100,7 +100,7 @@ void MultithreadTcpServer::stop()
     emit stopped();
     // Сейчас наиболее безопасно обновить параметры конфигурации, т.к. никакая из частей системы
     // не будет обращаться к данным конфигурации(до перезапуска)
-    BesConfigReader::getInstance()->readConfigs();
+    ConfigReader::getInstance()->readConfigs();
     ClientConnection::initSslConfiguration();
 }
 

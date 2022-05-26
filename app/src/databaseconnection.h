@@ -2,7 +2,7 @@
 #define DATABASECONNECTION_H
 
 #include <QSqlDatabase>
-#include "besconfigreader.h"
+#include "config_reader.h"
 
 #define USING_PLUGIN_NAME "QMYSQL"
 #define USER_TABLE_NAME "user"

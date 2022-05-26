@@ -1,7 +1,7 @@
 #include <QDir>
 #include <QFile>
 #include "beslogsystem.h"
-#include "besconfigreader.h"
+#include "config_reader.h"
 #include "projectstructuredefender.h"
 #include "libs/include/toml.hpp"
 

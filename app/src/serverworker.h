@@ -3,7 +3,7 @@
 // Автор: Сырцев Вадим Игоревич
 #include<QRandomGenerator>
 #include "databaseconnection.h"
-#include "besconfigreader.h"
+#include "config_reader.h"
 #include <QThread>
 
 /**

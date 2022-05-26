@@ -5,7 +5,7 @@
 #include <QSslSocket>
 #include <QTextStream>
 #include <QRandomGenerator>
-#include"besconfigreader.h"
+#include"config_reader.h"
 
 enum class  SmtpAnswerCode{READY=220,
                            SUCCESS=250,

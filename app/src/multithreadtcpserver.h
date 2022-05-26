@@ -9,7 +9,7 @@
 #include "serverworker.h"
 #include "serverstatisticscounter.h"
 #include "beslogsystem.h"
-#include "besconfigreader.h"
+#include "config_reader.h"
 
 // Интервал обновления счётчика времени работы приложения
 #define WORKING_TIME_COUNTER_UPDATE_TIME 1000

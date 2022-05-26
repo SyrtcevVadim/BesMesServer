@@ -11,7 +11,7 @@ EmailSender::EmailSender(const QString &recipientEmail,
     socket = new QSslSocket();
     stream = new QTextStream(socket);
 
-    BesConfigReader *configs = BesConfigReader::getInstance();
+    ConfigReader *configs = ConfigReader::getInstance();
     senderEmail = configs->getString("email_sender_account","email");
     senderPassword = configs->getString("email_sender_account", "password");
 
@@ -29,7 +29,7 @@ EmailSender::~EmailSender()
 void EmailSender::connectToSmtpServer()
 {
     // Получаем доступ к параметрам конфигурации
-    BesConfigReader *configs = BesConfigReader::getInstance();
+    ConfigReader *configs = ConfigReader::getInstance();
     socket->connectToHostEncrypted(configs->getString("esmtp_server","address"),
                                    configs->getInt("esmtp_server","port"));
     if(!socket->waitForConnected(2000))
@@ -64,7 +64,7 @@ QString EmailSender::getMessage()
     QString result{};
     result += "To: "+recipientEmail+"\r\n";
     result += "From: "+senderEmail +"\r\n";
-    BesConfigReader *configs = BesConfigReader::getInstance();
+    ConfigReader *configs = ConfigReader::getInstance();
     switch(currentEmailType)
     {
         case EmailType::EmailWithVerificationCode:

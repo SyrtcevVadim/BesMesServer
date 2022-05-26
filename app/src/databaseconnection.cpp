@@ -22,16 +22,16 @@ DatabaseConnection::~DatabaseConnection()
 void DatabaseConnection::configureDatabaseConnection()
 {
     // Получаем доступ к параметрам конфигурации
-    BesConfigReader *configs = BesConfigReader::getInstance();
+    ConfigReader &config_reader = ConfigReader::getInstance();
     besMesDatabase = QSqlDatabase::addDatabase(USING_PLUGIN_NAME, connectionName);
     // Указываем ip-адрес устройства, на котором развёрнута база данных и порт, прослушиваемый базой данных
-    besMesDatabase.setHostName(configs->getString("database","address"));
-    besMesDatabase.setPort(configs->getInt("database", "port"));
+    besMesDatabase.setHostName(config_reader.getDatabaseHostAddress());
+    besMesDatabase.setPort(config_reader.getDatabaseListeningPort());
     // Указываем имя базы данных, к которой хотим подключиться
-    besMesDatabase.setDatabaseName(configs->getString("database", "name"));
+    besMesDatabase.setDatabaseName(config_reader.getDatabaseName());
     // Указываем имя аккаунта, который мы будем использовать для подключения к базе данных
-    besMesDatabase.setUserName(configs->getString("database_connection", "user_name"));
-    besMesDatabase.setPassword(configs->getString("database_connection", "password"));
+    besMesDatabase.setUserName(config_reader.getDatabaseUserName());
+    besMesDatabase.setPassword(config_reader.getDatabaseUserPassword());
 }
 
 void DatabaseConnection::open()
