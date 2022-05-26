@@ -3,7 +3,6 @@
 #include<QSslCertificate>
 #include "clientconnection.h"
 #include "config_reader.h"
-#include "beslogsystem.h"
 
 QSslConfiguration ClientConnection::sslConfiguration;
 
@@ -18,7 +17,7 @@ void ClientConnection::initSslConfiguration()
     // Нужно открыть файл, чтобы QSslKey смог прочесть его содержимое
     if(!privateKeyFile->open(QIODevice::ReadOnly))
     {
-        BesLogSystem::getInstance()->logUnableToOpenPrivateKeyMessage(pathToPrivateKey);
+        qDebug() << "Файл с закрытым ключом не найден";
     }
     QSslKey privateKey(privateKeyFile, QSsl::Rsa,
                        QSsl::Pem, QSsl::PrivateKey,
@@ -30,7 +29,7 @@ void ClientConnection::initSslConfiguration()
     QFile *certificateFile = new QFile(pathToCertificate);
     if(!certificateFile->open(QIODevice::ReadOnly))
     {
-        BesLogSystem::getInstance()->logUnableToOpenCertificateMessage(pathToCertificate);
+        qDebug() << "Файл с сертификатом безопасности не найден";
     }
     QSslCertificate certificate(certificateFile, QSsl::Pem);
     certificateFile->close();

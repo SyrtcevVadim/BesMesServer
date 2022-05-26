@@ -1,12 +1,12 @@
 #include<string_view>
 #include<QDebug>
-
 #include "config_reader.h"
-#include "beslogsystem.h"
-
+#include "singleton_base.h"
 
 ConfigReader::ConfigReader(const QString &configureDirectoryName, const QString &configureFileName)
+    : SingletonBase()
 {
+
     readConfigs(configureDirectoryName, configureFileName);
 }
 
@@ -37,7 +37,6 @@ void ConfigReader::readConfigs(const QString &configureDirectoryName, const QStr
     }
 }
 
-
 quint16 ConfigReader::getServerListeningPort()
 {
     return getQuint16("server", "listening_port");
@@ -67,6 +66,7 @@ QString ConfigReader::getDatabaseHostAddress()
 {
     return getString("database", "host_address");
 }
+
 quint16 ConfigReader::getDatabaseListeningPort()
 {
     return getQuint16("database","listening_port");

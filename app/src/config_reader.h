@@ -53,11 +53,11 @@ private:
     quint16 getQuint16(const QString &table, const QString &name);
     /// Считывает настройки системы из файла конфигурации
     void readConfigs(const QString &configureDirectoryName, const QString &configureFileName);
-
-protected:
     ConfigReader(const QString &configureDirectoryName = CONFIG_DIR_NAME, const QString &configureFileName = CONFIG_FILE_NAME);
     /// В этой таблице будут хранится настройки из файла конфигурации
     toml::table configs;
+
+    friend class SingletonBase<ConfigReader>;
 };
 
 #endif // BESCONFIGEDITOR_H

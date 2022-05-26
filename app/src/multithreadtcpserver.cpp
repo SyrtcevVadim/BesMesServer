@@ -12,7 +12,6 @@ MultithreadTcpServer::MultithreadTcpServer(QHostAddress serverIPAddress,
     serverIPAddress(serverIPAddress)
 {
     configureStatisticsCounter();
-    configureLogSystem();
     configureTimers();
     // Создаём потоки после выделения всех ресурсов
     initWorkers();
@@ -46,25 +45,6 @@ void MultithreadTcpServer::configureStatisticsCounter()
             SIGNAL(activeConnectionsCounterChanged(unsigned long long)));
 }
 
-void MultithreadTcpServer::configureLogSystem()
-{
-    BesLogSystem *logSystem = BesLogSystem::getInstance();
-    /*
-     * Все сообщения, которые мы хотим журналировать, мы должны отправлять в
-     * виде сигналов. Эти сигналы будут обрабатываться логгирующей системой
-     */
-
-    connect(this, SIGNAL(started()),
-            logSystem, SLOT(logServerStartedMessage()));
-    connect(this, SIGNAL(stopped()),
-            logSystem, SLOT(logServerStoppedMessage()));
-
-    connect(this, SIGNAL(clientConnectionOpenned()),
-            logSystem, SLOT(logClientConnectionCreatedMessage()));
-    connect(this, SIGNAL(clientConnectionClosed()),
-            logSystem, SLOT(logClientConnectionClosedMessage()));
-}
-
 void MultithreadTcpServer::configureTimers()
 {
     currentSessionWorkingTimeTimer.setInterval(WORKING_TIME_COUNTER_UPDATE_TIME);
@@ -75,10 +55,10 @@ void MultithreadTcpServer::configureTimers()
 void MultithreadTcpServer::start()
 {
     // Получаем доступ к настройкам конфигурации
-    ConfigReader *configs = ConfigReader::getInstance();
+    ConfigReader &config_reader = ConfigReader::getInstance();
 
     // Начинаем слушать входящие соединения
-    listen(serverIPAddress, configs->getInt("server","client_connection_port"));
+    listen(serverIPAddress, config_reader.getServerListeningPort());
     // Запускает рабочие потоки
     for(ServerWorker *worker:serverWorkers)
     {
@@ -98,9 +78,6 @@ void MultithreadTcpServer::stop()
     currentSessionWorkingTimeTimer.stop();
     // Отправляем сигнал о том, что нужно остановить рабочие потоки (отключаем все соединения от них)
     emit stopped();
-    // Сейчас наиболее безопасно обновить параметры конфигурации, т.к. никакая из частей системы
-    // не будет обращаться к данным конфигурации(до перезапуска)
-    ConfigReader::getInstance()->readConfigs();
     ClientConnection::initSslConfiguration();
 }
 

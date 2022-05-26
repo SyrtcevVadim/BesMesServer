@@ -61,9 +61,6 @@ private:
     QString generateVerificationCode();
     /// Настраивает подключение к базе данных в рабочем потоке
     void configureDatabaseConnection();
-    /// Настраивает систему логгирования сообщений для регистрации событий рабочих потоков
-    void configureLogSystem();
-
     /// Счётчик созданных объектов
     static unsigned int createdObjectCounter;
     /// Номер потока, работающего в рамках серверного приложения

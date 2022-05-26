@@ -18,7 +18,7 @@ public:
     }
 
 protected:
-    SingletonBase();
+    SingletonBase() {}
 };
 
 #endif // SINGLETONBASE_H

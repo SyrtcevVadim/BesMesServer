@@ -8,7 +8,6 @@
 #include "timecounter.h"
 #include "serverworker.h"
 #include "serverstatisticscounter.h"
-#include "beslogsystem.h"
 #include "config_reader.h"
 
 // Интервал обновления счётчика времени работы приложения
@@ -62,8 +61,6 @@ private:
 
     /// Настраивает объект-счётчик
     void configureStatisticsCounter();
-    /// Настраивает систему регистрации сообщений
-    void configureLogSystem();
     /// Настраивает таймеры сервера:
     /// Таймер счётчика времени работы сервера
     void configureTimers();
