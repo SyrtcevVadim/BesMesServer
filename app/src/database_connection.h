@@ -4,7 +4,7 @@
 #include <QSqlDatabase>
 #include "config_reader.h"
 
-#define USING_PLUGIN_NAME "QMYSQL"
+#define USING_PLUGIN_NAME "QPSQL"
 #define USER_TABLE_NAME "user"
 
 class DatabaseConnection

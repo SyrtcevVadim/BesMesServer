@@ -1,6 +1,6 @@
 #include<QThread>
 #include<QTcpSocket>
-#include "multi_thread_tcp_server.h"
+#include "multithread_tcp_server.h"
 #include "client_connection.h"
 
 
@@ -24,6 +24,7 @@ void MultithreadTcpServer::start()
 {
     // Получаем доступ к настройкам конфигурации
     ConfigReader &config_reader = ConfigReader::getInstance();
+    qDebug() << config_reader.getServerListeningPort();
 
     // Начинаем слушать входящие соединения
     listen(serverIPAddress, config_reader.getServerListeningPort());

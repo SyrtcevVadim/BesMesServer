@@ -1,7 +1,7 @@
 #include <QCoreApplication>
 #include "project_structure_defender.h"
 #include "client_connection.h"
-#include "multi_thread_tcp_server.h"
+#include "multithread_tcp_server.h"
 
 int main(int argc, char *argv[])
 {

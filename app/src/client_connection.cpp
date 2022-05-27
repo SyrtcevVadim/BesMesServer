@@ -1,6 +1,8 @@
 #include <QFile>
 #include <QSslKey>
 #include <QSslCertificate>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include "client_connection.h"
 #include "config_reader.h"
 
@@ -8,7 +10,7 @@ QSslConfiguration ClientConnection::sslConfiguration;
 
 void ClientConnection::initSslConfiguration()
 {
-    sslConfiguration.setProtocol(QSsl::TlsV1_3OrLater);
+    sslConfiguration.setProtocol(QSsl::TlsV1_2);
     sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
     ConfigReader &config_reader = ConfigReader::getInstance();
 
@@ -43,26 +45,17 @@ void ClientConnection::initSslConfiguration()
 
 ClientConnection::ClientConnection(qintptr socketDescriptor, QObject *parent) : QObject(parent)
 {
-    // Обнуляем все флаги статуса
-    statusFlags=0;
     // Создаём сокет защищённого уровня
     socket = new QSslSocket();
     socket->setSocketDescriptor(socketDescriptor);
     // Устанавливаем конфигурацию Ssl для серверного сокета
     socket->setSslConfiguration(sslConfiguration);
+
     // Первыми инициализируем SSL-рукопожатие
     socket->startServerEncryption();
-    stream = new QTextStream(socket);
 
-    connect(socket, SIGNAL(encrypted()), SLOT(sendGreetingMessage()));
     connect(socket, SIGNAL(disconnected()), SLOT(deleteLater()));
     connect(socket, SIGNAL(readyRead()), SLOT(processIncomingMessage()));
-}
-
-void ClientConnection::sendGreetingMessage()
-{
-    qDebug() << "Отправляет приветственное сообщение. Мы вошли в защищённый режим";
-    sendResponse(QString("+ %1").arg(GREETING_MESSAGE));
 }
 
 ClientConnection::~ClientConnection()
@@ -70,7 +63,6 @@ ClientConnection::~ClientConnection()
     socket->close();
     emit closed();
     delete socket;
-    delete stream;
     qDebug() << "Клиентское подключение разорвано!";
 }
 
@@ -79,13 +71,13 @@ void ClientConnection::close()
     socket->close();
 }
 
-void ClientConnection::sendResponse(QString response)
+void ClientConnection::sendResponse(const QJsonDocument &response)
 {
-    *stream << response << END_OF_MESSAGE;
-    stream->flush();
+    socket->write(response.toJson());
+    socket->flush();
 }
 
-QString ClientConnection::receiveIncomingMessage()
+optional<QJsonDocument> ClientConnection::receiveIncomingMessage()
 {
     /* Корректно принимает сообщение от клиента целиком.
      * Может случиться так, что сообщение будет разбито на куски, которые будут приняты друг за другом
@@ -93,155 +85,75 @@ QString ClientConnection::receiveIncomingMessage()
      * Сообщения передаются в кодировке UTF-16
      */
     static QString clientMessage="";
-    clientMessage += stream->readAll();
+    clientMessage += QString::fromUtf8(socket->readAll());
 
-    if(!clientMessage.endsWith(END_OF_MESSAGE))
+
+    // Пытаемся собрать объект Json-документа
+    QJsonDocument incomingMessage = QJsonDocument::fromJson(clientMessage.toUtf8());
+    if(incomingMessage.isNull())
     {
         // Пустая строка означает, что сообщение принято не до конца
-        return "";
+        return std::nullopt;
     }
-    QString result{clientMessage};
     // Очищаем прочитанное сообщение, чтобы быть готовым прочесть новое
     clientMessage.clear();
-    return result;
+    clientMessage.reserve(2048);
+    return incomingMessage;
 }
 
-QStringList ClientConnection::parseMessage(QString clientMessage)
+void ClientConnection::processQuery(const QJsonDocument &queryDocument)
 {
-    // Избавляемся от ненужных пустых символов
-    clientMessage = clientMessage.trimmed();
-    QTextStream argStream(&clientMessage);
-    QStringList result;
-    // Разбиваем сообщение на фрагмента: команду и ее аргументы
-    while(!argStream.atEnd())
-    {
-        QString arg;
-        argStream >> arg;
-        result.append(arg);
+    QString query = queryDocument[QUERY_TITLE].toString();
+    if (query == LOGIN_QUERY) {
+        QJsonObject response{
+            {"тип_запроса","ЛОГИН"},
+            {"код_ответа", 0}};
+        sendResponse(QJsonDocument(response));
     }
-    return result;
-}
+    else if (query == REGISTRATION_QUERY) {
+        QJsonObject response{
+            {"тип_запроса","РЕГИСТРАЦИЯ"},
+            {"код_ответа", 0}};
+        sendResponse(QJsonDocument(response));
+    }
+    else if (query == GET_USERS_LIST_QUERY) {
 
-Command ClientConnection::getCommandType(const QString &commandName)
-{
-    if(commandName == LOGIN_COMMAND)
-    {
-        return Command::LogIn;
     }
-    else if(commandName == REGISTRATION_COMMAND)
-    {
-        return Command::Registration;
-    }
-    else if(commandName == VERIFICATION_COMMAND)
-    {
-        return Command::Verification;
-    }
-    return Command::Unspecified;
-}
+    else if (query == GET_CHATS_LIST_QUERY) {
 
-void ClientConnection::processCommand(QStringList messageParts)
-{
-    Command command = getCommandType(messageParts[0]);
-    Error occuredError=Error::None;
-
-    switch(command)
-    {
-        case Command::LogIn:
-        {
-            // Команда аутентификации принимает два параметра
-            if(messageParts.length()-1 == LOGIN_REQUIRED_ARGS)
-            {
-                qDebug() << "Обрабатываем команду аутентификации";
-                emit logInCommandSent(messageParts[1], messageParts[2]);
-            }
-            else
-            {
-                qDebug() << "В команде аутентификации указано неверное количество аргументов";
-                occuredError = Error::Not_enought_args;
-            }
-            break;
-        }
-        case Command::Registration:
-        {
-            /* Команда регистрации принимает 4 параметра
-             * имя, фамилия, адрес электронной почты, пароль
-             */
-            if(messageParts.length()-1 == REGISTRATION_REQUIRED_ARGS)
-            {
-                qDebug() << "Обрабатываем команду регистрации";
-                emit registrationCommandSent(messageParts[1], messageParts[2],
-                        messageParts[3], messageParts[4]);
-            }
-            else
-            {
-                qDebug() << "В команде регистрации указано неверное количество аргументов";
-                occuredError = Error::Not_enought_args;
-            }
-            break;
-        }
-        case Command::Verification:
-        {
-            if(messageParts.length()-1 == VERIFICATION_REQUIRED_ARGS)
-            {
-                qDebug() << "Обрабатываем команду с кодом верификации регистрации";
-                emit verificationCommandSent(messageParts[1]);
-            }
-            else
-            {
-                qDebug() << "В команде регистрации указано неверное количество аргументов";
-                occuredError=Error::Not_enought_args;
-            }
-            break;
-        }
-        case Command::Unspecified:
-        {
-            qDebug() << "Получена неизвестная команда "<< messageParts[0];
-            break;
-        }
     }
-    // Блок обработки ошибок
-    switch(occuredError)
-    {
-        case Error::Not_enought_args:
-        {
-            sendResponse(QString("- %1 неверное количество аргументов")
-                         .arg(NOT_ENOUGH_ARGS_ERROR));
-        }
+    else if (query == SEND_MESSAGE_QUERY) {
+
+    }
+    else if (query == CREATE_CHAT_QUERY) {
+
+    }
+    else if (query == DELETE_CHAT_QUERY) {
+
+    }
+    else if (query == INVITE_TO_CHAT_QUERY) {
+
+    }
+    else if (query == KICK_FROM_CHAT_QUERY) {
+
+    }
+    else if (query == REFRESH_CHAT_QUERY) {
+
+    }
+    else if (query == SYNCHRONIZATION_QUERY) {
+
+    }
+    else {
+
     }
 }
 
 void ClientConnection::processIncomingMessage()
 {
-    QString clientMessage = receiveIncomingMessage();
-    // В случае, если сообщение ещё не обработано
-    if(clientMessage.isEmpty())
-    {
+    optional<QJsonDocument> clientMessage = receiveIncomingMessage();
+    if(!clientMessage) {
         return;
     }
-    qDebug() << "Пользователь отправил сообщение: "<<clientMessage;
-
-
-    // Разбиваем входящую строку на фрагменты: команда и аргументы
-    QStringList messageParts = parseMessage(clientMessage);
-
-    // Пустые команды не обрабатываем
-    if(messageParts.length() > 1)
-    {
-        processCommand(messageParts);
-    }
-}
-
-void ClientConnection::setStatusFlag(unsigned long long flag)
-{
-    statusFlags |= flag;
-}
-
-void ClientConnection::setVerificationCode(const QString &code)
-{
-    verificationCode = code;
-}
-
-bool ClientConnection::checkVerificationCode(const QString &code)
-{
-    return code == verificationCode;
+    qDebug() << "Пользователь отправил сообщение: "<< *clientMessage;
+    processQuery(*clientMessage);
 }

@@ -3,13 +3,8 @@
 // Автор: Сырцев Вадим Игоревич
 #include <QTcpServer>
 #include <QVector>
-#include <QTimer>
-
 #include "server_worker.h"
 #include "config_reader.h"
-
-// Интервал обновления счётчика времени работы приложения
-#define WORKING_TIME_COUNTER_UPDATE_TIME 1000
 
 /**
  * Описывает многопоточный TCP-сервер, способный принимать входящие подключения
@@ -27,6 +22,7 @@ signals:
     void started();
     /// Сигнал, высылаемый, когда сервер перестаёт прослушивать входящие соединения
     void stopped();
+
     /// Сигнал, высылаемый после открытия нового соединения с клиентским приложением
     void clientConnectionOpenned();
     /// Сигнал, высылаемый после разрыва соединения с клиентским приложением
@@ -34,9 +30,6 @@ signals:
     /// Сигнал, высылаемый после открытия или разрыва клиентского соединения
     /// activeConnectionsCounter - количество активных соединений
     void activeConnectionsCounterChanged(unsigned long long activeConnectionsCounter);
-    /// Отправляется каждый раз, когда время работы сервера в текущей
-    /// сессии обновляется
-    void workingTimeUpdated(QString time);
 public slots:
     /// Запускает работу сервера: прослушивание входящих соединений
     void start();
@@ -45,7 +38,7 @@ public slots:
 
 protected:
     /// Вызывается сервером каждый раз, когда имеется входящее соединение
-    void incomingConnection(qintptr socketDescriptor);
+    void incomingConnection(qintptr socketDescriptor) override;
 private:
     /// Создаёт оптимальное количество рабочих потоков, по которым будет распределена
     /// нагрузка входящих соединений, основываясь на значении possibleThreadNumber

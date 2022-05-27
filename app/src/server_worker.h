@@ -46,19 +46,10 @@ signals:
 protected:
     void run();
 private slots:
-    /// Обрабатывает команду аутентификации
-    void processLogInCommand(QString email, QString password);
-    /// Обрабатывает команду регистрации
-    void processRegistrationCommand(QString firstName, QString last_name,
-                                    QString email, QString password);
-    /// Обрабатывает команду верификации регистрации
-    void processVerificationCommand(QString code);
     /// Уменьшает счётчик клиентских соединений, обрабатываемых текущим потоком
     void decreaseHandlingConnectionsCounter();
 private:
     inline void initCounters();
-    /// Генерирует код верификации регистрации
-    QString generateVerificationCode();
     /// Настраивает подключение к базе данных в рабочем потоке
     void configureDatabaseConnection();
     /// Счётчик созданных объектов

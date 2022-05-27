@@ -22,32 +22,36 @@
 // ------------------------------------------------------------
 */
 
+#define QUERY_TITLE "тип_запроса"
+
 // Команда аутентификации существующего пользователя
-#define LOGIN_COMMAND "ПРИВЕТ"
-// Количество необходимых аргументов для команды
-#define LOGIN_REQUIRED_ARGS 2
+#define LOGIN_QUERY "ЛОГИН"
 // Возможные ошибки:
 // Не существует пользователя
 #define WRONG_USERNAME_OR_PASSWORD_ERROR 2
-
 // Команда регистрации нового пользователя
-#define REGISTRATION_COMMAND "РЕГИСТРАЦИЯ"
-// Количество необходимых аргументов для команды
-#define REGISTRATION_REQUIRED_ARGS 4
+#define REGISTRATION_QUERY "РЕГИСТРАЦИЯ"
 // Возможные ошибки:
 // Пользователь с таким адресом электронной почты уже существует
 #define EMAIL_OCCUPIED_ERROR 3
 
-// Команда для отправки кода верификации регистрации
-#define VERIFICATION_COMMAND "КОДРЕГ"
-// Количество необходимых аргументов для команды
-#define VERIFICATION_REQUIRED_ARGS 1
-// Длина кода верификации регистрации
-#define VERIFICATION_CODE_LENGTH 6
-// Возможные ошибки:
-// Получен неправильный код верификации регистрации
-#define WRONG_VERIFICATION_CODE_ERROR 3
-// Не удалось зарегистрировать нового пользователя из-за возникшей ошибки на сервере
-#define REGISTRATION_INNER_ERROR 4
+#define GET_USERS_LIST_QUERY "СПИСОКПОЛЬЗОВАТЕЛЕЙ"
 
+#define GET_CHATS_LIST_QUERY "ЧАТЛИСТ"
+
+#define GET_UNREAD_MESSAGES_QUERY "ЧАТСООБЩ"
+
+#define SEND_MESSAGE_QUERY "ОТПРСООБЩ"
+
+#define CREATE_CHAT_QUERY "ЧАТСОЗДАТЬ"
+
+#define DELETE_CHAT_QUERY "ЧАТУДАЛ"
+
+#define INVITE_TO_CHAT_QUERY "ЧАТПРИГЛ"
+
+#define KICK_FROM_CHAT_QUERY "ЧАТИСКЛ"
+
+#define REFRESH_CHAT_QUERY "ЧАТОБНОВ"
+
+#define SYNCHRONIZATION_QUERY "СИНХР"
 #endif // BES_PROTOCOL_H
