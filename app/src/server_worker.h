@@ -1,7 +1,6 @@
 #ifndef SERVER_WORKER_H
 #define SERVER_WORKER_H
 // Автор: Сырцев Вадим Игоревич
-#include<QRandomGenerator>
 #include "database_connection.h"
 #include "config_reader.h"
 #include <QThread>
@@ -20,8 +19,12 @@ public:
     void addClientConnection(qintptr socketDescriptor);
     /// Возвращает количество клиентских подключений, обрабатываем текущим рабочим потоком
     unsigned long long getHandlingConnectionsCounter();
+    // Запросы от пользователей
+    bool verify_log_in(const QString &email, const QString &password);
+    bool register_new_user(const QString &firstName, const QString &lastName, const QString &email, const QString &password);
 public slots:
     void quit();
+
 signals:
     /// Сигнал, высылаемый, когда рабочему потоку удалось установить соединение
     /// с базой данных
@@ -31,18 +34,7 @@ signals:
     /// Сигнал, высылаемый, когда клиентское соединение, обрабатываемое
     /// в данном потоке, разрывается
     void clientConnectionClosed();
-    /// Сигнал, высылаемый при успешном прохождении пользователем аутентификации
-    void clientLoggedIn(QString email);
-    /// Сигнал, высылаемый при неудачной попытке прохождения аутентификации
-    void clientFailedAuthentication(QString email);
-    /// Сигнал, высылаемый после отправки пользователю кода верификации
-    void verificationCodeWasSent(QString email);
-    /// Сигнал, высылаемый после успешной регистрации пользователя
-    void clientWasRegistered(QString email);
-    /// Сигнал, высылаемый, когда пользователь отправляет неверный код верификации
-    void clientSentWrongVerificationCode(QString email,QString code);
-    /// Сигнал, высылаемый, когда пользователь для регистрации указал занятую почту
-    void clientUsedOccupiedEmailForRegistration(QString email);
+
 protected:
     void run();
 private slots:
@@ -60,9 +52,6 @@ private:
     unsigned long long handlingConnectionsCounter;
     /// Объект подключения к базе данных
     DatabaseConnection *databaseConnection;
-    /// Генератор псевдослучайных чисел. Используется для генерации
-    /// кодов верификации
-    static QRandomGenerator generator;
 };
 
 #endif // SERVER_WORKER_H

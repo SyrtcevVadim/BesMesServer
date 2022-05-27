@@ -2,6 +2,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QDate>
+#include <QCryptographicHash>
 #include "database_connection.h"
 
 DatabaseConnection::DatabaseConnection(const QString &connectionName)
@@ -46,50 +47,44 @@ void DatabaseConnection::close()
     besMesDatabase.close();
 }
 
-bool DatabaseConnection::userExists(const QString &email)
+bool DatabaseConnection::isEmailAvailable(const QString &email)
 {
     QSqlQuery query(besMesDatabase);
-    QString strQuery = QString("SELECT email FROM %1 WHERE email='%2'").arg(USER_TABLE_NAME, email);
-
-    query.exec(strQuery);
-    // Если пользователя с таким адресом эл. почты не существует
-    while(query.next())
-    {
-        return true;
-    }
-    return false;
+    query.prepare("SELECT is_email_available(:email)");
+    query.bindValue(":email", email);
+    query.exec();
+    query.first();
+    // Возвращает true, если данная почта свободна, иначе - false
+    return query.value(0).toBool();
 }
 
-bool DatabaseConnection::userExists(const QString &email, const QString &password)
+bool DatabaseConnection::verifyLogIn(const QString &email, const QString &password)
 {
-    QSqlQuery query(besMesDatabase);
-    QString strQuery = QString("SELECT email, password FROM %1 WHERE email='%2' AND password='%3'").
-            arg(USER_TABLE_NAME, email, password);
-    query.exec(strQuery);
+    // Хэшируем пароль
+    QByteArray hashedPassword = QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Algorithm::Keccak_512);
 
-    while(query.next())
-    {
-        return true;
-    }
-    return false;
+    QSqlQuery query(besMesDatabase);
+    query.prepare("SELECT verify_log_in(:email, :hashed_password)");
+    query.bindValue(":email", email);
+    query.bindValue(":hashed_password", QLatin1String(hashedPassword.toHex()));
+    query.exec();
+    query.first();
+    return query.value(0).toBool();
 }
 
-bool DatabaseConnection::addNewUser(const QString &firstName, const QString &lastName, const QString &email, const QString &password)
+bool DatabaseConnection::registerNewUser(const QString &firstName, const QString &lastName, const QString &email, const QString &password)
 {
+    // Хэшируем пароль
+    QByteArray hashedPassword = QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Algorithm::Keccak_512);
     QSqlQuery query(besMesDatabase);
-    //TODO СДЕЛАТЬ ПОДДЕРЖКУ КИРИЛЛИЦЫ
-    QString queryString = QString("INSERT INTO %1 (first_name, last_name, email, password, registration_date) "
-                    "VALUES ('%2', '%3', '%4', '%5', CURDATE())")
-            .arg(USER_TABLE_NAME,
-                 firstName,
-                 lastName,
-                 email,
-                 password);
-
-    qDebug() << queryString;
-    bool result =query.exec(QObject::trUtf8(queryString.toStdString().c_str()));
-    qDebug() << query.lastError();
-    return result;
+    query.prepare("SELECT register_new_user(:firstName, :lastName, :email, :hashed_password)");
+    query.bindValue(":firstName", firstName);
+    query.bindValue(":lastName", lastName);
+    query.bindValue(":email", email);
+    query.bindValue(":hashed_password", QLatin1String(hashedPassword.toHex()));
+    query.exec();
+    query.first();
+    return query.value(0).toBool();
 }
 
 bool DatabaseConnection::isActive()

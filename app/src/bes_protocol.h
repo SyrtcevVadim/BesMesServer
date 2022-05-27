@@ -23,6 +23,7 @@
 */
 
 #define QUERY_TITLE "тип_запроса"
+#define QUERY_RESPONSE_TITLE "код_ответа"
 
 // Команда аутентификации существующего пользователя
 #define LOGIN_QUERY "ЛОГИН"

@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include "client_connection.h"
 #include "config_reader.h"
+#include "server_worker.h"
 
 QSslConfiguration ClientConnection::sslConfiguration;
 
@@ -71,9 +72,9 @@ void ClientConnection::close()
     socket->close();
 }
 
-void ClientConnection::sendResponse(const QJsonDocument &response)
+void ClientConnection::sendResponse(const QJsonObject &response)
 {
-    socket->write(response.toJson());
+    socket->write(QJsonDocument(response).toJson());
     socket->flush();
 }
 
@@ -104,17 +105,35 @@ optional<QJsonDocument> ClientConnection::receiveIncomingMessage()
 void ClientConnection::processQuery(const QJsonDocument &queryDocument)
 {
     QString query = queryDocument[QUERY_TITLE].toString();
+    ServerWorker *worker = static_cast<ServerWorker*>(parent());
+    QJsonObject response {
+        {QUERY_TITLE, query},
+        {QUERY_RESPONSE_TITLE, 0}
+    };
     if (query == LOGIN_QUERY) {
-        QJsonObject response{
-            {"тип_запроса","ЛОГИН"},
-            {"код_ответа", 0}};
-        sendResponse(QJsonDocument(response));
+        if (worker->verify_log_in(queryDocument["почта"].toString(),
+                                  queryDocument["пароль"].toString()))
+        {
+            response[QUERY_RESPONSE_TITLE] = 0;
+        }
+        else
+        {
+            response[QUERY_RESPONSE_TITLE] = 1;
+        }
+
     }
     else if (query == REGISTRATION_QUERY) {
-        QJsonObject response{
-            {"тип_запроса","РЕГИСТРАЦИЯ"},
-            {"код_ответа", 0}};
-        sendResponse(QJsonDocument(response));
+        if (worker->register_new_user(queryDocument["имя"].toString(),
+                                      queryDocument["фамилия"].toString(),
+                                      queryDocument["почта"].toString(),
+                                      queryDocument["пароль"].toString()))
+        {
+            response[QUERY_RESPONSE_TITLE] = 0;
+        }
+        else
+        {
+            response[QUERY_RESPONSE_TITLE] = 1;
+        }
     }
     else if (query == GET_USERS_LIST_QUERY) {
 
@@ -146,6 +165,7 @@ void ClientConnection::processQuery(const QJsonDocument &queryDocument)
     else {
 
     }
+    sendResponse(response);
 }
 
 void ClientConnection::processIncomingMessage()

@@ -1,10 +1,11 @@
 #include <QDebug>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include "server_worker.h"
 #include "client_connection.h"
 
 // Изначально нет созданных объектов серверных рабочих
 unsigned int ServerWorker::createdObjectCounter = 0;
-QRandomGenerator ServerWorker::generator(QDateTime::currentSecsSinceEpoch());
 
 ServerWorker::ServerWorker(QObject *parent):
     QThread(parent)
@@ -40,7 +41,7 @@ unsigned long long ServerWorker::getHandlingConnectionsCounter()
 void ServerWorker::addClientConnection(qintptr socketDescriptor)
 {
     ++handlingConnectionsCounter;
-    ClientConnection *incomingConnection = new ClientConnection(socketDescriptor);
+    ClientConnection *incomingConnection = new ClientConnection(socketDescriptor, this);
     // Связываем клиентское подключение с рабочим потоком
     // После разрыва пользовательского соединения уведомляем об этом рабочий поток
     connect(incomingConnection, SIGNAL(closed()), SIGNAL(clientConnectionClosed()));
@@ -64,13 +65,25 @@ void ServerWorker::decreaseHandlingConnectionsCounter()
 void ServerWorker::run()
 {
     qDebug() << QString("Поток %1 запущен").arg(id);
-    //configureDatabaseConnection();
-    //databaseConnection->open();
+    configureDatabaseConnection();
+    databaseConnection->open();
     exec();
 }
 
 void ServerWorker::initCounters()
 {
     handlingConnectionsCounter=0;
+}
+
+bool ServerWorker::verify_log_in(const QString &email, const QString &password)
+{
+    return databaseConnection->verifyLogIn(email, password);
+}
+bool ServerWorker::register_new_user(const QString &firstName,
+                                     const QString &lastName,
+                                     const QString &email,
+                                     const QString &password)
+{
+    return databaseConnection->registerNewUser(firstName, lastName, email, password);
 }
 

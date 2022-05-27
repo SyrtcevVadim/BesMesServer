@@ -17,14 +17,13 @@ public:
     /// Закрывает соединение с базой данных, освобождая все ресурсы
     void close();
 
-
     /// Проверяет, существует ли пользователь с таким адресом электронной почты
-    bool userExists(const QString &email);
+    bool isEmailAvailable(const QString &email);
     /// Проверяет, существует ли пользователь с таким адресом электронной почты
     /// и паролем
-    bool userExists(const QString &email, const QString &password);
+    bool verifyLogIn(const QString &email, const QString &password);
     /// Добавляет нового пользователя в базу данных
-    bool addNewUser(const QString &firstName, const QString &lastName,
+    bool registerNewUser(const QString &firstName, const QString &lastName,
                     const QString &email, const QString &password);
     /// Проверяет, является ли подключение к базе даннzых активным
     bool isActive();

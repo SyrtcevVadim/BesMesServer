@@ -44,7 +44,7 @@ public:
 public slots:
     /// Отправляет клиенту сообщение.
     /// К сообщению автоматически добавляется символ конца сообщения.
-    void sendResponse(const QJsonDocument &response);
+    void sendResponse(const QJsonObject &response);
     /// Закрывает клиентское соединение
     void close();
     /// Устанавливает параметры для корректной работы ssl-соединения. Следует вызвать эту функцию
