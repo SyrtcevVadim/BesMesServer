@@ -1,9 +1,11 @@
 #ifndef SERVER_WORKER_H
 #define SERVER_WORKER_H
 // Автор: Сырцев Вадим Игоревич
+#include <QThread>
 #include "database_connection.h"
 #include "config_reader.h"
-#include <QThread>
+#include "user.h"
+#include "chat.h"
 
 /**
  * Описывает поток сервера, в котором могут обрабатываться пользовательские подключения
@@ -20,8 +22,17 @@ public:
     /// Возвращает количество клиентских подключений, обрабатываем текущим рабочим потоком
     unsigned long long getHandlingConnectionsCounter();
     // Запросы от пользователей
-    bool verify_log_in(const QString &email, const QString &password);
-    bool register_new_user(const QString &firstName, const QString &lastName, const QString &email, const QString &password);
+    bool verifyLogIn(const QString &email, const QString &password);
+    qint64 getUserId(const QString &email);
+    bool registerNewUser(const QString &firstName, const QString &lastName, const QString &email, const QString &password);
+    QVector<User> getListOfUsers();
+    QVector<Chat> getListOfChats(qint64 userId);
+    bool createNewChat(qint64 ownerId, const QString &chatTitle);
+    bool inviteToChat(qint64 chatId, qint64 userId);
+    bool kickFromChat(qint64 chatId, qint64 userId);
+    QVector<qint64> getUsersInChat(qint64 chatId);
+    bool sendMessage(qint64 chatId, const QString &messageBody, qint64 senderId);
+
 public slots:
     void quit();
 

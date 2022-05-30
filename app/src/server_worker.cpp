@@ -75,11 +75,17 @@ void ServerWorker::initCounters()
     handlingConnectionsCounter=0;
 }
 
-bool ServerWorker::verify_log_in(const QString &email, const QString &password)
+bool ServerWorker::verifyLogIn(const QString &email, const QString &password)
 {
     return databaseConnection->verifyLogIn(email, password);
 }
-bool ServerWorker::register_new_user(const QString &firstName,
+
+qint64 ServerWorker::getUserId(const QString &email)
+{
+    return databaseConnection->getUserId(email);
+}
+
+bool ServerWorker::registerNewUser(const QString &firstName,
                                      const QString &lastName,
                                      const QString &email,
                                      const QString &password)
@@ -87,3 +93,37 @@ bool ServerWorker::register_new_user(const QString &firstName,
     return databaseConnection->registerNewUser(firstName, lastName, email, password);
 }
 
+QVector<User> ServerWorker::getListOfUsers()
+{
+    return databaseConnection->getListOfUsers();
+}
+
+QVector<Chat> ServerWorker::getListOfChats(qint64 userId)
+{
+    return databaseConnection->getListOfChats(userId);
+}
+
+bool ServerWorker::createNewChat(qint64 ownerId, const QString &chatTitle)
+{
+    return databaseConnection->createNewChat(ownerId, chatTitle);
+}
+
+bool ServerWorker::inviteToChat(qint64 chatId, qint64 userId)
+{
+    return databaseConnection->inviteTochat(chatId, userId);
+}
+
+bool ServerWorker::kickFromChat(qint64 chatId, qint64 userId)
+{
+    return databaseConnection->kickFromChat(chatId, userId);
+}
+
+QVector<qint64> ServerWorker::getUsersInChat(qint64 chatId)
+{
+    return databaseConnection->getUsersInChat(chatId);
+}
+
+bool ServerWorker::sendMessage(qint64 chatId, const QString &messageBody, qint64 senderId)
+{
+    return databaseConnection->sendMessage(chatId, messageBody, senderId);
+}

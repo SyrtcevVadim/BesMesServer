@@ -7,17 +7,13 @@
 struct User
 {
 public:
+    qint64 userId;
     /// Имя
     QString firstName;
     /// Фамилия
     QString lastName;
     /// Почта
     QString email;
-    /// Пароль от аккаунта в системе BesMes
-    QString password;
-
-    QString gender;
-    QDate birthdate;
     /// Очищает все поля структуры
     void clear();
 };

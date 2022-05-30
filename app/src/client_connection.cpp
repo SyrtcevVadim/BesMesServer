@@ -3,9 +3,12 @@
 #include <QSslCertificate>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include "client_connection.h"
 #include "config_reader.h"
 #include "server_worker.h"
+#include "user.h"
+#include "chat.h"
 
 QSslConfiguration ClientConnection::sslConfiguration;
 
@@ -104,48 +107,78 @@ optional<QJsonDocument> ClientConnection::receiveIncomingMessage()
 
 void ClientConnection::processQuery(const QJsonDocument &queryDocument)
 {
-    QString query = queryDocument[QUERY_TITLE].toString();
+    QString query = queryDocument[QUERY_NAME_KEY].toString();
+
     ServerWorker *worker = static_cast<ServerWorker*>(parent());
-    QJsonObject response {
-        {QUERY_TITLE, query},
-        {QUERY_RESPONSE_TITLE, 0}
+    QJsonObject response{
+        {QUERY_NAME_KEY, query},
+        {QUERY_RESPONSE_KEY, 0}
     };
+
     if (query == LOGIN_QUERY) {
-        if (worker->verify_log_in(queryDocument["почта"].toString(),
-                                  queryDocument["пароль"].toString()))
+        if (worker->verifyLogIn(queryDocument[USER_EMAIL_KEY].toString(),
+                                  queryDocument[USER_PASSWORD_KEY].toString()))
         {
-            response[QUERY_RESPONSE_TITLE] = 0;
+            response[QUERY_RESPONSE_KEY] = 0;
+            // Запоминаем идентификатор пользователя
+            user.userId = worker->getUserId(queryDocument[USER_EMAIL_KEY].toString());
         }
         else
         {
-            response[QUERY_RESPONSE_TITLE] = 1;
+            response[QUERY_RESPONSE_KEY] = 1;
         }
 
     }
     else if (query == REGISTRATION_QUERY) {
-        if (worker->register_new_user(queryDocument["имя"].toString(),
-                                      queryDocument["фамилия"].toString(),
-                                      queryDocument["почта"].toString(),
-                                      queryDocument["пароль"].toString()))
+        if (worker->registerNewUser(queryDocument[USER_FIRST_NAME_KEY].toString(),
+                                      queryDocument[USER_LAST_NAME_KEY].toString(),
+                                      queryDocument[USER_EMAIL_KEY].toString(),
+                                      queryDocument[USER_PASSWORD_KEY].toString()))
         {
-            response[QUERY_RESPONSE_TITLE] = 0;
+            response[QUERY_RESPONSE_KEY] = 0;
         }
         else
         {
-            response[QUERY_RESPONSE_TITLE] = 1;
+            response[QUERY_RESPONSE_KEY] = 1;
         }
     }
     else if (query == GET_USERS_LIST_QUERY) {
+        QVector<User> users = worker->getListOfUsers();
+        QJsonArray array_of_users;
+        QJsonObject userObject;
 
+        for (User &user: users)
+        {
+            userObject[USER_ID_KEY] = user.userId;
+            userObject[USER_FIRST_NAME_KEY] = user.firstName;
+            userObject[USER_LAST_NAME_KEY] = user.lastName;
+            userObject[USER_EMAIL_KEY] = user.email;
+            array_of_users.append(userObject);
+        }
+        response.insert(USERS_KEY, array_of_users);
     }
     else if (query == GET_CHATS_LIST_QUERY) {
+        QVector<Chat> chats = worker->getListOfChats(user.userId);
+        QJsonArray array_of_chats;
+        QJsonObject chatObject;
 
+        for (Chat &chat: chats)
+        {
+            chatObject[CHAT_ID_KEY] = chat.chatId;
+            chatObject[CHAT_TITLE_KEY] = chat.chatTitle;
+            array_of_chats.append(chatObject);
+        }
+        response.insert(CHATS_KEY, array_of_chats);
     }
     else if (query == SEND_MESSAGE_QUERY) {
-
+        worker->sendMessage(static_cast<qint64>(queryDocument[CHAT_ID_KEY].toDouble()),
+                            queryDocument[MESSAGE_BODY_KEY].toString(),
+                            static_cast<qint64>(queryDocument[SENDER_ID_KEY].toDouble()));
     }
     else if (query == CREATE_CHAT_QUERY) {
-
+        worker->sendMessage(static_cast<qint64>(queryDocument[CHAT_ID_KEY].toDouble()),
+                            queryDocument[MESSAGE_BODY_KEY].toString(),
+                            static_cast<qint64>(queryDocument[SENDER_ID_KEY].toDouble()));
     }
     else if (query == DELETE_CHAT_QUERY) {
 
@@ -163,7 +196,7 @@ void ClientConnection::processQuery(const QJsonDocument &queryDocument)
 
     }
     else {
-
+        return;
     }
     sendResponse(response);
 }

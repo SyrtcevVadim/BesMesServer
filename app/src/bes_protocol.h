@@ -7,9 +7,6 @@
  * Группа 03ПГ
 */
 
-// Стандартная последовательность, обозначающая конец сообщения
-#define END_OF_MESSAGE "\r\n"
-
 // Сообщение, которое отправляет каждому новому подключённому соединению
 #define GREETING_MESSAGE "Привет! Вы успешно подключились к серверу BesMesServer! Пройдите аутентификацию или зарегистрируйтесь!"
 
@@ -22,8 +19,22 @@
 // ------------------------------------------------------------
 */
 
-#define QUERY_TITLE "тип_запроса"
-#define QUERY_RESPONSE_TITLE "код_ответа"
+#define QUERY_NAME_KEY "тип_запроса"
+#define QUERY_RESPONSE_KEY "код_ответа"
+#define USER_ID_KEY "ид_пользователя"
+#define USER_FIRST_NAME_KEY "имя"
+#define USER_LAST_NAME_KEY "фамилия"
+#define USER_EMAIL_KEY "почта"
+#define USER_PASSWORD_KEY "пароль"
+
+#define USERS_KEY "пользователи"
+#define CHATS_KEY "чаты"
+
+#define CHAT_ID_KEY "ид_чата"
+#define CHAT_TITLE_KEY "название"
+
+#define MESSAGE_BODY_KEY "тело_сообщения"
+#define SENDER_ID_KEY "ид_отправителя"
 
 // Команда аутентификации существующего пользователя
 #define LOGIN_QUERY "ЛОГИН"

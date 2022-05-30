@@ -3,6 +3,8 @@
 
 #include <QSqlDatabase>
 #include "config_reader.h"
+#include "user.h"
+#include "chat.h"
 
 #define USING_PLUGIN_NAME "QPSQL"
 #define USER_TABLE_NAME "user"
@@ -22,9 +24,24 @@ public:
     /// Проверяет, существует ли пользователь с таким адресом электронной почты
     /// и паролем
     bool verifyLogIn(const QString &email, const QString &password);
+    qint64 getUserId(const QString &email);
+
     /// Добавляет нового пользователя в базу данных
     bool registerNewUser(const QString &firstName, const QString &lastName,
                     const QString &email, const QString &password);
+
+    QVector<User> getListOfUsers();
+
+    bool createNewChat(qint64 ownerId, const QString &chatTitle);
+    bool deleteChat(qint64 chatId);
+    QVector<Chat> getListOfChats(qint64 userId);
+
+    bool inviteTochat(qint64 chatId, qint64 userId);
+    bool kickFromChat(qint64 chatId, qint64 userId);
+
+    QVector<qint64> getUsersInChat(qint64 chatId);
+    bool sendMessage(qint64 chatId, const QString &messageBody, qint64 senderId);
+
     /// Проверяет, является ли подключение к базе даннzых активным
     bool isActive();
 private:
