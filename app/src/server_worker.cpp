@@ -1,6 +1,5 @@
 #include <QDebug>
-#include <QJsonDocument>
-#include <QJsonObject>
+
 #include "server_worker.h"
 #include "client_connection.h"
 
@@ -103,9 +102,13 @@ QVector<Chat> ServerWorker::getListOfChats(qint64 userId)
     return databaseConnection->getListOfChats(userId);
 }
 
-bool ServerWorker::createNewChat(qint64 ownerId, const QString &chatTitle)
+qint64 ServerWorker::createNewChat(qint64 ownerId, const QString &chatTitle)
 {
     return databaseConnection->createNewChat(ownerId, chatTitle);
+}
+bool ServerWorker::deleteChat(qint64 chatId)
+{
+    return databaseConnection->deleteChat(chatId);
 }
 
 bool ServerWorker::inviteToChat(qint64 chatId, qint64 userId)
@@ -126,4 +129,15 @@ QVector<qint64> ServerWorker::getUsersInChat(qint64 chatId)
 bool ServerWorker::sendMessage(qint64 chatId, const QString &messageBody, qint64 senderId)
 {
     return databaseConnection->sendMessage(chatId, messageBody, senderId);
+}
+
+QVector<Chat> ServerWorker::synchronize(qint64 userId, qint64 lastMessageTimestamp)
+{
+    QVector<Chat> chatsWithUnreadMessages = databaseConnection->getChatsWithUnreadMessages(userId, lastMessageTimestamp);
+
+    for (Chat &currentChat: chatsWithUnreadMessages)
+    {
+        currentChat.unreadMessages = databaseConnection->getUnreadMessages(currentChat.chatId, lastMessageTimestamp);
+    }
+    return chatsWithUnreadMessages;
 }

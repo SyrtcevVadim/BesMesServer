@@ -13,7 +13,8 @@ SOURCES += \
 HEADERS += \
         $$files(src/*.h*) \
         $$files(libs/include/*.h*) \
-    src/chat.h
+    src/chat.h \
+    src/message.h
 
 RESOURCES += \
         $$files(res/*.qrc)

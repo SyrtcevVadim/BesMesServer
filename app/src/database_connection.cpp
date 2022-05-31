@@ -135,14 +135,15 @@ QVector<User> DatabaseConnection::getListOfUsers()
     return users;
 }
 
-bool DatabaseConnection::createNewChat(qint64 ownerId, const QString &chatTitle)
+qint64 DatabaseConnection::createNewChat(qint64 ownerId, const QString &chatTitle)
 {
     QSqlQuery query(besMesDatabase);
-    query.prepare("CALL create_chat(:owner_id, :chatTitle)");
-    query.bindValue(":owernId", ownerId);
+    query.prepare("SELECT create_chat(:ownerId, :chatTitle)");
+    query.bindValue(":ownerId", ownerId);
     query.bindValue(":chatTitle", chatTitle);
     query.exec();
-    return true;
+    query.first();
+    return query.value(0).toLongLong();
 }
 
 bool DatabaseConnection::deleteChat(qint64 chatId)
@@ -211,7 +212,7 @@ QVector<qint64> DatabaseConnection::getUsersInChat(qint64 chatId)
     return users;
 }
 
-bool DatabaseConnection::sendMessage(qint64 chatId, const QString &messageBody, qint64 senderId)
+qint64 DatabaseConnection::sendMessage(qint64 chatId, const QString &messageBody, qint64 senderId)
 {
     QSqlQuery query(besMesDatabase);
     query.prepare("SELECT send_message(:chatId, :messageBody, :senderId)");
@@ -220,7 +221,52 @@ bool DatabaseConnection::sendMessage(qint64 chatId, const QString &messageBody, 
     query.bindValue(":senderId", senderId);
     query.exec();
     query.first();
+    return query.value(0).toLongLong();
+}
+
+bool DatabaseConnection::hasUnreadMessages(qint64 chatId, qint64 lastMessageTimestamp)
+{
+    QSqlQuery query(besMesDatabase);
+    query.prepare("SELECT has_unread_messages(:chatId, :lastMessageTimestamp)");
+    query.bindValue(":chatId", chatId);
+    query.bindValue(":lastMessageTimestamp", QDateTime::fromSecsSinceEpoch(lastMessageTimestamp));
+    query.exec();
+    query.first();
     return query.value(0).toBool();
+}
+
+QVector<Message> DatabaseConnection::getUnreadMessages(qint64 chatId, qint64 lastMessageTimestamp)
+{
+    QSqlQuery query(besMesDatabase);
+    query.prepare("SELECT * FROM get_unread_messages(:chatId, :lastMessageTimestamp)");
+    query.bindValue(":chatId", chatId);
+    query.bindValue(":lastMessageTimestamp", QDateTime::fromSecsSinceEpoch(lastMessageTimestamp));
+    query.exec();
+    QVector<Message> unreadMessages;
+    while(query.next())
+    {
+        unreadMessages.push_back(Message{query.value(0).toString(),
+                                         query.value(1).toLongLong(),
+                                         query.value(2).toDateTime().toSecsSinceEpoch()});
+    }
+    return unreadMessages;
+}
+
+QVector<Chat> DatabaseConnection::getChatsWithUnreadMessages(qint64 userId, qint64 lastMessageTimestamp)
+{
+    /*
+     * Для каждого чата проверяем, есть ли в нём непрочитанные сообщения
+     */
+   QVector<Chat> chatsWithUnreadMessages;
+   chatsWithUnreadMessages.reserve(8);
+   for (Chat &chat: getListOfChats(userId))
+   {
+        if (hasUnreadMessages(chat.chatId, lastMessageTimestamp))
+        {
+            chatsWithUnreadMessages.push_back(chat);
+        }
+   }
+   return chatsWithUnreadMessages;
 }
 
 bool DatabaseConnection::isActive()

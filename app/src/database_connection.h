@@ -32,7 +32,7 @@ public:
 
     QVector<User> getListOfUsers();
 
-    bool createNewChat(qint64 ownerId, const QString &chatTitle);
+    qint64 createNewChat(qint64 ownerId, const QString &chatTitle);
     bool deleteChat(qint64 chatId);
     QVector<Chat> getListOfChats(qint64 userId);
 
@@ -40,7 +40,11 @@ public:
     bool kickFromChat(qint64 chatId, qint64 userId);
 
     QVector<qint64> getUsersInChat(qint64 chatId);
-    bool sendMessage(qint64 chatId, const QString &messageBody, qint64 senderId);
+    qint64 sendMessage(qint64 chatId, const QString &messageBody, qint64 senderId);
+
+    bool hasUnreadMessages(qint64 chatId, qint64 lastMessageTimestamp);
+    QVector<Message> getUnreadMessages(qint64 chatId, qint64 lastMessageTimestamp);
+    QVector<Chat> getChatsWithUnreadMessages(qint64 userId, qint64 lastMessageTimestamp);
 
     /// Проверяет, является ли подключение к базе даннzых активным
     bool isActive();

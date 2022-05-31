@@ -27,11 +27,13 @@ public:
     bool registerNewUser(const QString &firstName, const QString &lastName, const QString &email, const QString &password);
     QVector<User> getListOfUsers();
     QVector<Chat> getListOfChats(qint64 userId);
-    bool createNewChat(qint64 ownerId, const QString &chatTitle);
+    qint64 createNewChat(qint64 ownerId, const QString &chatTitle);
+    bool deleteChat(qint64 chatId);
     bool inviteToChat(qint64 chatId, qint64 userId);
     bool kickFromChat(qint64 chatId, qint64 userId);
     QVector<qint64> getUsersInChat(qint64 chatId);
     bool sendMessage(qint64 chatId, const QString &messageBody, qint64 senderId);
+    QVector<Chat> synchronize(qint64 userId, qint64 lastMessageTimestamp);
 
 public slots:
     void quit();

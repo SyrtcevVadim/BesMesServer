@@ -107,11 +107,11 @@ optional<QJsonDocument> ClientConnection::receiveIncomingMessage()
 
 void ClientConnection::processQuery(const QJsonDocument &queryDocument)
 {
-    QString query = queryDocument[QUERY_NAME_KEY].toString();
+    QString query = queryDocument[QUERY_TYPE_KEY].toString();
 
     ServerWorker *worker = static_cast<ServerWorker*>(parent());
     QJsonObject response{
-        {QUERY_NAME_KEY, query},
+        {QUERY_TYPE_KEY, query},
         {QUERY_RESPONSE_KEY, 0}
     };
 
@@ -122,6 +122,7 @@ void ClientConnection::processQuery(const QJsonDocument &queryDocument)
             response[QUERY_RESPONSE_KEY] = 0;
             // Запоминаем идентификатор пользователя
             user.userId = worker->getUserId(queryDocument[USER_EMAIL_KEY].toString());
+            response[USER_ID_KEY] = user.userId;
         }
         else
         {
@@ -171,29 +172,50 @@ void ClientConnection::processQuery(const QJsonDocument &queryDocument)
         response.insert(CHATS_KEY, array_of_chats);
     }
     else if (query == SEND_MESSAGE_QUERY) {
-        worker->sendMessage(static_cast<qint64>(queryDocument[CHAT_ID_KEY].toDouble()),
+        qint64 sending_time = worker->sendMessage(static_cast<qint64>(queryDocument[CHAT_ID_KEY].toDouble()),
                             queryDocument[MESSAGE_BODY_KEY].toString(),
                             static_cast<qint64>(queryDocument[SENDER_ID_KEY].toDouble()));
+        response[MESSAGE_SENDING_TIME_KEY] = sending_time;
     }
     else if (query == CREATE_CHAT_QUERY) {
-        worker->sendMessage(static_cast<qint64>(queryDocument[CHAT_ID_KEY].toDouble()),
-                            queryDocument[MESSAGE_BODY_KEY].toString(),
-                            static_cast<qint64>(queryDocument[SENDER_ID_KEY].toDouble()));
+        qint64 chatId = worker->createNewChat(user.userId,
+                    queryDocument[CHAT_NAME_KEY].toString());
+        response[CHAT_ID_KEY] = chatId;
     }
     else if (query == DELETE_CHAT_QUERY) {
-
+        worker->deleteChat(static_cast<qint64>(queryDocument[CHAT_ID_KEY].toDouble()));
     }
     else if (query == INVITE_TO_CHAT_QUERY) {
-
+        worker->inviteToChat(static_cast<qint64>(queryDocument[CHAT_ID_KEY].toDouble()),
+                             static_cast<qint64>(queryDocument[USER_ID_KEY].toDouble()));
     }
     else if (query == KICK_FROM_CHAT_QUERY) {
-
-    }
-    else if (query == REFRESH_CHAT_QUERY) {
-
+        worker->kickFromChat(static_cast<qint64>(queryDocument[CHAT_ID_KEY].toDouble()),
+                             static_cast<qint64>(queryDocument[USER_ID_KEY].toDouble()));
     }
     else if (query == SYNCHRONIZATION_QUERY) {
+        QVector<Chat> chatsWithUnreadMessages = worker->synchronize(user.userId,
+                                                                    static_cast<qint64>(queryDocument[MESSAGE_SENDING_TIME_KEY].toDouble()));
+        QJsonArray chatsArray;
+        QJsonObject chatObject;
+        for (Chat &chat: chatsWithUnreadMessages)
+        {
+            chatObject[CHAT_ID_KEY] = chat.chatId;
+            QJsonArray messagesArray;
+            QJsonObject messageObject;
+            for (Message &message: chat.unreadMessages)
+            {
+                messageObject[MESSAGE_BODY_KEY] = message.body;
+                messageObject[SENDER_ID_KEY] = message.senderId;
+                messageObject[SENDING_MESSAGE_TIMESTAMP] = message.sendingTimestamp;
+                messagesArray.append(messageObject);
+            }
 
+            chatObject[MESSAGES_KEY] = messagesArray;
+            chatsArray.append(chatObject);
+        }
+        response[CHATS_KEY] =chatsArray;
+        qDebug() << response;
     }
     else {
         return;
