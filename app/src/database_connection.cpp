@@ -171,7 +171,7 @@ QVector<Chat> DatabaseConnection::getListOfChats(qint64 userId)
     query.exec();
     while(query.next())
     {
-        chats.append(Chat{query.value(0).toLongLong(), query.value(1).toString()});
+        chats.append(Chat{query.value(0).toLongLong(), query.value(1).toString(), QVector<Message>()});
     }
     return chats;
 }
@@ -229,7 +229,7 @@ bool DatabaseConnection::hasUnreadMessages(qint64 chatId, qint64 lastMessageTime
     QSqlQuery query(besMesDatabase);
     query.prepare("SELECT has_unread_messages(:chatId, :lastMessageTimestamp)");
     query.bindValue(":chatId", chatId);
-    query.bindValue(":lastMessageTimestamp", QDateTime::fromSecsSinceEpoch(lastMessageTimestamp));
+    query.bindValue(":lastMessageTimestamp", lastMessageTimestamp);
     query.exec();
     query.first();
     return query.value(0).toBool();
@@ -240,7 +240,8 @@ QVector<Message> DatabaseConnection::getUnreadMessages(qint64 chatId, qint64 las
     QSqlQuery query(besMesDatabase);
     query.prepare("SELECT * FROM get_unread_messages(:chatId, :lastMessageTimestamp)");
     query.bindValue(":chatId", chatId);
-    query.bindValue(":lastMessageTimestamp", QDateTime::fromSecsSinceEpoch(lastMessageTimestamp));
+    query.bindValue(":lastMessageTimestamp",
+                    lastMessageTimestamp);
     query.exec();
     QVector<Message> unreadMessages;
     while(query.next())

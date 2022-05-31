@@ -126,7 +126,7 @@ QVector<qint64> ServerWorker::getUsersInChat(qint64 chatId)
     return databaseConnection->getUsersInChat(chatId);
 }
 
-bool ServerWorker::sendMessage(qint64 chatId, const QString &messageBody, qint64 senderId)
+qint64 ServerWorker::sendMessage(qint64 chatId, const QString &messageBody, qint64 senderId)
 {
     return databaseConnection->sendMessage(chatId, messageBody, senderId);
 }

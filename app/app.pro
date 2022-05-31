@@ -13,6 +13,7 @@ SOURCES += \
 HEADERS += \
         $$files(src/*.h*) \
         $$files(libs/include/*.h*) \
+    src/IDatabaseConnection.h \
     src/chat.h \
     src/message.h
 

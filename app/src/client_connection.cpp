@@ -174,7 +174,7 @@ void ClientConnection::processQuery(const QJsonDocument &queryDocument)
     else if (query == SEND_MESSAGE_QUERY) {
         qint64 sending_time = worker->sendMessage(static_cast<qint64>(queryDocument[CHAT_ID_KEY].toDouble()),
                             queryDocument[MESSAGE_BODY_KEY].toString(),
-                            static_cast<qint64>(queryDocument[SENDER_ID_KEY].toDouble()));
+                            user.userId);
         response[MESSAGE_SENDING_TIME_KEY] = sending_time;
     }
     else if (query == CREATE_CHAT_QUERY) {
@@ -195,7 +195,8 @@ void ClientConnection::processQuery(const QJsonDocument &queryDocument)
     }
     else if (query == SYNCHRONIZATION_QUERY) {
         QVector<Chat> chatsWithUnreadMessages = worker->synchronize(user.userId,
-                                                                    static_cast<qint64>(queryDocument[MESSAGE_SENDING_TIME_KEY].toDouble()));
+                                                                    static_cast<qint64>(queryDocument[TIMESTAMP_KEY].toDouble()));
+        qDebug() << static_cast<qint64>(queryDocument[TIMESTAMP_KEY].toDouble());
         QJsonArray chatsArray;
         QJsonObject chatObject;
         for (Chat &chat: chatsWithUnreadMessages)
